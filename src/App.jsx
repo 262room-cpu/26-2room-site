@@ -1,5 +1,15 @@
 import './App.css'
 
+const CONTACT_EMAIL = '26.2room@internet.ru'
+const CC_EMAILS = 'oleg_191090@mail.ru'
+
+const createMailto = (subject) =>
+  `mailto:${CONTACT_EMAIL}?cc=${CC_EMAILS}&subject=${encodeURIComponent(subject)}`
+
+const START_SUBJECT = 'Добавить старт в 26.2 ROOM'
+const PARTNERSHIP_SUBJECT = 'Партнёрство с 26.2 ROOM'
+const GENERAL_SUBJECT = 'Обращение с сайта 26.2 ROOM'
+
 function App() {
   const races = [
     { date: '03.05', name: 'Atyrau Run', city: 'Атырау' },
@@ -64,6 +74,32 @@ function App() {
     },
   ]
 
+  const platformCards = [
+    {
+      title: 'На сайте',
+      items: [
+        'о проекте и экосистеме',
+        'избранные старты и анонсы',
+        'заявки от организаторов',
+        'партнёрства и спонсорство',
+        'переход в Instagram',
+      ],
+    },
+    {
+      title: 'В приложении',
+      badge: 'Coming soon',
+      highlight: true,
+      items: [
+        'полный календарь стартов',
+        'фильтры по городу, дате и дистанции',
+        'избранное',
+        'уведомления',
+        'карта стартов',
+        'личный календарь бегуна',
+      ],
+    },
+  ]
+
   const organizerItems = [
     'добавить событие на сайт',
     'попасть в календарь стартов',
@@ -86,14 +122,14 @@ function App() {
       text: 'Для марафонов, трейлов, городских забегов, клубных пробежек и спортивных событий.',
       items: ['дата и город', 'дистанции', 'ссылка на регистрацию', 'Instagram или сайт организатора'],
       button: 'Отправить старт',
-      href: 'mailto:26.2room@internet.ru?subject=Добавить старт в 26.2 ROOM',
+      href: createMailto(START_SUBJECT),
     },
     {
       title: 'Стать партнёром',
       text: 'Для брендов, спонсоров, спортивных магазинов, экипировки, питания, сервисов и компаний.',
       items: ['спецпроект', 'интеграция в Instagram', 'спонсорство календаря', 'коллаборация с забегами'],
       button: 'Обсудить партнёрство',
-      href: 'mailto:26.2room@internet.ru?subject=Партнёрство с 26.2 ROOM',
+      href: createMailto(PARTNERSHIP_SUBJECT),
     },
   ]
 
@@ -133,10 +169,10 @@ function App() {
             </p>
 
             <div className="buttons">
-              <a className="primaryBtn" href="mailto:26.2room@internet.ru?subject=Добавить старт в 26.2 ROOM">
+              <a className="primaryBtn" href={createMailto(START_SUBJECT)}>
                 Добавить старт
               </a>
-              <a className="secondaryBtn" href="mailto:26.2room@internet.ru?subject=Партнёрство с 26.2 ROOM">
+              <a className="secondaryBtn" href={createMailto(PARTNERSHIP_SUBJECT)}>
                 Стать партнёром
               </a>
               <a className="secondaryBtn" href="https://www.instagram.com/26.2_room/" target="_blank" rel="noreferrer">
@@ -239,6 +275,36 @@ function App() {
           </div>
         </section>
 
+        <section className="platformSection">
+          <div className="platformIntro">
+            <small>САЙТ И БУДУЩЕЕ ПРИЛОЖЕНИЕ</small>
+            <h2>Сайт показывает главное. Приложение откроет всё.</h2>
+            <p>
+              На сайте мы рассказываем о проекте, показываем избранные старты и
+              собираем заявки от организаторов и партнёров. Полный календарь,
+              фильтры, карта, избранное и уведомления будут доступны в
+              приложении 26.2 ROOM.
+            </p>
+          </div>
+
+          <div className="platformCards">
+            {platformCards.map((card) => (
+              <article className={`platformCard ${card.highlight ? 'platformCardHot' : ''}`} key={card.title}>
+                <div className="platformCardTop">
+                  <h3>{card.title}</h3>
+                  {card.badge && <span>{card.badge}</span>}
+                </div>
+
+                <ul>
+                  {card.items.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </article>
+            ))}
+          </div>
+        </section>
+
         <section className="section" id="ecosystem">
           <div className="sectionTitle">
             <small>ЭКОСИСТЕМА</small>
@@ -302,7 +368,7 @@ function App() {
               спортивное событие? 26.2 ROOM поможет рассказать о вашем старте
               беговой аудитории.
             </p>
-            <a className="primaryBtn" href="mailto:26.2room@internet.ru?subject=Добавить старт в 26.2 ROOM">
+            <a className="primaryBtn" href={createMailto(START_SUBJECT)}>
               Добавить свой старт
             </a>
           </div>
@@ -326,7 +392,7 @@ function App() {
               создаём медиа, календарь стартов и цифровую платформу, вокруг
               которой собирается активная спортивная аудитория.
             </p>
-            <a className="primaryBtn" href="mailto:26.2room@internet.ru?subject=Партнёрство с 26.2 ROOM">
+            <a className="primaryBtn" href={createMailto(PARTNERSHIP_SUBJECT)}>
               Обсудить партнёрство
             </a>
           </div>
@@ -370,16 +436,16 @@ function App() {
           <h2>Хотите добавить старт, предложить партнёрство или обсудить интеграцию?</h2>
 
           <div className="buttons center">
-            <a className="primaryBtn" href="mailto:26.2room@internet.ru?subject=Добавить старт в 26.2 ROOM">
+            <a className="primaryBtn" href={createMailto(START_SUBJECT)}>
               Добавить старт
             </a>
-            <a className="secondaryBtn" href="mailto:26.2room@internet.ru?subject=Партнёрство с 26.2 ROOM">
+            <a className="secondaryBtn" href={createMailto(PARTNERSHIP_SUBJECT)}>
               Стать партнёром
             </a>
             <a className="secondaryBtn" href="https://www.instagram.com/26.2_room/" target="_blank" rel="noreferrer">
               Instagram
             </a>
-            <a className="secondaryBtn" href="mailto:26.2room@internet.ru">
+            <a className="secondaryBtn" href={createMailto(GENERAL_SUBJECT)}>
               Email
             </a>
           </div>
@@ -425,7 +491,7 @@ function App() {
         <div className="footerLinks">
           <a href="#ecosystem">Экосистема</a>
           <a href="#organizers">Организаторам</a>
-          <a href="mailto:26.2room@internet.ru">Contact</a>
+          <a href={createMailto(GENERAL_SUBJECT)}>Contact</a>
         </div>
       </footer>
     </div>

@@ -540,6 +540,130 @@ a {
   margin: 0;
 }
 
+.platformSection {
+  max-width: 1200px;
+  margin: 24px auto 0;
+  padding: 90px 24px;
+}
+
+.platformIntro {
+  max-width: 900px;
+  margin-bottom: 38px;
+}
+
+.platformIntro small {
+  color: #FFD600;
+  font-weight: 900;
+  letter-spacing: 4px;
+}
+
+.platformIntro h2 {
+  font-size: 52px;
+  line-height: 1.02;
+  margin: 16px 0;
+  letter-spacing: -1px;
+}
+
+.platformIntro p {
+  color: #d4d4d8;
+  font-size: 19px;
+  line-height: 1.65;
+  margin: 0;
+}
+
+.platformCards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.platformCard {
+  min-height: 390px;
+  border: 1px solid #27272a;
+  border-radius: 38px;
+  padding: 36px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)),
+    #09090b;
+  box-shadow: 0 26px 90px rgba(0, 0, 0, 0.26);
+}
+
+.platformCardHot {
+  border-color: rgba(255, 214, 0, 0.32);
+  background:
+    radial-gradient(circle at 80% 0%, rgba(255, 214, 0, 0.24), transparent 38%),
+    linear-gradient(145deg, rgba(255, 214, 0, 0.08), rgba(255, 255, 255, 0.018)),
+    #09090b;
+  box-shadow:
+    0 0 52px rgba(255, 214, 0, 0.11),
+    0 30px 100px rgba(0, 0, 0, 0.3);
+}
+
+.platformCardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.platformCard h3 {
+  color: #fff;
+  font-size: 34px;
+  line-height: 1;
+  margin: 0;
+}
+
+.platformCardTop span {
+  border: 1px solid rgba(255, 214, 0, 0.34);
+  border-radius: 999px;
+  background: rgba(255, 214, 0, 0.12);
+  color: #FFD600;
+  padding: 8px 13px;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.platformCard ul {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.platformCard li {
+  position: relative;
+  color: #d4d4d8;
+  font-weight: 800;
+  line-height: 1.35;
+  padding-left: 30px;
+}
+
+.platformCard li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.35em;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #FFD600;
+  box-shadow: 0 0 16px rgba(255, 214, 0, 0.38);
+}
+
+.platformCardHot h3 {
+  color: #FFD600;
+  text-shadow: 0 0 22px rgba(255, 214, 0, 0.22);
+}
+
+.platformCardHot li {
+  color: #f4f4f5;
+}
+
 .featureCard {
   background: rgba(9, 9, 11, 0.86);
   border: 1px solid #27272a;
@@ -957,6 +1081,10 @@ a {
     grid-template-columns: repeat(2, 1fr);
   }
 
+  .platformCards {
+    grid-template-columns: 1fr;
+  }
+
   .startsSection {
     padding: 34px;
   }
@@ -967,6 +1095,7 @@ a {
   .mediaSection h2,
   .appStatus h2,
   .whyIntro h2,
+  .platformIntro h2,
   .contactHubTitle h2,
   .finalCta h2 {
     font-size: 38px;
@@ -992,6 +1121,7 @@ a {
   .mediaSection,
   .appStatus,
   .whySection,
+  .platformCard,
   .contactCard {
     border-radius: 34px;
     padding: 34px;
@@ -1079,9 +1209,33 @@ a {
   .mediaSection h2,
   .appStatus h2,
   .whyIntro h2,
+  .platformIntro h2,
   .contactHubTitle h2,
   .finalCta h2 {
     font-size: 32px;
+  }
+
+  .platformSection {
+    padding: 56px 18px;
+  }
+
+  .platformIntro p {
+    font-size: 17px;
+  }
+
+  .platformCard {
+    min-height: 0;
+    padding: 26px;
+    border-radius: 28px;
+  }
+
+  .platformCardTop {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .platformCard h3 {
+    font-size: 28px;
   }
 
   .whySection {
