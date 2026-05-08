@@ -82,22 +82,31 @@ function App() {
       return formFields
     }, {})
 
+    const type = activeForm === 'start' ? 'race' : 'partner'
+
     try {
+      console.log('Sending request to /api/send-request', { type, fields })
+
       const response = await fetch('/api/send-request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          type: activeForm === 'start' ? 'race' : 'partner',
+          type,
           fields,
         }),
       })
 
       if (!response.ok) {
+        console.error('Failed to send request to /api/send-request', {
+          status: response.status,
+          statusText: response.statusText,
+        })
         throw new Error('Request failed')
       }
 
       setSubmissionStatus('success')
-    } catch {
+    } catch (error) {
+      console.error('Request to /api/send-request failed', error)
       setSubmissionStatus('error')
     }
   }
