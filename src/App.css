@@ -1135,13 +1135,13 @@ a {
 .requestForm {
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: 20px;
 }
 
 .formGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+  gap: 18px;
 }
 
 .requestForm label {
@@ -1156,32 +1156,55 @@ a {
   font-weight: 800;
 }
 
+.requestForm label span b {
+  color: #FFD600;
+  margin-left: 4px;
+}
+
 .requestForm input,
 .requestForm textarea {
   width: 100%;
-  border: 1px solid #27272a;
-  border-radius: 18px;
-  background: rgba(0, 0, 0, 0.34);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 20px;
+  background: rgba(0, 0, 0, 0.42);
   color: #fff;
   font: inherit;
   outline: none;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease;
 }
 
 .requestForm input {
-  height: 50px;
-  padding: 0 16px;
+  height: 58px;
+  padding: 0 18px;
 }
 
 .requestForm textarea {
   resize: vertical;
-  min-height: 116px;
-  padding: 14px 16px;
+  min-height: 132px;
+  padding: 17px 18px;
+}
+
+.requestForm input::placeholder,
+.requestForm textarea::placeholder {
+  color: #71717a;
 }
 
 .requestForm input:focus,
 .requestForm textarea:focus {
   border-color: rgba(255, 214, 0, 0.55);
   box-shadow: 0 0 0 3px rgba(255, 214, 0, 0.12);
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.invalidField input,
+.invalidField textarea {
+  border-color: rgba(255, 95, 95, 0.78);
+  box-shadow:
+    0 0 0 3px rgba(255, 95, 95, 0.1),
+    0 0 18px rgba(255, 214, 0, 0.08);
 }
 
 .wideField {
@@ -1196,6 +1219,34 @@ a {
   padding: 16px 18px;
   font-weight: 800;
   line-height: 1.45;
+}
+
+.formError {
+  border: 1px solid rgba(255, 95, 95, 0.36);
+  border-radius: 22px;
+  background:
+    linear-gradient(135deg, rgba(255, 95, 95, 0.12), rgba(255, 214, 0, 0.06)),
+    rgba(9, 9, 11, 0.78);
+  color: #fecaca;
+  padding: 16px 18px;
+  font-weight: 900;
+  line-height: 1.45;
+}
+
+.formFootnote {
+  color: #a1a1aa;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.softDisabledBtn {
+  opacity: 0.72;
+  filter: saturate(0.75);
+}
+
+.requestForm .primaryBtn:disabled {
+  cursor: wait;
+  opacity: 0.76;
 }
 
 @media (max-width: 900px) {

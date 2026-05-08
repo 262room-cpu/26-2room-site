@@ -27,23 +27,87 @@ const partnershipFormFields = [
   'Комментарий',
 ]
 
+const startRequiredFields = ['Название старта', 'Дата', 'Город', 'Email или WhatsApp']
+const partnershipRequiredFields = ['Имя / компания', 'Email или WhatsApp', 'Что хотите обсудить']
+
+const fieldPlaceholders = {
+  'Название старта': 'Например: Almaty Night Run',
+  Дата: 'Например: 24.08.2026',
+  Город: 'Алматы',
+  Страна: 'Казахстан',
+  Дистанции: '5K, 10K, 21.1K',
+  'Ссылка на регистрацию': 'https://...',
+  'Instagram организатора': '@organizer',
+  'Контактное лицо': 'Имя и роль',
+  'Email или WhatsApp': 'email или номер WhatsApp',
+  Комментарий: 'Дополнительные детали',
+  'Имя / компания': 'Имя или название бренда',
+  'Сфера деятельности': 'Экипировка, питание, сервисы...',
+  'Что хотите обсудить': 'Партнёрство, интеграция, спецпроект...',
+}
+
 function App() {
   const [activeForm, setActiveForm] = useState(null)
-  const [formSubmitted, setFormSubmitted] = useState(false)
+  const [submissionStatus, setSubmissionStatus] = useState('idle')
+  const [formAttempted, setFormAttempted] = useState(false)
+  const [formValues, setFormValues] = useState({})
 
   const openForm = (type) => {
     setActiveForm(type)
-    setFormSubmitted(false)
+    setSubmissionStatus('idle')
+    setFormAttempted(false)
+    setFormValues({})
   }
 
   const closeForm = () => {
     setActiveForm(null)
-    setFormSubmitted(false)
+    setSubmissionStatus('idle')
+    setFormAttempted(false)
+    setFormValues({})
   }
 
-  const handleFormSubmit = (event) => {
+  const handleFormSubmit = async (event) => {
     event.preventDefault()
-    setFormSubmitted(true)
+    setFormAttempted(true)
+
+    if (missingRequiredFields.length > 0) {
+      setSubmissionStatus('idle')
+      return
+    }
+
+    setSubmissionStatus('sending')
+
+    const fields = currentForm.fields.reduce((formFields, field) => {
+      formFields[field] = formValues[field]?.trim() || ''
+      return formFields
+    }, {})
+
+    try {
+      const response = await fetch('/api/send-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: activeForm === 'start' ? 'race' : 'partner',
+          fields,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Request failed')
+      }
+
+      setSubmissionStatus('success')
+    } catch {
+      setSubmissionStatus('error')
+    }
+  }
+
+  const handleFieldChange = (field, value) => {
+    setFormValues((currentValues) => ({
+      ...currentValues,
+      [field]: value,
+    }))
+    setSubmissionStatus('idle')
   }
 
   const currentForm =
@@ -51,13 +115,21 @@ function App() {
       ? {
           title: START_SUBJECT,
           fields: startFormFields,
+          requiredFields: startRequiredFields,
           submitLabel: 'Отправить заявку',
         }
       : {
           title: PARTNERSHIP_SUBJECT,
           fields: partnershipFormFields,
+          requiredFields: partnershipRequiredFields,
           submitLabel: 'Обсудить партнёрство',
         }
+
+  const missingRequiredFields = currentForm.requiredFields.filter(
+    (field) => !formValues[field]?.trim(),
+  )
+  const hasEmptyRequiredFields = missingRequiredFields.length > 0
+  const isSending = submissionStatus === 'sending'
 
   const races = [
     { date: '03.05', name: 'Atyrau Run', city: 'Атырау' },
@@ -554,34 +626,72 @@ function App() {
               <small>26.2 ROOM</small>
               <h2 id="modal-title">{currentForm.title}</h2>
               <p>
-                Заполните форму, чтобы подготовить заявку. Отправку подключим
-                позже, а пока основной контакт: {CONTACT_EMAIL}
+                Заполните форму, и мы получим заявку на почту 26.2 ROOM.
+                Для срочной связи: {CONTACT_EMAIL}
               </p>
             </div>
 
             <form className="requestForm" onSubmit={handleFormSubmit}>
               <div className="formGrid">
-                {currentForm.fields.map((field) => (
-                  <label className={field === 'Комментарий' || field === 'Что хотите обсудить' ? 'wideField' : ''} key={field}>
-                    <span>{field}</span>
+                {currentForm.fields.map((field) => {
+                  const isRequired = currentForm.requiredFields.includes(field)
+                  const isInvalid = formAttempted && isRequired && !formValues[field]?.trim()
+                  const isWide = field === 'Комментарий' || field === 'Что хотите обсудить'
+
+                  return (
+                    <label className={`${isWide ? 'wideField' : ''} ${isInvalid ? 'invalidField' : ''}`} key={field}>
+                      <span>
+                        {field}
+                        {isRequired && <b>*</b>}
+                      </span>
                     {field === 'Комментарий' || field === 'Что хотите обсудить' ? (
-                      <textarea rows="4" />
+                      <textarea
+                        rows="4"
+                        value={formValues[field] || ''}
+                        placeholder={fieldPlaceholders[field]}
+                        onChange={(event) => handleFieldChange(field, event.target.value)}
+                      />
                     ) : (
-                      <input type="text" />
+                      <input
+                        type="text"
+                        value={formValues[field] || ''}
+                        placeholder={fieldPlaceholders[field]}
+                        onChange={(event) => handleFieldChange(field, event.target.value)}
+                      />
                     )}
-                  </label>
-                ))}
+                    </label>
+                  )
+                })}
               </div>
 
-              {formSubmitted && (
-                <div className="formNotice">
-                  Заявка подготовлена. Скоро мы подключим отправку формы. Пока
-                  напишите нам напрямую: {CONTACT_EMAIL}
+              {formAttempted && hasEmptyRequiredFields && (
+                <div className="formError">
+                  Заполните обязательные поля, чтобы мы могли связаться с вами.
                 </div>
               )}
 
-              <button className="primaryBtn" type="submit">
-                {currentForm.submitLabel}
+              {submissionStatus === 'success' && (
+                <div className="formNotice">
+                  Заявка отправлена. Мы свяжемся с вами.
+                </div>
+              )}
+
+              {submissionStatus === 'error' && (
+                <div className="formError">
+                  Не удалось отправить заявку. Напишите нам напрямую:
+                  {' '}
+                  {CONTACT_EMAIL}
+                </div>
+              )}
+
+              <div className="formFootnote">
+                Для срочной связи:
+                {' '}
+                {CONTACT_EMAIL}
+              </div>
+
+              <button className={`primaryBtn ${hasEmptyRequiredFields ? 'softDisabledBtn' : ''}`} type="submit" disabled={isSending}>
+                {isSending ? 'Отправляем...' : currentForm.submitLabel}
               </button>
             </form>
           </div>
