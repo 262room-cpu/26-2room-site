@@ -2,7 +2,6 @@
 import { Resend } from 'resend'
 
 const CONTACT_EMAIL = '26.2room@internet.ru'
-const CC_EMAIL = 'oleg_191090@mail.ru'
 
 const escapeHtml = (value) =>
   String(value ?? '')
@@ -99,7 +98,6 @@ export default async function handler(request, response) {
     const { data, error } = await resend.emails.send({
       from: '26.2 ROOM <onboarding@resend.dev>',
       to: [CONTACT_EMAIL],
-      cc: [CC_EMAIL],
       subject: getSubject(type),
       html: buildHtml({ type, fields }),
     })
