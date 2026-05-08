@@ -41,6 +41,29 @@ function App() {
     },
   ]
 
+  const reasons = [
+    {
+      number: '01',
+      title: 'Видимость',
+      text: 'Помогаем стартам и брендам стать заметнее в беговой среде.',
+    },
+    {
+      number: '02',
+      title: 'Доверие',
+      text: 'Официальная витрина проекта вместо разрозненных постов, сторис и случайных анонсов.',
+    },
+    {
+      number: '03',
+      title: 'Контент',
+      text: 'Создаём визуалы, афиши, мемы, рилсы и понятную подачу для бегового сообщества.',
+    },
+    {
+      number: '04',
+      title: 'Рост',
+      text: 'Строим платформу, которая может масштабироваться за пределы Казахстана.',
+    },
+  ]
+
   const organizerItems = [
     'добавить событие на сайт',
     'попасть в календарь стартов',
@@ -186,6 +209,32 @@ function App() {
                 <span>{item.title}</span>
                 <p>{item.text}</p>
               </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="whySection">
+          <div className="whyIntro">
+            <small>ПОЧЕМУ 26.2 ROOM?</small>
+            <h2>Почему 26.2 ROOM?</h2>
+            <p className="whyLead">
+              Беговая аудитория уже есть — ей нужно удобное место, где видны
+              старты, клубы, организаторы и бренды.
+            </p>
+            <p>
+              Мы соединяем календарь стартов, Instagram-медиа, беговое
+              комьюнити, будущую app-платформу и партнёрские интеграции в одну
+              экосистему.
+            </p>
+          </div>
+
+          <div className="whyGrid">
+            {reasons.map((reason) => (
+              <article className="whyCard" key={reason.title}>
+                <span>{reason.number}</span>
+                <h3>{reason.title}</h3>
+                <p>{reason.text}</p>
+              </article>
             ))}
           </div>
         </section>

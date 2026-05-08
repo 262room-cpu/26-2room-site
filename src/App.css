@@ -460,6 +460,86 @@ a {
   margin: 36px 0 0;
 }
 
+.whySection {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 72px 24px;
+  border: 1px solid rgba(255, 214, 0, 0.14);
+  border-radius: 44px;
+  background:
+    radial-gradient(circle at 18% 10%, rgba(255, 214, 0, 0.16), transparent 34%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.012)),
+    #070708;
+  box-shadow:
+    0 0 54px rgba(255, 214, 0, 0.07),
+    0 30px 100px rgba(0, 0, 0, 0.3);
+}
+
+.whyIntro {
+  max-width: 860px;
+  margin-bottom: 38px;
+}
+
+.whyIntro small {
+  color: #FFD600;
+  font-weight: 900;
+  letter-spacing: 4px;
+}
+
+.whyIntro h2 {
+  font-size: 52px;
+  line-height: 1.02;
+  margin: 16px 0;
+  letter-spacing: -1px;
+}
+
+.whyIntro p {
+  color: #a1a1aa;
+  font-size: 18px;
+  line-height: 1.65;
+  margin: 0;
+}
+
+.whyIntro .whyLead {
+  color: #f4f4f5;
+  font-size: 21px;
+  margin-bottom: 14px;
+}
+
+.whyGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.whyCard {
+  border: 1px solid rgba(255, 214, 0, 0.15);
+  border-radius: 30px;
+  padding: 26px;
+  background: rgba(9, 9, 11, 0.82);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.whyCard span {
+  color: rgba(255, 214, 0, 0.72);
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 3px;
+}
+
+.whyCard h3 {
+  color: #FFD600;
+  font-size: 24px;
+  margin: 28px 0 12px;
+  text-shadow: 0 0 18px rgba(255, 214, 0, 0.18);
+}
+
+.whyCard p {
+  color: #d4d4d8;
+  line-height: 1.55;
+  margin: 0;
+}
+
 .featureCard {
   background: rgba(9, 9, 11, 0.86);
   border: 1px solid #27272a;
@@ -873,6 +953,10 @@ a {
     grid-template-columns: 1fr;
   }
 
+  .whyGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
   .startsSection {
     padding: 34px;
   }
@@ -882,6 +966,7 @@ a {
   .businessText h2,
   .mediaSection h2,
   .appStatus h2,
+  .whyIntro h2,
   .contactHubTitle h2,
   .finalCta h2 {
     font-size: 38px;
@@ -906,6 +991,7 @@ a {
   .checkCard,
   .mediaSection,
   .appStatus,
+  .whySection,
   .contactCard {
     border-radius: 34px;
     padding: 34px;
@@ -992,9 +1078,29 @@ a {
   .businessText h2,
   .mediaSection h2,
   .appStatus h2,
+  .whyIntro h2,
   .contactHubTitle h2,
   .finalCta h2 {
     font-size: 32px;
+  }
+
+  .whySection {
+    margin-left: 18px;
+    margin-right: 18px;
+    padding: 26px;
+    border-radius: 28px;
+  }
+
+  .whyIntro .whyLead {
+    font-size: 18px;
+  }
+
+  .whyIntro p {
+    font-size: 17px;
+  }
+
+  .whyGrid {
+    grid-template-columns: 1fr;
   }
 
   .contactHub {
