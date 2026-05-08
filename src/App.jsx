@@ -272,7 +272,7 @@ function App() {
         <div className="logoBox">
           <img className="logoImage" src="/logo-26-2room.jpg.jpg" alt="26.2 ROOM" />
           <div className="brandCopy">
-            <div className="logoText">26.2 ROOM</div>
+            <div className="logoText" data-text="26.2 ROOM">26.2 ROOM</div>
             <div className="tagline">YOUR FINISH LINE</div>
           </div>
         </div>

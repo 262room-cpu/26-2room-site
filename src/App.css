@@ -88,31 +88,43 @@ a {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 24px;
-  padding: 8px 14px 8px 8px;
-  border: 1px solid rgba(255, 214, 0, 0.12);
-  border-radius: 32px;
+  gap: 26px;
+  padding: 10px 18px 10px 10px;
+  border: 1px solid rgba(255, 214, 0, 0.18);
+  border-radius: 34px;
   background:
-    linear-gradient(135deg, rgba(255, 214, 0, 0.075), rgba(255, 255, 255, 0.015)),
-    rgba(0, 0, 0, 0.18);
+    radial-gradient(circle at 8% 12%, rgba(255, 214, 0, 0.18), transparent 36%),
+    linear-gradient(135deg, rgba(255, 214, 0, 0.09), rgba(255, 255, 255, 0.018)),
+    rgba(0, 0, 0, 0.24);
   box-shadow:
-    0 0 34px rgba(255, 214, 0, 0.08),
+    0 0 40px rgba(255, 214, 0, 0.1),
+    0 18px 55px rgba(0, 0, 0, 0.28),
     inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.logoBox::after {
+  content: "";
+  position: absolute;
+  left: 122px;
+  top: 18px;
+  bottom: 18px;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, rgba(255, 214, 0, 0.42), transparent);
 }
 
 .logoImage {
   display: block;
   width: auto;
-  height: clamp(92px, 7.4vw, 104px);
-  max-width: 142px;
+  height: clamp(98px, 7.8vw, 112px);
+  max-width: 150px;
   object-fit: contain;
-  border: 1px solid rgba(255, 214, 0, 0.26);
-  border-radius: 26px;
+  border: 1px solid rgba(255, 214, 0, 0.3);
+  border-radius: 28px;
   background:
-    linear-gradient(145deg, rgba(255, 214, 0, 0.08), rgba(255, 255, 255, 0.018));
+    linear-gradient(145deg, rgba(255, 214, 0, 0.1), rgba(255, 255, 255, 0.02));
   box-shadow:
-    0 0 34px rgba(255, 214, 0, 0.22),
-    0 18px 45px rgba(0, 0, 0, 0.28);
+    0 0 38px rgba(255, 214, 0, 0.24),
+    0 20px 48px rgba(0, 0, 0, 0.34);
 }
 
 .brandCopy {
@@ -123,33 +135,63 @@ a {
 }
 
 .logoText {
+  position: relative;
+  isolation: isolate;
   font-family: Arial, Helvetica, sans-serif;
   font-weight: 900;
-  letter-spacing: 5.8px;
-  font-size: clamp(21px, 1.85vw, 28px);
-  line-height: 0.95;
+  letter-spacing: 6.4px;
+  font-size: clamp(24px, 2.2vw, 34px);
+  line-height: 0.9;
   color: #FFD600;
-  background: linear-gradient(92deg, #fff9bf 0%, #FFD600 38%, #ffe45c 68%, #d6b300 100%);
+  background: linear-gradient(92deg, #fff8b8 0%, #FFD600 34%, #ffec6d 58%, #b89100 100%);
   -webkit-background-clip: text;
   background-clip: text;
+  -webkit-text-stroke: 0.55px rgba(255, 246, 175, 0.52);
+  transform: skewX(-4deg);
   text-shadow:
-    0 0 8px rgba(255, 214, 0, 0.52),
-    0 0 20px rgba(255, 214, 0, 0.26),
-    0 0 42px rgba(255, 214, 0, 0.12);
+    1px 1px 0 rgba(96, 76, 0, 0.62),
+    0 0 10px rgba(255, 214, 0, 0.42),
+    0 0 26px rgba(255, 214, 0, 0.22);
+}
+
+.logoText::before,
+.logoText::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.logoText::before {
+  z-index: -1;
+  color: transparent;
+  -webkit-text-stroke: 1.75px rgba(205, 161, 0, 0.5);
+  transform: translate(4px, 4px);
+  text-shadow:
+    0 0 16px rgba(255, 214, 0, 0.16),
+    0 8px 18px rgba(0, 0, 0, 0.34);
+}
+
+.logoText::after {
+  z-index: -2;
+  color: rgba(72, 58, 0, 0.42);
+  -webkit-text-stroke: 1px rgba(255, 214, 0, 0.1);
+  transform: translate(7px, 7px);
+  filter: blur(0.35px);
 }
 
 .tagline {
   width: fit-content;
-  border-top: 1px solid rgba(255, 214, 0, 0.32);
-  padding-top: 8px;
-  color: #fef3c7;
-  font-size: clamp(10px, 0.86vw, 12px);
+  border-top: 1px solid rgba(255, 214, 0, 0.38);
+  padding-top: 9px;
+  color: #fff4b0;
+  font-size: clamp(10px, 0.9vw, 12px);
   font-style: normal;
   font-weight: 900;
-  letter-spacing: 3.8px;
+  letter-spacing: 4.6px;
   text-shadow:
-    0 0 7px rgba(255, 214, 0, 0.46),
-    0 0 18px rgba(255, 214, 0, 0.2);
+    0 0 8px rgba(255, 214, 0, 0.38),
+    0 0 18px rgba(255, 214, 0, 0.16);
 }
 
 .nav {
@@ -1331,9 +1373,9 @@ a {
   }
 
   .logoImage {
-    height: clamp(82px, 10vw, 94px);
-    max-width: 128px;
-    border-radius: 24px;
+    height: clamp(86px, 10vw, 100px);
+    max-width: 136px;
+    border-radius: 25px;
   }
 
   .businessText,
@@ -1367,32 +1409,49 @@ a {
   }
 
   .logoBox {
-    gap: 14px;
+    gap: 16px;
     padding: 7px 10px 7px 7px;
     border-radius: 26px;
   }
 
+  .logoBox::after {
+    left: 86px;
+    top: 14px;
+    bottom: 14px;
+  }
+
   .logoImage {
-    height: clamp(68px, 18vw, 76px);
-    max-width: 104px;
+    height: clamp(70px, 18vw, 78px);
+    max-width: 108px;
     border-radius: 20px;
   }
 
   .logoText {
-    font-size: 15px;
-    letter-spacing: 3.5px;
+    font-size: 16px;
+    letter-spacing: 3.3px;
+    -webkit-text-stroke: 0.35px rgba(255, 246, 175, 0.45);
     text-shadow:
-      0 0 6px rgba(255, 214, 0, 0.5),
-      0 0 14px rgba(255, 214, 0, 0.28);
+      1px 1px 0 rgba(95, 78, 0, 0.58),
+      0 0 8px rgba(255, 214, 0, 0.34);
+  }
+
+  .logoText::before {
+    -webkit-text-stroke: 1.1px rgba(205, 161, 0, 0.42);
+    transform: translate(2.5px, 2.5px);
+  }
+
+  .logoText::after {
+    transform: translate(4.5px, 4.5px);
+    filter: blur(0.25px);
   }
 
   .tagline {
     padding-top: 6px;
     font-size: 9px;
-    letter-spacing: 2px;
+    letter-spacing: 2.2px;
     text-shadow:
-      0 0 6px rgba(255, 214, 0, 0.42),
-      0 0 12px rgba(255, 214, 0, 0.2);
+      0 0 6px rgba(255, 214, 0, 0.34),
+      0 0 12px rgba(255, 214, 0, 0.16);
   }
 
   .hero,
