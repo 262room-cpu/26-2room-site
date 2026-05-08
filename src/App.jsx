@@ -95,8 +95,12 @@ function App() {
           fields,
         }),
       })
+      const result = await response.json().catch(() => null)
 
-      if (!response.ok) {
+      console.log('API response:', result)
+
+      if (!response.ok || result?.ok !== true) {
+        console.error('API error:', result)
         console.error('Failed to send request to /api/send-request', {
           status: response.status,
           statusText: response.statusText,

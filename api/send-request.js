@@ -96,7 +96,7 @@ export default async function handler(request, response) {
   try {
     const resend = new Resend(process.env.RESEND_API_KEY)
 
-    await resend.emails.send({
+    const { data, error } = await resend.emails.send({
       from: '26.2 ROOM <onboarding@resend.dev>',
       to: [CONTACT_EMAIL],
       cc: [CC_EMAIL],
@@ -104,8 +104,19 @@ export default async function handler(request, response) {
       html: buildHtml({ type, fields }),
     })
 
-    return response.status(200).json({ ok: true })
-  } catch {
+    if (error) {
+      console.error('Resend error:', error)
+      return response.status(500).json({ ok: false, error: 'Email sending failed', details: error })
+    }
+
+    if (data) {
+      console.log('Resend success:', data)
+      return response.status(200).json({ ok: true, id: data.id, data })
+    }
+
+    return response.status(500).json({ ok: false, error: 'No response from Resend' })
+  } catch (error) {
+    console.error('Resend request failed:', error)
     return response.status(500).json({ error: 'Failed to send request' })
   }
 }
