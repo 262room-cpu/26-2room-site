@@ -11,15 +11,15 @@ function App() {
   const audiences = [
     {
       title: 'Бегунам',
-      text: 'Находить старты, следить за календарём, выбирать забеги и открывать беговое комьюнити.',
+      text: 'Находить старты, следить за календарём и выбирать следующий забег.',
     },
     {
       title: 'Организаторам',
-      text: 'Добавлять свои старты, получать охват, вести людей на регистрацию и усиливать событие через медиа.',
+      text: 'Добавлять события, получать охват и вести участников на регистрацию.',
     },
     {
       title: 'Брендам',
-      text: 'Заходить в активную спортивную аудиторию через партнёрства, спецпроекты и интеграции.',
+      text: 'Интегрироваться в активную спортивную аудиторию через медиа и партнёрства.',
     },
   ]
 
@@ -98,22 +98,22 @@ function App() {
       <main>
         <section className="hero">
           <div className="heroText">
-            <div className="badge">Приложение · сайт · Instagram-медиа</div>
+            <div className="badge">Сайт · Instagram · App</div>
 
             <h1>
               Беговая экосистема для стартов, людей и брендов.
             </h1>
 
             <p>
-              26.2 ROOM объединяет бегунов, организаторов стартов, клубы и
-              бренды через приложение, сайт и Instagram-медиа.
+              26.2 ROOM объединяет бегунов, организаторов, клубы и бренды
+              через сайт, Instagram-медиа и будущее приложение.
             </p>
 
             <div className="buttons">
-              <a className="primaryBtn" href="mailto:26.2room@internet.ru?subject=Добавить старт">
+              <a className="primaryBtn" href="mailto:26.2room@internet.ru?subject=Добавить старт в 26.2 ROOM">
                 Добавить старт
               </a>
-              <a className="secondaryBtn" href="mailto:26.2room@internet.ru?subject=Партнёрство">
+              <a className="secondaryBtn" href="mailto:26.2room@internet.ru?subject=Партнёрство с 26.2 ROOM">
                 Стать партнёром
               </a>
               <a className="secondaryBtn" href="https://www.instagram.com/26.2_room/" target="_blank" rel="noreferrer">
@@ -150,7 +150,7 @@ function App() {
 
               <div className="featuredRace">
                 <small>Экосистема</small>
-                <h3>Сайт + App + IG</h3>
+                <h3>Сайт + Instagram + App</h3>
                 <p>Анонсы · медиа · регистрация</p>
               </div>
 
@@ -171,11 +171,12 @@ function App() {
 
         <section className="section audienceSection" id="audiences">
           <div className="sectionTitle">
-            <small>ДЛЯ КОГО 26.2 ROOM</small>
-            <h2>Три аудитории. Одна беговая экосистема.</h2>
+            <small>ЧТО ТАКОЕ 26.2 ROOM?</small>
+            <h2>Единое пространство для беговой культуры.</h2>
             <p>
-              26.2 ROOM соединяет тех, кто бежит, тех, кто создаёт старты, и
-              бренды, которым важно быть рядом с активным спортивным сообществом.
+              Это единое пространство для беговой культуры: мы собираем
+              старты, рассказываем о событиях, создаём медиа-контент и строим
+              цифровую платформу для бегунов и организаторов.
             </p>
           </div>
 
@@ -252,7 +253,7 @@ function App() {
               спортивное событие? 26.2 ROOM поможет рассказать о вашем старте
               беговой аудитории.
             </p>
-            <a className="primaryBtn" href="mailto:26.2room@internet.ru?subject=Добавить свой старт">
+            <a className="primaryBtn" href="mailto:26.2room@internet.ru?subject=Добавить старт в 26.2 ROOM">
               Добавить свой старт
             </a>
           </div>
@@ -276,7 +277,7 @@ function App() {
               создаём медиа, календарь стартов и цифровую платформу, вокруг
               которой собирается активная спортивная аудитория.
             </p>
-            <a className="primaryBtn" href="mailto:26.2room@internet.ru?subject=Обсудить партнёрство">
+            <a className="primaryBtn" href="mailto:26.2room@internet.ru?subject=Партнёрство с 26.2 ROOM">
               Обсудить партнёрство
             </a>
           </div>
@@ -320,10 +321,10 @@ function App() {
           <h2>Хотите добавить старт, предложить партнёрство или обсудить интеграцию?</h2>
 
           <div className="buttons center">
-            <a className="primaryBtn" href="mailto:26.2room@internet.ru?subject=Добавить старт">
+            <a className="primaryBtn" href="mailto:26.2room@internet.ru?subject=Добавить старт в 26.2 ROOM">
               Добавить старт
             </a>
-            <a className="secondaryBtn" href="mailto:26.2room@internet.ru?subject=Партнёрство">
+            <a className="secondaryBtn" href="mailto:26.2room@internet.ru?subject=Партнёрство с 26.2 ROOM">
               Стать партнёром
             </a>
             <a className="secondaryBtn" href="https://www.instagram.com/26.2_room/" target="_blank" rel="noreferrer">
