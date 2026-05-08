@@ -85,54 +85,71 @@ a {
 }
 
 .logoBox {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 22px;
+  gap: 24px;
+  padding: 8px 14px 8px 8px;
+  border: 1px solid rgba(255, 214, 0, 0.12);
+  border-radius: 32px;
+  background:
+    linear-gradient(135deg, rgba(255, 214, 0, 0.075), rgba(255, 255, 255, 0.015)),
+    rgba(0, 0, 0, 0.18);
+  box-shadow:
+    0 0 34px rgba(255, 214, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .logoImage {
   display: block;
   width: auto;
-  height: clamp(86px, 7vw, 96px);
-  max-width: 132px;
+  height: clamp(92px, 7.4vw, 104px);
+  max-width: 142px;
   object-fit: contain;
-  border: 1px solid rgba(255, 214, 0, 0.18);
-  border-radius: 22px;
-  background: rgba(255, 214, 0, 0.03);
-  box-shadow: 0 0 32px rgba(255, 214, 0, 0.18);
+  border: 1px solid rgba(255, 214, 0, 0.26);
+  border-radius: 26px;
+  background:
+    linear-gradient(145deg, rgba(255, 214, 0, 0.08), rgba(255, 255, 255, 0.018));
+  box-shadow:
+    0 0 34px rgba(255, 214, 0, 0.22),
+    0 18px 45px rgba(0, 0, 0, 0.28);
 }
 
 .brandCopy {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
+  transform: translateY(1px);
 }
 
 .logoText {
+  font-family: Arial, Helvetica, sans-serif;
   font-weight: 900;
-  letter-spacing: 5px;
-  font-size: 19px;
-  line-height: 1;
+  letter-spacing: 5.8px;
+  font-size: clamp(21px, 1.85vw, 28px);
+  line-height: 0.95;
   color: #FFD600;
-  background: linear-gradient(92deg, #fff7b0 0%, #FFD600 42%, #ffe867 72%, #caa700 100%);
+  background: linear-gradient(92deg, #fff9bf 0%, #FFD600 38%, #ffe45c 68%, #d6b300 100%);
   -webkit-background-clip: text;
   background-clip: text;
   text-shadow:
-    0 0 8px rgba(255, 214, 0, 0.58),
-    0 0 18px rgba(255, 214, 0, 0.34),
-    0 0 34px rgba(255, 214, 0, 0.2);
+    0 0 8px rgba(255, 214, 0, 0.52),
+    0 0 20px rgba(255, 214, 0, 0.26),
+    0 0 42px rgba(255, 214, 0, 0.12);
 }
 
 .tagline {
-  color: #ffe867;
-  font-size: 14px;
-  font-style: italic;
-  font-weight: 800;
-  letter-spacing: 0.9px;
+  width: fit-content;
+  border-top: 1px solid rgba(255, 214, 0, 0.32);
+  padding-top: 8px;
+  color: #fef3c7;
+  font-size: clamp(10px, 0.86vw, 12px);
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: 3.8px;
   text-shadow:
-    0 0 7px rgba(255, 214, 0, 0.7),
-    0 0 16px rgba(255, 214, 0, 0.42),
-    0 0 30px rgba(255, 214, 0, 0.22);
+    0 0 7px rgba(255, 214, 0, 0.46),
+    0 0 18px rgba(255, 214, 0, 0.2);
 }
 
 .nav {
@@ -1314,9 +1331,9 @@ a {
   }
 
   .logoImage {
-    height: clamp(76px, 10vw, 88px);
-    max-width: 120px;
-    border-radius: 22px;
+    height: clamp(82px, 10vw, 94px);
+    max-width: 128px;
+    border-radius: 24px;
   }
 
   .businessText,
@@ -1350,29 +1367,32 @@ a {
   }
 
   .logoBox {
-    gap: 16px;
+    gap: 14px;
+    padding: 7px 10px 7px 7px;
+    border-radius: 26px;
   }
 
   .logoImage {
-    height: clamp(64px, 17vw, 72px);
-    max-width: 100px;
-    border-radius: 18px;
+    height: clamp(68px, 18vw, 76px);
+    max-width: 104px;
+    border-radius: 20px;
   }
 
   .logoText {
-    font-size: 13px;
-    letter-spacing: 3.2px;
+    font-size: 15px;
+    letter-spacing: 3.5px;
     text-shadow:
       0 0 6px rgba(255, 214, 0, 0.5),
       0 0 14px rgba(255, 214, 0, 0.28);
   }
 
   .tagline {
-    font-size: 12px;
-    letter-spacing: 0.6px;
+    padding-top: 6px;
+    font-size: 9px;
+    letter-spacing: 2px;
     text-shadow:
-      0 0 6px rgba(255, 214, 0, 0.58),
-      0 0 13px rgba(255, 214, 0, 0.32);
+      0 0 6px rgba(255, 214, 0, 0.42),
+      0 0 12px rgba(255, 214, 0, 0.2);
   }
 
   .hero,
