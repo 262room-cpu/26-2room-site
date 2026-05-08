@@ -198,10 +198,13 @@ a {
   height: 52px;
   padding: 0 26px;
   border-radius: 999px;
+  border: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  font: inherit;
   font-weight: 900;
+  cursor: pointer;
 }
 
 .primaryBtn {
@@ -1042,8 +1045,157 @@ a {
   gap: 20px;
 }
 
-.footerLinks a:hover {
+.footerLinks button {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.footerLinks a:hover,
+.footerLinks button:hover {
   color: #FFD600;
+}
+
+.formOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(18px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.formModal {
+  position: relative;
+  width: min(920px, 100%);
+  max-height: min(860px, calc(100vh - 48px));
+  overflow: auto;
+  border: 1px solid rgba(255, 214, 0, 0.22);
+  border-radius: 38px;
+  padding: 42px;
+  background:
+    radial-gradient(circle at 16% 0%, rgba(255, 214, 0, 0.18), transparent 36%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.012)),
+    #09090b;
+  box-shadow:
+    0 0 70px rgba(255, 214, 0, 0.12),
+    0 40px 120px rgba(0, 0, 0, 0.6);
+}
+
+.modalClose {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.modalClose:hover {
+  border-color: rgba(255, 214, 0, 0.34);
+  color: #FFD600;
+}
+
+.modalHeader {
+  max-width: 720px;
+  margin-bottom: 30px;
+}
+
+.modalHeader small {
+  color: #FFD600;
+  font-weight: 900;
+  letter-spacing: 4px;
+}
+
+.modalHeader h2 {
+  font-size: 42px;
+  line-height: 1.05;
+  margin: 14px 0;
+}
+
+.modalHeader p {
+  color: #d4d4d8;
+  font-size: 17px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.requestForm {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.requestForm label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.requestForm label span {
+  color: #f4f4f5;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.requestForm input,
+.requestForm textarea {
+  width: 100%;
+  border: 1px solid #27272a;
+  border-radius: 18px;
+  background: rgba(0, 0, 0, 0.34);
+  color: #fff;
+  font: inherit;
+  outline: none;
+}
+
+.requestForm input {
+  height: 50px;
+  padding: 0 16px;
+}
+
+.requestForm textarea {
+  resize: vertical;
+  min-height: 116px;
+  padding: 14px 16px;
+}
+
+.requestForm input:focus,
+.requestForm textarea:focus {
+  border-color: rgba(255, 214, 0, 0.55);
+  box-shadow: 0 0 0 3px rgba(255, 214, 0, 0.12);
+}
+
+.wideField {
+  grid-column: 1 / -1;
+}
+
+.formNotice {
+  border: 1px solid rgba(255, 214, 0, 0.24);
+  border-radius: 22px;
+  background: rgba(255, 214, 0, 0.1);
+  color: #fef3c7;
+  padding: 16px 18px;
+  font-weight: 800;
+  line-height: 1.45;
 }
 
 @media (max-width: 900px) {
@@ -1296,5 +1448,29 @@ a {
 
   .footerLinks {
     flex-wrap: wrap;
+  }
+
+  .formOverlay {
+    padding: 14px;
+    align-items: flex-start;
+  }
+
+  .formModal {
+    max-height: calc(100vh - 28px);
+    padding: 28px;
+    border-radius: 28px;
+  }
+
+  .modalHeader h2 {
+    font-size: 30px;
+  }
+
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .modalClose {
+    top: 16px;
+    right: 16px;
   }
 }

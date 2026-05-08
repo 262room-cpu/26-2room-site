@@ -1,16 +1,64 @@
+import { useState } from 'react'
 import './App.css'
 
 const CONTACT_EMAIL = '26.2room@internet.ru'
-const CC_EMAILS = 'oleg_191090@mail.ru'
-
-const createMailto = (subject) =>
-  `mailto:${CONTACT_EMAIL}?cc=${CC_EMAILS}&subject=${encodeURIComponent(subject)}`
 
 const START_SUBJECT = 'Добавить старт в 26.2 ROOM'
 const PARTNERSHIP_SUBJECT = 'Партнёрство с 26.2 ROOM'
-const GENERAL_SUBJECT = 'Обращение с сайта 26.2 ROOM'
+
+const startFormFields = [
+  'Название старта',
+  'Дата',
+  'Город',
+  'Страна',
+  'Дистанции',
+  'Ссылка на регистрацию',
+  'Instagram организатора',
+  'Контактное лицо',
+  'Email или WhatsApp',
+  'Комментарий',
+]
+
+const partnershipFormFields = [
+  'Имя / компания',
+  'Сфера деятельности',
+  'Email или WhatsApp',
+  'Что хотите обсудить',
+  'Комментарий',
+]
 
 function App() {
+  const [activeForm, setActiveForm] = useState(null)
+  const [formSubmitted, setFormSubmitted] = useState(false)
+
+  const openForm = (type) => {
+    setActiveForm(type)
+    setFormSubmitted(false)
+  }
+
+  const closeForm = () => {
+    setActiveForm(null)
+    setFormSubmitted(false)
+  }
+
+  const handleFormSubmit = (event) => {
+    event.preventDefault()
+    setFormSubmitted(true)
+  }
+
+  const currentForm =
+    activeForm === 'start'
+      ? {
+          title: START_SUBJECT,
+          fields: startFormFields,
+          submitLabel: 'Отправить заявку',
+        }
+      : {
+          title: PARTNERSHIP_SUBJECT,
+          fields: partnershipFormFields,
+          submitLabel: 'Обсудить партнёрство',
+        }
+
   const races = [
     { date: '03.05', name: 'Atyrau Run', city: 'Атырау' },
     { date: '07.05', name: 'Alaman Run', city: 'Алматы' },
@@ -122,14 +170,14 @@ function App() {
       text: 'Для марафонов, трейлов, городских забегов, клубных пробежек и спортивных событий.',
       items: ['дата и город', 'дистанции', 'ссылка на регистрацию', 'Instagram или сайт организатора'],
       button: 'Отправить старт',
-      href: createMailto(START_SUBJECT),
+      formType: 'start',
     },
     {
       title: 'Стать партнёром',
       text: 'Для брендов, спонсоров, спортивных магазинов, экипировки, питания, сервисов и компаний.',
       items: ['спецпроект', 'интеграция в Instagram', 'спонсорство календаря', 'коллаборация с забегами'],
       button: 'Обсудить партнёрство',
-      href: createMailto(PARTNERSHIP_SUBJECT),
+      formType: 'partnership',
     },
   ]
 
@@ -169,12 +217,12 @@ function App() {
             </p>
 
             <div className="buttons">
-              <a className="primaryBtn" href={createMailto(START_SUBJECT)}>
+              <button className="primaryBtn" type="button" onClick={() => openForm('start')}>
                 Добавить старт
-              </a>
-              <a className="secondaryBtn" href={createMailto(PARTNERSHIP_SUBJECT)}>
+              </button>
+              <button className="secondaryBtn" type="button" onClick={() => openForm('partnership')}>
                 Стать партнёром
-              </a>
+              </button>
               <a className="secondaryBtn" href="https://www.instagram.com/26.2_room/" target="_blank" rel="noreferrer">
                 Instagram
               </a>
@@ -368,9 +416,9 @@ function App() {
               спортивное событие? 26.2 ROOM поможет рассказать о вашем старте
               беговой аудитории.
             </p>
-            <a className="primaryBtn" href={createMailto(START_SUBJECT)}>
+            <button className="primaryBtn" type="button" onClick={() => openForm('start')}>
               Добавить свой старт
-            </a>
+            </button>
           </div>
 
           <div className="checkCard">
@@ -392,9 +440,9 @@ function App() {
               создаём медиа, календарь стартов и цифровую платформу, вокруг
               которой собирается активная спортивная аудитория.
             </p>
-            <a className="primaryBtn" href={createMailto(PARTNERSHIP_SUBJECT)}>
+            <button className="primaryBtn" type="button" onClick={() => openForm('partnership')}>
               Обсудить партнёрство
-            </a>
+            </button>
           </div>
 
           <div className="checkCard yellowCard">
@@ -436,18 +484,18 @@ function App() {
           <h2>Хотите добавить старт, предложить партнёрство или обсудить интеграцию?</h2>
 
           <div className="buttons center">
-            <a className="primaryBtn" href={createMailto(START_SUBJECT)}>
+            <button className="primaryBtn" type="button" onClick={() => openForm('start')}>
               Добавить старт
-            </a>
-            <a className="secondaryBtn" href={createMailto(PARTNERSHIP_SUBJECT)}>
+            </button>
+            <button className="secondaryBtn" type="button" onClick={() => openForm('partnership')}>
               Стать партнёром
-            </a>
+            </button>
             <a className="secondaryBtn" href="https://www.instagram.com/26.2_room/" target="_blank" rel="noreferrer">
               Instagram
             </a>
-            <a className="secondaryBtn" href={createMailto(GENERAL_SUBJECT)}>
+            <button className="secondaryBtn" type="button" onClick={() => openForm('partnership')}>
               Email
-            </a>
+            </button>
           </div>
 
           <div className="email">26.2room@internet.ru</div>
@@ -477,9 +525,9 @@ function App() {
                   ))}
                 </ul>
 
-                <a className="primaryBtn" href={card.href}>
+                <button className="primaryBtn" type="button" onClick={() => openForm(card.formType)}>
                   {card.button}
-                </a>
+                </button>
               </article>
             ))}
           </div>
@@ -491,9 +539,54 @@ function App() {
         <div className="footerLinks">
           <a href="#ecosystem">Экосистема</a>
           <a href="#organizers">Организаторам</a>
-          <a href={createMailto(GENERAL_SUBJECT)}>Contact</a>
+          <button type="button" onClick={() => openForm('partnership')}>Contact</button>
         </div>
       </footer>
+
+      {activeForm && (
+        <div className="formOverlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+          <div className="formModal">
+            <button className="modalClose" type="button" onClick={closeForm} aria-label="Закрыть форму">
+              ×
+            </button>
+
+            <div className="modalHeader">
+              <small>26.2 ROOM</small>
+              <h2 id="modal-title">{currentForm.title}</h2>
+              <p>
+                Заполните форму, чтобы подготовить заявку. Отправку подключим
+                позже, а пока основной контакт: {CONTACT_EMAIL}
+              </p>
+            </div>
+
+            <form className="requestForm" onSubmit={handleFormSubmit}>
+              <div className="formGrid">
+                {currentForm.fields.map((field) => (
+                  <label className={field === 'Комментарий' || field === 'Что хотите обсудить' ? 'wideField' : ''} key={field}>
+                    <span>{field}</span>
+                    {field === 'Комментарий' || field === 'Что хотите обсудить' ? (
+                      <textarea rows="4" />
+                    ) : (
+                      <input type="text" />
+                    )}
+                  </label>
+                ))}
+              </div>
+
+              {formSubmitted && (
+                <div className="formNotice">
+                  Заявка подготовлена. Скоро мы подключим отправку формы. Пока
+                  напишите нам напрямую: {CONTACT_EMAIL}
+                </div>
+              )}
+
+              <button className="primaryBtn" type="submit">
+                {currentForm.submitLabel}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
