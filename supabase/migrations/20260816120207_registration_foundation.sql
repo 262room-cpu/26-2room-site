@@ -11,6 +11,25 @@ begin
 end;
 $function$;
 
+create table public.payment_merchant_accounts (
+  id uuid primary key default gen_random_uuid(),
+  code text not null,
+  display_name text not null,
+  provider text not null,
+  is_enabled boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint payment_merchant_accounts_code_key unique (code),
+  constraint payment_merchant_accounts_id_provider_key unique (id, provider),
+  constraint payment_merchant_accounts_code_not_blank_check check (btrim(code) <> ''),
+  constraint payment_merchant_accounts_display_name_not_blank_check check (
+    btrim(display_name) <> ''
+  ),
+  constraint payment_merchant_accounts_provider_not_blank_check check (
+    btrim(provider) <> ''
+  )
+);
+
 create table public.events (
   id uuid primary key default gen_random_uuid(),
   slug text not null,
@@ -32,6 +51,7 @@ create table public.events (
   event_window_end time without time zone,
   registration_opens_at timestamptz,
   registration_closes_at timestamptz,
+  payment_merchant_account_id uuid,
   capacity integer not null,
   price_minor bigint,
   currency text not null,
@@ -42,6 +62,8 @@ create table public.events (
   updated_at timestamptz not null default now(),
   constraint events_slug_key unique (slug),
   constraint events_registration_code_prefix_key unique (registration_code_prefix),
+  constraint events_payment_merchant_account_id_fkey foreign key (payment_merchant_account_id)
+    references public.payment_merchant_accounts (id) on delete restrict,
   constraint events_slug_not_blank_check check (btrim(slug) <> ''),
   constraint events_registration_code_prefix_not_blank_check check (
     registration_code_prefix is null or btrim(registration_code_prefix) <> ''
@@ -314,6 +336,7 @@ create table public.registration_consents (
 create table public.payments (
   id uuid primary key default gen_random_uuid(),
   registration_id uuid not null,
+  merchant_account_id uuid not null,
   provider text not null,
   provider_payment_id text,
   status text not null,
@@ -329,6 +352,8 @@ create table public.payments (
   updated_at timestamptz not null default now(),
   constraint payments_registration_id_fkey foreign key (registration_id)
     references public.registrations (id) on delete restrict,
+  constraint payments_merchant_account_provider_fkey foreign key (merchant_account_id, provider)
+    references public.payment_merchant_accounts (id, provider) on delete restrict,
   constraint payments_provider_not_blank_check check (btrim(provider) <> ''),
   constraint payments_provider_payment_id_not_blank_check check (
     provider_payment_id is null or btrim(provider_payment_id) <> ''
@@ -395,9 +420,18 @@ comment on column public.registrations.flow_token_hash is
   'Lower- or uppercase hexadecimal SHA-256 hash; the raw flow token is never stored.';
 comment on table public.registration_documents is
   'Metadata for private registration documents; file bytes remain in private Storage.';
+comment on table public.payment_merchant_accounts is
+  'Non-secret logical routing identities; provider credentials remain outside the database.';
+comment on column public.events.payment_merchant_account_id is
+  'Default merchant account for new payment attempts; not historical payment data.';
+comment on column public.payments.merchant_account_id is
+  'Historical merchant account used to create this payment attempt.';
 
 create index events_status_starts_at_idx
   on public.events (status, starts_at);
+
+create index events_payment_merchant_account_id_idx
+  on public.events (payment_merchant_account_id);
 
 create index event_distances_event_sort_order_idx
   on public.event_distances (event_id, sort_order);
@@ -431,11 +465,18 @@ create unique index payments_provider_payment_id_key
 create index payments_registration_created_at_idx
   on public.payments (registration_id, created_at);
 
+create index payments_merchant_account_created_at_idx
+  on public.payments (merchant_account_id, created_at);
+
 create index event_partners_event_sort_order_idx
   on public.event_partners (event_id, sort_order);
 
 create index event_kit_items_event_sort_order_idx
   on public.event_kit_items (event_id, sort_order);
+
+create trigger payment_merchant_accounts_set_updated_at
+before update on public.payment_merchant_accounts
+for each row execute function public.set_updated_at();
 
 create trigger events_set_updated_at
 before update on public.events
@@ -473,6 +514,7 @@ create trigger event_registration_counters_set_updated_at
 before update on public.event_registration_counters
 for each row execute function public.set_updated_at();
 
+alter table public.payment_merchant_accounts enable row level security;
 alter table public.events enable row level security;
 alter table public.event_distances enable row level security;
 alter table public.registrations enable row level security;
@@ -486,6 +528,7 @@ alter table public.event_kit_items enable row level security;
 alter table public.event_registration_counters enable row level security;
 
 revoke all privileges on table
+  public.payment_merchant_accounts,
   public.events,
   public.event_distances,
   public.registrations,
@@ -500,6 +543,7 @@ revoke all privileges on table
 from public;
 
 revoke all privileges on table
+  public.payment_merchant_accounts,
   public.events,
   public.event_distances,
   public.registrations,
@@ -522,6 +566,7 @@ grant select, insert, update, delete on table
 to service_role;
 
 grant select, insert, update on table
+  public.payment_merchant_accounts,
   public.registrations,
   public.children,
   public.parents,
