@@ -61,6 +61,7 @@ create table public.events (
     or (
       date_status = 'confirmed'
       and starts_at is not null
+      and tentative_date is null
     )
     or (
       date_status is null
@@ -150,6 +151,9 @@ create table public.registrations (
   constraint registrations_public_id_not_blank_check check (
     public_id is null or btrim(public_id) <> ''
   ),
+  constraint registrations_public_id_confirmation_check check (
+    public_id is null or confirmed_at is not null
+  ),
   constraint registrations_idempotency_key_not_blank_check check (btrim(idempotency_key) <> ''),
   constraint registrations_amount_minor_check check (amount_minor >= 0),
   constraint registrations_currency_check check (currency ~ '^[A-Z]{3}$'),
@@ -165,17 +169,40 @@ create table public.registrations (
   constraint registrations_check_in_token_hash_check check (
     check_in_token_hash is null or check_in_token_hash ~ '^[0-9A-Fa-f]{64}$'
   ),
-  constraint registrations_confirmed_timestamp_check check (
-    confirmed_at is null or status = 'confirmed'
+  constraint registrations_check_in_confirmation_check check (
+    check_in_token_hash is null or confirmed_at is not null
   ),
-  constraint registrations_expired_timestamp_check check (
-    expired_at is null or status = 'expired'
+  constraint registrations_state_timestamps_check check (
+    (
+      status = 'pending_payment'
+      and confirmed_at is null
+      and expired_at is null
+      and cancelled_at is null
+    )
+    or (
+      status = 'confirmed'
+      and confirmed_at is not null
+      and expired_at is null
+      and cancelled_at is null
+    )
+    or (
+      status = 'expired'
+      and confirmed_at is null
+      and expired_at is not null
+      and cancelled_at is null
+    )
+    or (
+      status = 'cancelled'
+      and cancelled_at is not null
+      and expired_at is null
+    )
   ),
-  constraint registrations_cancelled_timestamp_check check (
-    cancelled_at is null or status = 'cancelled'
+  constraint registrations_kit_confirmation_check check (
+    kit_issued_at is null or confirmed_at is not null
   ),
-  constraint registrations_kit_issuer_check check (
-    kit_issued_by is null or kit_issued_at is not null
+  constraint registrations_kit_issue_pair_check check (
+    (kit_issued_at is null and kit_issued_by is null)
+    or (kit_issued_at is not null and kit_issued_by is not null)
   )
 );
 
