@@ -1,5 +1,5 @@
 import { Link, useParams } from 'react-router'
-import { EVENT_STATUSES, getEventBySlug } from '../data/events'
+import { EVENT_DATE_STATUSES, EVENT_STATUSES, getEventBySlug } from '../data/events'
 import './EventPage.css'
 
 const EVENT_STATUS_LABELS = {
@@ -13,7 +13,7 @@ const EVENT_STATUS_LABELS = {
 
 const REGISTRATION_STATUS_COPY = {
   [EVENT_STATUSES.DRAFT]: 'Информация о мероприятии готовится. Регистрация будет доступна после утверждения деталей.',
-  [EVENT_STATUSES.COMING_SOON]: 'Регистрация скоро откроется. Следите за обновлениями 26.2 ROOM.',
+  [EVENT_STATUSES.COMING_SOON]: 'Регистрация откроется после подтверждения даты.',
   [EVENT_STATUSES.OPEN]: 'Перейдите к форме участника, чтобы продолжить регистрацию.',
   [EVENT_STATUSES.SOLD_OUT]: 'Лимит участников на это мероприятие исчерпан.',
   [EVENT_STATUSES.CLOSED]: 'Регистрация на мероприятие завершена.',
@@ -25,11 +25,16 @@ function formatEventDate(value) {
     return null
   }
 
+  const dateOnlyMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value)
+  const date = dateOnlyMatch
+    ? new Date(Number(dateOnlyMatch[1]), Number(dateOnlyMatch[2]) - 1, Number(dateOnlyMatch[3]))
+    : new Date(value)
+
   return new Intl.DateTimeFormat('ru-RU', {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
-  }).format(new Date(value))
+  }).format(date)
 }
 
 function formatPrice(price, currency) {
@@ -77,7 +82,17 @@ function EventPage() {
     )
   }
 
-  const eventDate = formatEventDate(event.startsAt)
+  const confirmedEventDate = formatEventDate(event.startsAt)
+  const tentativeEventDate =
+    event.dateStatus === EVENT_DATE_STATUSES.TENTATIVE
+      ? formatEventDate(event.tentativeDate)
+      : null
+  const eventDate = confirmedEventDate ?? tentativeEventDate
+  const eventDateIsTentative = !confirmedEventDate && Boolean(tentativeEventDate)
+  const eventWindow =
+    event.eventWindow?.start && event.eventWindow?.end
+      ? `${event.eventWindow.start}–${event.eventWindow.end}`
+      : null
   const eventPrice = formatPrice(event.price, event.currency)
   const statusLabel = EVENT_STATUS_LABELS[event.status] ?? 'Статус уточняется'
   const registrationCopy = REGISTRATION_STATUS_COPY[event.status] ?? 'Информация о регистрации уточняется.'
@@ -119,14 +134,24 @@ function EventPage() {
               {eventDate && (
                 <div>
                   <span>Дата</span>
-                  <strong>{eventDate}</strong>
+                  <strong>{eventDateIsTentative ? `Ориентировочно ${eventDate}` : eventDate}</strong>
+                  {eventDateIsTentative && (
+                    <small className="eventPageMetaNote">Точная дата уточняется</small>
+                  )}
+                </div>
+              )}
+
+              {eventWindow && (
+                <div>
+                  <span>Ориентировочное время</span>
+                  <strong>{eventWindow}</strong>
                 </div>
               )}
 
               {event.venue && (
                 <div>
                   <span>Место</span>
-                  <strong>{event.venue}</strong>
+                  <strong>{event.city ? `${event.venue}, ${event.city}` : event.venue}</strong>
                 </div>
               )}
 
@@ -170,12 +195,18 @@ function EventPage() {
         {hasDistances && (
           <section className="eventPageSection">
             <p className="eventPageEyebrow">Дистанции</p>
-            <h2>Форматы участия</h2>
+            <h2>500 м или 1000 м</h2>
+            <div className="eventPageSectionNotes">
+              {event.participantNote && <p>{event.participantNote}</p>}
+              {event.distanceSelectionNote && <p>{event.distanceSelectionNote}</p>}
+            </div>
             <div className="eventPageGrid">
               {event.distances.map((distance) => (
                 <article className="eventPageCard" key={distance.id}>
                   <h3>{distance.title}</h3>
-                  {distance.distanceMeters && <p>{distance.distanceMeters} м</p>}
+                  {distance.distanceMeters && distance.title !== `${distance.distanceMeters} м` && (
+                    <p>{distance.distanceMeters} м</p>
+                  )}
                   {distance.capacity && <small>{distance.capacity} участников</small>}
                 </article>
               ))}

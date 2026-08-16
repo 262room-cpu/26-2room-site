@@ -10,7 +10,7 @@ const STATUS_GATE_CONTENT = {
   },
   [EVENT_STATUSES.COMING_SOON]: {
     title: 'Регистрация скоро откроется',
-    description: 'Следите за обновлениями события на странице 26.2 ROOM.',
+    description: 'Регистрация откроется после подтверждения даты.',
   },
   [EVENT_STATUSES.SOLD_OUT]: {
     title: 'Все места заняты',

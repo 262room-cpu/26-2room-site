@@ -1,5 +1,5 @@
 import { Link } from 'react-router'
-import { EVENT_STATUSES } from '../data/events'
+import { EVENT_DATE_STATUSES, EVENT_STATUSES } from '../data/events'
 
 const EVENT_STATUS_LABELS = {
   [EVENT_STATUSES.COMING_SOON]: 'Регистрация скоро',
@@ -14,11 +14,16 @@ function formatEventDate(value) {
     return null
   }
 
+  const dateOnlyMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value)
+  const date = dateOnlyMatch
+    ? new Date(Number(dateOnlyMatch[1]), Number(dateOnlyMatch[2]) - 1, Number(dateOnlyMatch[3]))
+    : new Date(value)
+
   return new Intl.DateTimeFormat('ru-RU', {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
-  }).format(new Date(value))
+  }).format(date)
 }
 
 function formatPrice(price, currency) {
@@ -29,12 +34,19 @@ function formatPrice(price, currency) {
   return new Intl.NumberFormat('ru-RU', {
     style: 'currency',
     currency,
+    currencyDisplay: 'narrowSymbol',
     maximumFractionDigits: 0,
   }).format(price)
 }
 
 function EventCard({ event }) {
-  const eventDate = formatEventDate(event.startsAt)
+  const confirmedEventDate = formatEventDate(event.startsAt)
+  const tentativeEventDate =
+    event.dateStatus === EVENT_DATE_STATUSES.TENTATIVE
+      ? formatEventDate(event.tentativeDate)
+      : null
+  const eventDate = confirmedEventDate ?? tentativeEventDate
+  const eventDateIsTentative = !confirmedEventDate && Boolean(tentativeEventDate)
   const eventPrice = formatPrice(event.price, event.currency)
   const statusLabel = EVENT_STATUS_LABELS[event.status] ?? 'Статус уточняется'
 
@@ -67,7 +79,10 @@ function EventCard({ event }) {
         {eventDate && (
           <div>
             <span>Дата</span>
-            <strong>{eventDate}</strong>
+            <strong>{eventDateIsTentative ? `Ориентировочно ${eventDate}` : eventDate}</strong>
+            {eventDateIsTentative && (
+              <small className="activeEventCardMetaNote">Дата уточняется</small>
+            )}
           </div>
         )}
 

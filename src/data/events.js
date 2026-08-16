@@ -7,6 +7,11 @@ export const EVENT_STATUSES = {
   FINISHED: 'finished',
 }
 
+export const EVENT_DATE_STATUSES = {
+  TENTATIVE: 'tentative',
+  CONFIRMED: 'confirmed',
+}
+
 export const events = [
   {
     id: 'kids-run-karaganda-2026',
@@ -17,16 +22,22 @@ export const events = [
 
     eventType: 'kids_run',
 
-    status: EVENT_STATUSES.DRAFT,
+    status: EVENT_STATUSES.COMING_SOON,
 
-    shortDescription: 'Детский беговой старт 26.2 ROOM в Караганде.',
-    description: '',
+    shortDescription: 'Детский беговой старт 26.2 ROOM в Центральном парке Караганды. Две дистанции на выбор — 500 м и 1000 м.',
+    description: '26.2 ROOM готовит детский беговой старт в Центральном парке Караганды. Участники младше 15 лет смогут выбрать одну из двух дистанций — 500 или 1000 метров. Планируется 500 участников. Точная дата мероприятия сейчас согласовывается.',
 
     city: 'Караганда',
-    venue: '',
+    venue: 'Центральный парк',
     address: '',
 
     startsAt: null,
+    dateStatus: EVENT_DATE_STATUSES.TENTATIVE,
+    tentativeDate: '2026-09-14',
+    eventWindow: {
+      start: '08:00',
+      end: '12:00',
+    },
 
     registrationOpensAt: null,
     registrationClosesAt: null,
@@ -38,7 +49,29 @@ export const events = [
 
     coverImage: null,
 
-    distances: [],
+    participantNote: 'Для детей до 15 лет.',
+    distanceSelectionNote: 'Дистанцию участник выбирает самостоятельно независимо от возраста.',
+
+    distances: [
+      {
+        id: '500m',
+        title: '500 м',
+        distanceMeters: 500,
+        minAge: null,
+        maxAge: 14,
+        capacity: null,
+        price: null,
+      },
+      {
+        id: '1000m',
+        title: '1000 м',
+        distanceMeters: 1000,
+        minAge: null,
+        maxAge: 14,
+        capacity: null,
+        price: null,
+      },
+    ],
     starterKit: [
       {
         id: 'control-wristband',
