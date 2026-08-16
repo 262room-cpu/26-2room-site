@@ -196,6 +196,34 @@
   margin-left: auto;
 }
 
+.registrationPageMessage {
+  min-height: 320px;
+}
+
+.registrationPageLoader {
+  width: 36px;
+  height: 36px;
+  margin: 0 auto 24px;
+  display: block;
+  border: 2px solid rgba(255, 214, 0, 0.2);
+  border-top-color: #FFD600;
+  border-radius: 50%;
+  box-shadow: 0 0 20px rgba(255, 214, 0, 0.14);
+  animation: registrationPageLoaderSpin 800ms linear infinite;
+}
+
+@keyframes registrationPageLoaderSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .registrationPageLoader {
+    animation: none;
+  }
+}
+
 @media (max-width: 820px) {
   .registrationPageIntro {
     grid-template-columns: 1fr;

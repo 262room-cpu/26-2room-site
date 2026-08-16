@@ -1,6 +1,8 @@
+import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router'
+import { EVENT_FETCH_STATUSES, fetchEventBySlug } from '../api/events'
 import KidsRegistrationForm from '../components/KidsRegistrationForm'
-import { EVENT_STATUSES, getEventBySlug } from '../data/events'
+import { EVENT_STATUSES } from '../data/events'
 import './RegistrationPage.css'
 
 const STATUS_GATE_CONTENT = {
@@ -51,6 +53,26 @@ function formatPrice(price, currency) {
   }).format(price)
 }
 
+function toMajorAmount(value) {
+  if (value === null || value === undefined || typeof value !== 'number') {
+    return null
+  }
+
+  return value / 100
+}
+
+function adaptRegistrationEvent(event) {
+  return {
+    ...event,
+    price: toMajorAmount(event.priceMinor),
+    distances: (event.distances ?? []).map((distance) => ({
+      ...distance,
+      id: distance.code,
+      price: toMajorAmount(distance.priceMinor),
+    })),
+  }
+}
+
 function RegistrationHeader({ event }) {
   return (
     <header className="registrationPageHeader">
@@ -66,26 +88,105 @@ function RegistrationHeader({ event }) {
   )
 }
 
-function RegistrationPage() {
-  const { slug } = useParams()
-  const event = getEventBySlug(slug)
+function RegistrationPageMessage({ title, description, loading = false }) {
+  return (
+    <div className="registrationPage">
+      <RegistrationHeader event={null} />
 
-  if (!event) {
-    return (
-      <div className="registrationPage">
-        <RegistrationHeader event={null} />
-
-        <main className="registrationPageNotFound">
-          <p className="registrationPageEyebrow">REGISTRATION</p>
-          <h1>Событие не найдено</h1>
-          <p>Проверьте ссылку или вернитесь на главную страницу 26.2 ROOM.</p>
+      <main
+        className="registrationPageNotFound registrationPageMessage"
+        aria-busy={loading}
+        aria-live="polite"
+      >
+        {loading && <span className="registrationPageLoader" aria-hidden="true" />}
+        <p className="registrationPageEyebrow">REGISTRATION</p>
+        <h1>{title}</h1>
+        <p>{description}</p>
+        {!loading && (
           <Link className="registrationPagePrimaryLink" to="/">
             Вернуться на главную
           </Link>
-        </main>
-      </div>
+        )}
+      </main>
+    </div>
+  )
+}
+
+function RegistrationPage() {
+  const { slug } = useParams()
+  const [eventRequest, setEventRequest] = useState({
+    slug: null,
+    status: null,
+    event: null,
+  })
+
+  useEffect(() => {
+    const controller = new AbortController()
+    let isActive = true
+
+    fetchEventBySlug(slug, { signal: controller.signal })
+      .then((result) => {
+        if (!isActive) {
+          return
+        }
+
+        setEventRequest({
+          slug,
+          status: result.status,
+          event:
+            result.status === EVENT_FETCH_STATUSES.SUCCESS
+              ? adaptRegistrationEvent(result.event)
+              : null,
+        })
+      })
+      .catch((error) => {
+        if (!isActive || error?.name === 'AbortError') {
+          return
+        }
+
+        setEventRequest({ slug, status: EVENT_FETCH_STATUSES.ERROR, event: null })
+      })
+
+    return () => {
+      isActive = false
+      controller.abort()
+    }
+  }, [slug])
+
+  const currentRequest =
+    eventRequest.slug === slug
+      ? eventRequest
+      : { status: null, event: null }
+
+  if (currentRequest.status === null) {
+    return (
+      <RegistrationPageMessage
+        loading
+        title="Загружаем регистрацию"
+        description="Получаем актуальный статус мероприятия."
+      />
     )
   }
+
+  if (currentRequest.status === EVENT_FETCH_STATUSES.NOT_FOUND) {
+    return (
+      <RegistrationPageMessage
+        title="Событие не найдено"
+        description="Проверьте ссылку или вернитесь на главную страницу 26.2 ROOM."
+      />
+    )
+  }
+
+  if (currentRequest.status === EVENT_FETCH_STATUSES.ERROR || !currentRequest.event) {
+    return (
+      <RegistrationPageMessage
+        title="Не удалось загрузить регистрацию"
+        description="Сейчас информация временно недоступна. Попробуйте открыть страницу позднее."
+      />
+    )
+  }
+
+  const event = currentRequest.event
 
   const eventDate = formatEventDate(event.startsAt)
   const eventPrice = formatPrice(event.price, event.currency)
