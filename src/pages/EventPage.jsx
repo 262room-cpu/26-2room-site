@@ -40,6 +40,7 @@ function formatPrice(price, currency) {
   return new Intl.NumberFormat('ru-RU', {
     style: 'currency',
     currency,
+    currencyDisplay: 'narrowSymbol',
     maximumFractionDigits: 0,
   }).format(price)
 }
@@ -185,10 +186,13 @@ function EventPage() {
         {hasStarterKit && (
           <section className="eventPageSection">
             <p className="eventPageEyebrow">Стартовый набор</p>
-            <h2>Что получает участник</h2>
+            <h2>Что входит в стартовый пакет</h2>
             <div className="eventPageGrid">
               {event.starterKit.map((item) => (
                 <article className="eventPageCard" key={item.id}>
+                  <span className="eventPageCardIndex">
+                    {String(item.sortOrder).padStart(2, '0')}
+                  </span>
                   <h3>{item.name}</h3>
                   {item.description && <p>{item.description}</p>}
                 </article>

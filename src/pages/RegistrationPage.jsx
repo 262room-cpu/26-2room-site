@@ -46,6 +46,7 @@ function formatPrice(price, currency) {
   return new Intl.NumberFormat('ru-RU', {
     style: 'currency',
     currency,
+    currencyDisplay: 'narrowSymbol',
     maximumFractionDigits: 0,
   }).format(price)
 }

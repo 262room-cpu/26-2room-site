@@ -33,13 +33,84 @@ export const events = [
 
     capacity: 500,
 
-    price: null,
+    price: 9000,
     currency: 'KZT',
 
     coverImage: null,
 
     distances: [],
-    starterKit: [],
+    starterKit: [
+      {
+        id: 'control-wristband',
+        name: 'Контрольный браслет',
+        description: '',
+        image: null,
+        sortOrder: 1,
+      },
+      {
+        id: 'silicone-wristband',
+        name: 'Силиконовый браслет 26.2 ROOM',
+        description: '',
+        image: null,
+        sortOrder: 2,
+      },
+      {
+        id: 'cap',
+        name: 'Бейсболка 26.2 ROOM',
+        description: '',
+        image: null,
+        sortOrder: 3,
+      },
+      {
+        id: 'medal',
+        name: 'Медаль 26.2 ROOM',
+        description: '',
+        image: null,
+        sortOrder: 4,
+      },
+      {
+        id: 'collectible-figure',
+        name: 'Коллекционная фигурка 26.2 ROOM',
+        description: '',
+        image: null,
+        sortOrder: 5,
+      },
+      {
+        id: 'stationery-accessories',
+        name: 'Набор аксессуаров для ручек / карандашей',
+        description: '',
+        image: null,
+        sortOrder: 6,
+      },
+      {
+        id: 'keychain',
+        name: 'Брелок 26.2 ROOM',
+        description: '',
+        image: null,
+        sortOrder: 7,
+      },
+      {
+        id: 'lanyard',
+        name: 'Лента 26.2 ROOM',
+        description: '',
+        image: null,
+        sortOrder: 8,
+      },
+      {
+        id: 'branded-bag',
+        name: 'Фирменный пакет 26.2 ROOM',
+        description: '',
+        image: null,
+        sortOrder: 9,
+      },
+      {
+        id: 'stickers',
+        name: 'Набор наклеек 26.2 ROOM',
+        description: '',
+        image: null,
+        sortOrder: 10,
+      },
+    ],
     partners: [],
   },
 ]
