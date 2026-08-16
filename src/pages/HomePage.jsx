@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import ActiveEvents from '../components/ActiveEvents'
+import { getRegistrationEvents } from '../data/events'
 import {
   audiences,
   contactCards,
@@ -152,6 +154,7 @@ function HomePage() {
   )
   const hasEmptyRequiredFields = missingRequiredFields.length > 0
   const isSending = submissionStatus === 'sending'
+  const registrationEvents = getRegistrationEvents()
 
   return (
     <div className="page">
@@ -247,6 +250,8 @@ function HomePage() {
             </div>
           </div>
         </section>
+
+        <ActiveEvents events={registrationEvents} />
 
         <section className="section audienceSection" id="audiences">
           <div className="sectionTitle">

@@ -44,6 +44,28 @@ export const events = [
   },
 ]
 
+const PUBLIC_EVENT_STATUSES = [
+  EVENT_STATUSES.COMING_SOON,
+  EVENT_STATUSES.OPEN,
+  EVENT_STATUSES.SOLD_OUT,
+  EVENT_STATUSES.CLOSED,
+  EVENT_STATUSES.FINISHED,
+]
+
+const REGISTRATION_EVENT_STATUSES = [
+  EVENT_STATUSES.COMING_SOON,
+  EVENT_STATUSES.OPEN,
+  EVENT_STATUSES.SOLD_OUT,
+]
+
 export function getEventBySlug(slug) {
   return events.find((event) => event.slug === slug) ?? null
+}
+
+export function getPublicEvents() {
+  return events.filter((event) => PUBLIC_EVENT_STATUSES.includes(event.status))
+}
+
+export function getRegistrationEvents() {
+  return events.filter((event) => REGISTRATION_EVENT_STATUSES.includes(event.status))
 }
