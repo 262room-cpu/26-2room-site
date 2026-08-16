@@ -55,12 +55,18 @@ function isValidSlug(slug) {
   )
 }
 
+function normalizeNullable(value) {
+  return value === null || value === 'null' ? null : value
+}
+
 function normalizeTime(value) {
-  if (typeof value !== 'string') {
-    return value
+  const normalizedValue = normalizeNullable(value)
+
+  if (typeof normalizedValue !== 'string') {
+    return normalizedValue
   }
 
-  return value.replace(/^(\d{2}:\d{2}):00$/, '$1')
+  return normalizedValue.replace(/^(\d{2}:\d{2}):00$/, '$1')
 }
 
 function mapDistance(distance) {
@@ -68,10 +74,10 @@ function mapDistance(distance) {
     code: distance.code,
     title: distance.title,
     distanceMeters: distance.distance_meters,
-    minAge: distance.min_age,
-    maxAge: distance.max_age,
-    capacity: distance.capacity,
-    priceMinor: distance.price_minor,
+    minAge: normalizeNullable(distance.min_age),
+    maxAge: normalizeNullable(distance.max_age),
+    capacity: normalizeNullable(distance.capacity),
+    priceMinor: normalizeNullable(distance.price_minor),
     sortOrder: distance.sort_order,
   }
 }
@@ -80,8 +86,8 @@ function mapKitItem(item) {
   return {
     code: item.code,
     name: item.name,
-    description: item.description,
-    image: item.image_path,
+    description: normalizeNullable(item.description),
+    image: normalizeNullable(item.image_path),
     sortOrder: item.sort_order,
   }
 }
@@ -89,46 +95,48 @@ function mapKitItem(item) {
 function mapPartner(partner) {
   return {
     name: partner.name,
-    logoPath: partner.logo_path,
-    websiteUrl: partner.website_url,
-    category: partner.category,
+    logoPath: normalizeNullable(partner.logo_path),
+    websiteUrl: normalizeNullable(partner.website_url),
+    category: normalizeNullable(partner.category),
     sortOrder: partner.sort_order,
   }
 }
 
-function mapEvent(event, distances, starterKit, partners) {
+export function mapEvent(event, distances, starterKit, partners) {
+  const eventWindowStart = normalizeTime(event.event_window_start)
+  const eventWindowEnd = normalizeTime(event.event_window_end)
   const eventWindow =
-    event.event_window_start === null && event.event_window_end === null
+    eventWindowStart === null && eventWindowEnd === null
       ? null
       : {
-          start: normalizeTime(event.event_window_start),
-          end: normalizeTime(event.event_window_end),
+          start: eventWindowStart,
+          end: eventWindowEnd,
         }
 
   return {
     slug: event.slug,
     title: event.title,
-    subtitle: event.subtitle,
+    subtitle: normalizeNullable(event.subtitle),
     eventType: event.event_type,
     status: event.status,
     shortDescription: event.short_description,
     description: event.description,
     city: event.city,
     venue: event.venue,
-    address: event.address,
+    address: normalizeNullable(event.address),
     timezone: event.timezone,
-    startsAt: event.starts_at,
-    tentativeDate: event.tentative_date,
+    startsAt: normalizeNullable(event.starts_at),
+    tentativeDate: normalizeNullable(event.tentative_date),
     dateStatus: event.date_status,
     eventWindow,
-    registrationOpensAt: event.registration_opens_at,
-    registrationClosesAt: event.registration_closes_at,
-    capacity: event.capacity,
-    priceMinor: event.price_minor,
-    currency: event.currency,
-    coverImage: event.cover_image_path,
-    participantNote: event.participant_note,
-    distanceSelectionNote: event.distance_selection_note,
+    registrationOpensAt: normalizeNullable(event.registration_opens_at),
+    registrationClosesAt: normalizeNullable(event.registration_closes_at),
+    capacity: normalizeNullable(event.capacity),
+    priceMinor: normalizeNullable(event.price_minor),
+    currency: normalizeNullable(event.currency),
+    coverImage: normalizeNullable(event.cover_image_path),
+    participantNote: normalizeNullable(event.participant_note),
+    distanceSelectionNote: normalizeNullable(event.distance_selection_note),
     distances: distances.map(mapDistance),
     starterKit: starterKit.map(mapKitItem),
     partners: partners.map(mapPartner),
