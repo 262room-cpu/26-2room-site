@@ -1,6 +1,6 @@
 begin;
 
-create function public.set_updated_at()
+create function public.room262_set_updated_at()
 returns trigger
 language plpgsql
 set search_path = ''
@@ -476,43 +476,43 @@ create index event_kit_items_event_sort_order_idx
 
 create trigger payment_merchant_accounts_set_updated_at
 before update on public.payment_merchant_accounts
-for each row execute function public.set_updated_at();
+for each row execute function public.room262_set_updated_at();
 
 create trigger events_set_updated_at
 before update on public.events
-for each row execute function public.set_updated_at();
+for each row execute function public.room262_set_updated_at();
 
 create trigger event_distances_set_updated_at
 before update on public.event_distances
-for each row execute function public.set_updated_at();
+for each row execute function public.room262_set_updated_at();
 
 create trigger registrations_set_updated_at
 before update on public.registrations
-for each row execute function public.set_updated_at();
+for each row execute function public.room262_set_updated_at();
 
 create trigger children_set_updated_at
 before update on public.children
-for each row execute function public.set_updated_at();
+for each row execute function public.room262_set_updated_at();
 
 create trigger parents_set_updated_at
 before update on public.parents
-for each row execute function public.set_updated_at();
+for each row execute function public.room262_set_updated_at();
 
 create trigger payments_set_updated_at
 before update on public.payments
-for each row execute function public.set_updated_at();
+for each row execute function public.room262_set_updated_at();
 
 create trigger event_partners_set_updated_at
 before update on public.event_partners
-for each row execute function public.set_updated_at();
+for each row execute function public.room262_set_updated_at();
 
 create trigger event_kit_items_set_updated_at
 before update on public.event_kit_items
-for each row execute function public.set_updated_at();
+for each row execute function public.room262_set_updated_at();
 
 create trigger event_registration_counters_set_updated_at
 before update on public.event_registration_counters
-for each row execute function public.set_updated_at();
+for each row execute function public.room262_set_updated_at();
 
 alter table public.payment_merchant_accounts enable row level security;
 alter table public.events enable row level security;
@@ -575,8 +575,10 @@ grant select, insert, update on table
   public.payments
 to service_role;
 
-revoke all privileges on function public.set_updated_at() from public, anon, authenticated;
-grant execute on function public.set_updated_at() to service_role;
+revoke all privileges on function public.room262_set_updated_at()
+from public, anon, authenticated;
+grant execute on function public.room262_set_updated_at()
+to service_role;
 
 insert into storage.buckets (
   id,
