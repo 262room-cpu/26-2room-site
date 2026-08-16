@@ -14,7 +14,7 @@ const EVENT_STATUS_LABELS = {
 const REGISTRATION_STATUS_COPY = {
   [EVENT_STATUSES.DRAFT]: 'Информация о мероприятии готовится. Регистрация будет доступна после утверждения деталей.',
   [EVENT_STATUSES.COMING_SOON]: 'Регистрация скоро откроется. Следите за обновлениями 26.2 ROOM.',
-  [EVENT_STATUSES.OPEN]: 'Регистрация будет подключена на следующем этапе.',
+  [EVENT_STATUSES.OPEN]: 'Перейдите к форме участника, чтобы продолжить регистрацию.',
   [EVENT_STATUSES.SOLD_OUT]: 'Лимит участников на это мероприятие исчерпан.',
   [EVENT_STATUSES.CLOSED]: 'Регистрация на мероприятие завершена.',
   [EVENT_STATUSES.FINISHED]: 'Мероприятие уже завершено.',
@@ -218,6 +218,12 @@ function EventPage() {
             <h2>{statusLabel}</h2>
             <p>{registrationCopy}</p>
           </div>
+
+          {event.status === EVENT_STATUSES.OPEN && (
+            <Link className="eventPagePrimaryLink" to={`/events/${event.slug}/register`}>
+              Зарегистрироваться
+            </Link>
+          )}
         </section>
       </main>
     </div>

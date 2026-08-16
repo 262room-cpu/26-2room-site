@@ -1,0 +1,259 @@
+.registrationPage {
+  min-height: 100vh;
+  overflow-x: hidden;
+  background:
+    radial-gradient(circle at 16% 8%, rgba(255, 214, 0, 0.13), transparent 28%),
+    radial-gradient(circle at 88% 24%, rgba(255, 214, 0, 0.08), transparent 24%),
+    linear-gradient(180deg, #050505 0%, #000 58%, #070707 100%);
+  color: #fff;
+  font-family: Arial, Helvetica, sans-serif;
+  text-align: left;
+}
+
+.registrationPageHeader {
+  width: min(1200px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: 26px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.registrationPageBrand {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  color: #FFD600;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  text-shadow:
+    0 0 14px rgba(255, 214, 0, 0.32),
+    0 0 28px rgba(255, 214, 0, 0.14);
+}
+
+.registrationPageBrand img {
+  width: 62px;
+  height: 62px;
+  object-fit: contain;
+  border: 1px solid rgba(255, 214, 0, 0.28);
+  border-radius: 18px;
+  box-shadow: 0 0 28px rgba(255, 214, 0, 0.18);
+}
+
+.registrationPageBackLink,
+.registrationPagePrimaryLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  border: 1px solid rgba(255, 214, 0, 0.3);
+  border-radius: 999px;
+  padding: 0 22px;
+  background: rgba(255, 214, 0, 0.09);
+  color: #fff4b0;
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 0.6px;
+  box-shadow: 0 0 26px rgba(255, 214, 0, 0.08);
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    color 160ms ease;
+}
+
+.registrationPageBackLink:hover,
+.registrationPagePrimaryLink:hover {
+  border-color: rgba(255, 214, 0, 0.58);
+  background: rgba(255, 214, 0, 0.15);
+  color: #FFD600;
+}
+
+.registrationPageMain {
+  width: min(1040px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: 48px 0 96px;
+}
+
+.registrationPageIntro {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
+  gap: 48px;
+  align-items: end;
+  margin-bottom: 38px;
+}
+
+.registrationPageEyebrow {
+  margin: 0 0 14px;
+  color: #FFD600;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.registrationPageIntro h1,
+.registrationPageGate h2,
+.registrationPageNotFound h1 {
+  margin: 0;
+  color: #fff;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.registrationPageIntro h1 {
+  max-width: 760px;
+  font-size: clamp(46px, 7vw, 86px);
+  line-height: 0.94;
+  overflow-wrap: anywhere;
+}
+
+.registrationPageSubtitle {
+  margin: 18px 0 0;
+  color: #fff4b0;
+  font-size: clamp(18px, 2vw, 26px);
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.registrationPageMeta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.registrationPageMeta div {
+  min-width: 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+  padding: 15px;
+  background: rgba(10, 10, 10, 0.68);
+}
+
+.registrationPageMeta dt {
+  margin-bottom: 7px;
+  color: #9098a8;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+.registrationPageMeta dd {
+  margin: 0;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.registrationPageGate,
+.registrationPageNotFound {
+  border: 1px solid rgba(255, 214, 0, 0.2);
+  border-radius: 28px;
+  padding: 38px;
+  background:
+    linear-gradient(145deg, rgba(255, 214, 0, 0.09), rgba(255, 255, 255, 0.025)),
+    rgba(10, 10, 10, 0.8);
+  box-shadow:
+    0 22px 64px rgba(0, 0, 0, 0.32),
+    0 0 44px rgba(255, 214, 0, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.registrationPageGate h2,
+.registrationPageNotFound h1 {
+  font-size: clamp(32px, 4.5vw, 58px);
+  line-height: 1;
+}
+
+.registrationPageGate > p:not(.registrationPageEyebrow),
+.registrationPageNotFound > p:not(.registrationPageEyebrow) {
+  max-width: 720px;
+  margin: 18px 0 0;
+  color: #cbd5e1;
+  font-size: 18px;
+  line-height: 1.65;
+}
+
+.registrationPageGate .registrationPagePrimaryLink,
+.registrationPageNotFound .registrationPagePrimaryLink {
+  margin-top: 26px;
+}
+
+.registrationPageNotFound {
+  width: min(760px, calc(100% - 48px));
+  margin: 72px auto 0;
+  text-align: center;
+}
+
+.registrationPageNotFound > p:not(.registrationPageEyebrow) {
+  margin-right: auto;
+  margin-left: auto;
+}
+
+@media (max-width: 820px) {
+  .registrationPageIntro {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+}
+
+@media (max-width: 640px) {
+  .registrationPageHeader,
+  .registrationPageMain {
+    width: min(100% - 32px, 1040px);
+  }
+
+  .registrationPageHeader {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 18px 0;
+  }
+
+  .registrationPageBrand {
+    gap: 12px;
+    font-size: 15px;
+    letter-spacing: 2px;
+  }
+
+  .registrationPageBrand img {
+    width: 54px;
+    height: 54px;
+    border-radius: 16px;
+  }
+
+  .registrationPageBackLink,
+  .registrationPagePrimaryLink {
+    width: 100%;
+  }
+
+  .registrationPageMain {
+    padding: 28px 0 64px;
+  }
+
+  .registrationPageMeta {
+    grid-template-columns: 1fr;
+  }
+
+  .registrationPageGate,
+  .registrationPageNotFound {
+    border-radius: 24px;
+    padding: 24px;
+  }
+
+  .registrationPageNotFound {
+    width: min(100% - 32px, 760px);
+    margin-top: 42px;
+  }
+
+  .registrationPageGate > p:not(.registrationPageEyebrow),
+  .registrationPageNotFound > p:not(.registrationPageEyebrow) {
+    font-size: 16px;
+  }
+}

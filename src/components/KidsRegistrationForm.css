@@ -1,0 +1,437 @@
+.kidsRegistrationForm {
+  display: grid;
+  gap: 18px;
+}
+
+.kidsRegistrationHeading {
+  max-width: 760px;
+  padding: 20px 0 12px;
+}
+
+.kidsRegistrationEyebrow {
+  margin: 0 0 12px;
+  color: #FFD600;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.kidsRegistrationHeading h2 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(36px, 5vw, 62px);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.kidsRegistrationHeading > p:last-child {
+  margin: 16px 0 0;
+  color: #cbd5e1;
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+.kidsRegistrationSection {
+  min-width: 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 28px;
+  padding: 30px;
+  background:
+    linear-gradient(145deg, rgba(255, 214, 0, 0.07), rgba(255, 255, 255, 0.02)),
+    rgba(9, 9, 9, 0.82);
+  box-shadow:
+    0 22px 60px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+
+.kidsRegistrationSectionHeading {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  margin-bottom: 26px;
+}
+
+.kidsRegistrationSectionHeading > span {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(255, 214, 0, 0.35);
+  border-radius: 14px;
+  background: rgba(255, 214, 0, 0.1);
+  color: #FFD600;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  box-shadow: 0 0 24px rgba(255, 214, 0, 0.1);
+}
+
+.kidsRegistrationSectionHeading h3 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(24px, 3vw, 34px);
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: 0;
+}
+
+.kidsRegistrationSectionHeading p {
+  margin: 8px 0 0;
+  color: #9ca3af;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.kidsRegistrationGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.kidsRegistrationField {
+  min-width: 0;
+  display: grid;
+  gap: 9px;
+  color: #f8fafc;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.kidsRegistrationFieldWide {
+  grid-column: 1 / -1;
+}
+
+.kidsRegistrationField > span:first-child,
+.kidsRegistrationChoiceGroup legend {
+  color: #f8fafc;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.kidsRegistrationField small,
+.kidsRegistrationChoiceGroup legend small {
+  margin-left: 6px;
+  color: #FFD600;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+}
+
+.kidsRegistrationInput {
+  width: 100%;
+  min-width: 0;
+  min-height: 52px;
+  box-sizing: border-box;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 15px;
+  padding: 13px 15px;
+  background: rgba(0, 0, 0, 0.48);
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  line-height: 1.35;
+  outline: none;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease;
+}
+
+.kidsRegistrationInput::placeholder {
+  color: #6f7785;
+}
+
+.kidsRegistrationInput:hover {
+  border-color: rgba(255, 214, 0, 0.3);
+}
+
+.kidsRegistrationInput:focus {
+  border-color: rgba(255, 214, 0, 0.72);
+  background: rgba(255, 214, 0, 0.035);
+  box-shadow:
+    0 0 0 3px rgba(255, 214, 0, 0.1),
+    0 0 28px rgba(255, 214, 0, 0.08);
+}
+
+.kidsRegistrationInputError {
+  border-color: rgba(255, 107, 92, 0.82);
+  box-shadow: 0 0 0 3px rgba(255, 107, 92, 0.08);
+}
+
+.kidsRegistrationInput[type='file'] {
+  overflow: hidden;
+  padding: 7px;
+  color: #cbd5e1;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.kidsRegistrationInput[type='file']::file-selector-button {
+  min-height: 38px;
+  margin-right: 12px;
+  border: 0;
+  border-radius: 11px;
+  padding: 0 14px;
+  background: #FFD600;
+  color: #050505;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.kidsRegistrationChoiceGroup {
+  min-width: 0;
+  margin: 26px 0 0;
+  border: 0;
+  padding: 0;
+}
+
+.kidsRegistrationChoiceGroup legend {
+  margin-bottom: 12px;
+  padding: 0;
+}
+
+.kidsRegistrationChoices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 12px;
+}
+
+.kidsRegistrationChoicesCompact {
+  grid-template-columns: repeat(2, minmax(0, 180px));
+}
+
+.kidsRegistrationChoices label {
+  position: relative;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.kidsRegistrationChoices input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.kidsRegistrationChoices label > span {
+  min-height: 52px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 15px;
+  padding: 12px 15px;
+  background: rgba(0, 0, 0, 0.42);
+  color: #e5e7eb;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.35;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.kidsRegistrationChoices label:hover > span {
+  border-color: rgba(255, 214, 0, 0.35);
+}
+
+.kidsRegistrationChoices input:focus-visible + span {
+  outline: 2px solid #FFD600;
+  outline-offset: 3px;
+}
+
+.kidsRegistrationChoices input:checked + span {
+  border-color: rgba(255, 214, 0, 0.72);
+  background: rgba(255, 214, 0, 0.12);
+  color: #FFD600;
+  box-shadow: 0 0 24px rgba(255, 214, 0, 0.1);
+}
+
+.kidsRegistrationChoices span strong {
+  color: inherit;
+  font-size: 16px;
+}
+
+.kidsRegistrationChoices span small {
+  margin-top: 4px;
+  color: #a8b0bd;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.kidsRegistrationNotice {
+  margin: 0;
+  border: 1px solid rgba(255, 214, 0, 0.22);
+  border-radius: 15px;
+  padding: 14px 16px;
+  background: rgba(255, 214, 0, 0.07);
+  color: #fff4b0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.kidsRegistrationSection > .kidsRegistrationNotice {
+  margin-bottom: 20px;
+}
+
+.kidsRegistrationHelp,
+.kidsRegistrationFileName {
+  color: #8f98a8;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.kidsRegistrationFileName {
+  color: #fff4b0;
+}
+
+.kidsRegistrationError {
+  display: block;
+  margin-top: 8px;
+  color: #ff9a8f;
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.kidsRegistrationConsents {
+  display: grid;
+  gap: 14px;
+}
+
+.kidsRegistrationConsents label {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 13px;
+  align-items: start;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.34);
+  color: #e5e7eb;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.kidsRegistrationConsents input {
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  accent-color: #FFD600;
+}
+
+.kidsRegistrationConsents label:focus-within {
+  border-color: rgba(255, 214, 0, 0.68);
+  box-shadow: 0 0 0 3px rgba(255, 214, 0, 0.08);
+}
+
+.kidsRegistrationFormAlert,
+.kidsRegistrationSuccess {
+  margin: 0;
+  border-radius: 18px;
+  padding: 16px 18px;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
+.kidsRegistrationFormAlert {
+  border: 1px solid rgba(255, 107, 92, 0.42);
+  background: rgba(255, 107, 92, 0.08);
+  color: #ffc1ba;
+}
+
+.kidsRegistrationSuccess {
+  border: 1px solid rgba(255, 214, 0, 0.38);
+  background: rgba(255, 214, 0, 0.1);
+  color: #fff4b0;
+}
+
+.kidsRegistrationSubmit {
+  width: fit-content;
+  min-height: 56px;
+  border: 0;
+  border-radius: 999px;
+  padding: 0 28px;
+  background: #FFD600;
+  color: #050505;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 0 36px rgba(255, 214, 0, 0.22);
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.kidsRegistrationSubmit:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 46px rgba(255, 214, 0, 0.3);
+}
+
+.kidsRegistrationSubmit:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 4px;
+}
+
+@media (max-width: 640px) {
+  .kidsRegistrationHeading > p:last-child {
+    font-size: 16px;
+  }
+
+  .kidsRegistrationSection {
+    border-radius: 22px;
+    padding: 21px;
+  }
+
+  .kidsRegistrationSectionHeading {
+    gap: 13px;
+    margin-bottom: 22px;
+  }
+
+  .kidsRegistrationSectionHeading > span {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+  }
+
+  .kidsRegistrationGrid,
+  .kidsRegistrationChoices,
+  .kidsRegistrationChoicesCompact {
+    grid-template-columns: 1fr;
+  }
+
+  .kidsRegistrationInput {
+    min-height: 54px;
+  }
+
+  .kidsRegistrationInput[type='file']::file-selector-button {
+    max-width: 48%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .kidsRegistrationConsents label {
+    padding: 14px;
+  }
+
+  .kidsRegistrationSubmit {
+    width: 100%;
+  }
+}
