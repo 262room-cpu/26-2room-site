@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { EVENT_FETCH_STATUSES, fetchEvents } from '../api/events'
 import ActiveEvents from '../components/ActiveEvents'
-import { getRegistrationEvents } from '../data/events'
 import {
   audiences,
   contactCards,
@@ -58,10 +58,43 @@ const fieldPlaceholders = {
 }
 
 function HomePage() {
+  const [eventsRequest, setEventsRequest] = useState({
+    status: null,
+    events: [],
+  })
   const [activeForm, setActiveForm] = useState(null)
   const [submissionStatus, setSubmissionStatus] = useState('idle')
   const [formAttempted, setFormAttempted] = useState(false)
   const [formValues, setFormValues] = useState({})
+
+  useEffect(() => {
+    const controller = new AbortController()
+    let isActive = true
+
+    fetchEvents({ signal: controller.signal })
+      .then((result) => {
+        if (!isActive) {
+          return
+        }
+
+        setEventsRequest({
+          status: result.status,
+          events: result.status === EVENT_FETCH_STATUSES.SUCCESS ? result.events : [],
+        })
+      })
+      .catch((error) => {
+        if (!isActive || error?.name === 'AbortError') {
+          return
+        }
+
+        setEventsRequest({ status: EVENT_FETCH_STATUSES.ERROR, events: [] })
+      })
+
+    return () => {
+      isActive = false
+      controller.abort()
+    }
+  }, [])
 
   const openForm = (type) => {
     setActiveForm(type)
@@ -154,7 +187,6 @@ function HomePage() {
   )
   const hasEmptyRequiredFields = missingRequiredFields.length > 0
   const isSending = submissionStatus === 'sending'
-  const registrationEvents = getRegistrationEvents()
 
   return (
     <div className="page">
@@ -251,7 +283,11 @@ function HomePage() {
           </div>
         </section>
 
-        <ActiveEvents events={registrationEvents} />
+        <ActiveEvents
+          events={eventsRequest.events}
+          loading={eventsRequest.status === null}
+          error={eventsRequest.status === EVENT_FETCH_STATUSES.ERROR}
+        />
 
         <section className="section audienceSection" id="audiences">
           <div className="sectionTitle">

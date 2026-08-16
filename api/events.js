@@ -4,6 +4,23 @@ const MAX_SLUG_LENGTH = 120
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 const PUBLIC_EVENT_STATUSES = ['coming_soon', 'open', 'sold_out', 'closed', 'finished']
 
+const EVENT_LIST_SELECT = [
+  'slug',
+  'title',
+  'subtitle',
+  'event_type',
+  'status',
+  'short_description',
+  'city',
+  'venue',
+  'starts_at',
+  'tentative_date',
+  'date_status',
+  'capacity',
+  'price_minor',
+  'currency',
+].join(',')
+
 const EVENT_SELECT = [
   'id',
   'slug',
@@ -102,6 +119,25 @@ function mapPartner(partner) {
   }
 }
 
+export function mapEventListItem(event) {
+  return {
+    slug: event.slug,
+    title: event.title,
+    subtitle: normalizeNullable(event.subtitle),
+    eventType: event.event_type,
+    status: event.status,
+    shortDescription: event.short_description,
+    city: event.city,
+    venue: event.venue,
+    startsAt: normalizeNullable(event.starts_at),
+    tentativeDate: normalizeNullable(event.tentative_date),
+    dateStatus: event.date_status,
+    capacity: normalizeNullable(event.capacity),
+    priceMinor: normalizeNullable(event.price_minor),
+    currency: normalizeNullable(event.currency),
+  }
+}
+
 export function mapEvent(event, distances, starterKit, partners) {
   const eventWindowStart = normalizeTime(event.event_window_start)
   const eventWindowEnd = normalizeTime(event.event_window_end)
@@ -160,8 +196,9 @@ export default async function handler(request, response) {
   }
 
   const slug = request.query?.slug
+  const isListRequest = slug === undefined
 
-  if (!isValidSlug(slug)) {
+  if (!isListRequest && !isValidSlug(slug)) {
     return response.status(400).json({ error: 'invalid_request' })
   }
 
@@ -176,6 +213,23 @@ export default async function handler(request, response) {
 
     console.error('Supabase event API initialization failed')
     return response.status(500).json({ error: 'internal_error' })
+  }
+
+  if (isListRequest) {
+    const { data: events, error: eventsError } = await supabase
+      .from('events')
+      .select(EVENT_LIST_SELECT)
+      .in('status', PUBLIC_EVENT_STATUSES)
+      .order('starts_at', { ascending: true, nullsFirst: false })
+      .order('tentative_date', { ascending: true, nullsFirst: false })
+      .order('slug', { ascending: true })
+
+    if (eventsError) {
+      logQueryError('events_list', eventsError)
+      return response.status(500).json({ error: 'internal_error' })
+    }
+
+    return response.status(200).json((events ?? []).map(mapEventListItem))
   }
 
   const { data: event, error: eventError } = await supabase

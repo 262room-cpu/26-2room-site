@@ -1,8 +1,8 @@
 import EventCard from './EventCard'
 import './ActiveEvents.css'
 
-function ActiveEvents({ events }) {
-  if (events.length === 0) {
+function ActiveEvents({ events, loading = false, error = false }) {
+  if (!loading && !error && events.length === 0) {
     return null
   }
 
@@ -17,11 +17,28 @@ function ActiveEvents({ events }) {
         </p>
       </div>
 
-      <div className="activeEventsGrid">
-        {events.map((event) => (
-          <EventCard event={event} key={event.id} />
-        ))}
-      </div>
+      {loading && (
+        <div className="activeEventsState" aria-live="polite" role="status">
+          <span className="activeEventsLoader" aria-hidden="true" />
+          <strong>Загружаем ближайшие старты</strong>
+          <p>Получаем актуальный список событий 26.2 ROOM.</p>
+        </div>
+      )}
+
+      {error && (
+        <div className="activeEventsState" aria-live="polite" role="status">
+          <strong>События временно недоступны</strong>
+          <p>Сейчас не удалось загрузить список стартов. Попробуйте открыть страницу позднее.</p>
+        </div>
+      )}
+
+      {!loading && !error && (
+        <div className="activeEventsGrid">
+          {events.map((event) => (
+            <EventCard event={event} key={event.slug} />
+          ))}
+        </div>
+      )}
     </section>
   )
 }
