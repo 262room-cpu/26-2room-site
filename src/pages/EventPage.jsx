@@ -1,6 +1,20 @@
+import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router'
-import { EVENT_DATE_STATUSES, EVENT_STATUSES, getEventBySlug } from '../data/events'
+import { EVENT_FETCH_STATUSES, fetchEventBySlug } from '../api/events'
 import './EventPage.css'
+
+const EVENT_STATUSES = {
+  DRAFT: 'draft',
+  COMING_SOON: 'coming_soon',
+  OPEN: 'open',
+  SOLD_OUT: 'sold_out',
+  CLOSED: 'closed',
+  FINISHED: 'finished',
+}
+
+const EVENT_DATE_STATUSES = {
+  TENTATIVE: 'tentative',
+}
 
 const EVENT_STATUS_LABELS = {
   [EVENT_STATUSES.DRAFT]: 'Событие готовится',
@@ -50,35 +64,132 @@ function formatPrice(price, currency) {
   }).format(price)
 }
 
-function EventPage() {
-  const { slug } = useParams()
-  const event = getEventBySlug(slug)
+function formatMinorPrice(priceMinor, currency) {
+  if (priceMinor === null || priceMinor === undefined || typeof priceMinor !== 'number') {
+    return null
+  }
 
-  if (!event) {
-    return (
-      <div className="eventPage">
-        <header className="eventPageHeader">
-          <Link className="eventPageBrand" to="/">
-            <img src="/logo-26-2room.jpg.jpg" alt="26.2 ROOM" />
-            <span>26.2 ROOM</span>
-          </Link>
+  return formatPrice(priceMinor / 100, currency)
+}
 
-          <Link className="eventPageBackLink" to="/">
-            На главную
-          </Link>
-        </header>
+function EventPageHeader() {
+  return (
+    <header className="eventPageHeader">
+      <Link className="eventPageBrand" to="/">
+        <img src="/logo-26-2room.jpg.jpg" alt="26.2 ROOM" />
+        <span>26.2 ROOM</span>
+      </Link>
 
-        <main className="eventPageNotFound">
-          <p className="eventPageEyebrow">EVENTS</p>
-          <h1>Событие не найдено</h1>
-          <p>
-            Проверьте ссылку или вернитесь на главную страницу 26.2 ROOM.
-          </p>
+      <Link className="eventPageBackLink" to="/">
+        На главную
+      </Link>
+    </header>
+  )
+}
+
+function EventPageMessage({ title, description, loading = false }) {
+  return (
+    <div className="eventPage">
+      <EventPageHeader />
+
+      <main
+        className="eventPageNotFound eventPageMessage"
+        aria-busy={loading}
+        aria-live="polite"
+      >
+        {loading && <span className="eventPageLoader" aria-hidden="true" />}
+        <p className="eventPageEyebrow">EVENTS</p>
+        <h1>{title}</h1>
+        <p>{description}</p>
+        {!loading && (
           <Link className="eventPagePrimaryLink" to="/">
             Вернуться на главную
           </Link>
-        </main>
-      </div>
+        )}
+      </main>
+    </div>
+  )
+}
+
+function EventPage() {
+  const { slug } = useParams()
+  const [eventRequest, setEventRequest] = useState({
+    slug: null,
+    status: null,
+    event: null,
+  })
+
+  useEffect(() => {
+    const controller = new AbortController()
+    let isActive = true
+
+    fetchEventBySlug(slug, { signal: controller.signal })
+      .then((result) => {
+        if (!isActive) {
+          return
+        }
+
+        setEventRequest({
+          slug,
+          status: result.status,
+          event: result.status === EVENT_FETCH_STATUSES.SUCCESS ? result.event : null,
+        })
+      })
+      .catch((error) => {
+        if (!isActive || error?.name === 'AbortError') {
+          return
+        }
+
+        setEventRequest({ slug, status: EVENT_FETCH_STATUSES.ERROR, event: null })
+      })
+
+    return () => {
+      isActive = false
+      controller.abort()
+    }
+  }, [slug])
+
+  const currentRequest =
+    eventRequest.slug === slug
+      ? eventRequest
+      : { status: null, event: null }
+
+  if (currentRequest.status === null) {
+    return (
+      <EventPageMessage
+        loading
+        title="Загружаем событие"
+        description="Получаем актуальную информацию о старте."
+      />
+    )
+  }
+
+  if (currentRequest.status === EVENT_FETCH_STATUSES.NOT_FOUND) {
+    return (
+      <EventPageMessage
+        title="Событие не найдено"
+        description="Проверьте ссылку или вернитесь на главную страницу 26.2 ROOM."
+      />
+    )
+  }
+
+  if (currentRequest.status === EVENT_FETCH_STATUSES.ERROR) {
+    return (
+      <EventPageMessage
+        title="Не удалось загрузить событие"
+        description="Сейчас информация временно недоступна. Попробуйте открыть страницу позднее."
+      />
+    )
+  }
+
+  const event = currentRequest.event
+
+  if (!event) {
+    return (
+      <EventPageMessage
+        title="Не удалось загрузить событие"
+        description="Сейчас информация временно недоступна. Попробуйте открыть страницу позднее."
+      />
     )
   }
 
@@ -93,7 +204,7 @@ function EventPage() {
     event.eventWindow?.start && event.eventWindow?.end
       ? `${event.eventWindow.start}–${event.eventWindow.end}`
       : null
-  const eventPrice = formatPrice(event.price, event.currency)
+  const eventPrice = formatMinorPrice(event.priceMinor, event.currency)
   const statusLabel = EVENT_STATUS_LABELS[event.status] ?? 'Статус уточняется'
   const registrationCopy = REGISTRATION_STATUS_COPY[event.status] ?? 'Информация о регистрации уточняется.'
   const hasDescription = Boolean(event.description?.trim())
@@ -103,16 +214,7 @@ function EventPage() {
 
   return (
     <div className="eventPage">
-      <header className="eventPageHeader">
-        <Link className="eventPageBrand" to="/">
-          <img src="/logo-26-2room.jpg.jpg" alt="26.2 ROOM" />
-          <span>26.2 ROOM</span>
-        </Link>
-
-        <Link className="eventPageBackLink" to="/">
-          На главную
-        </Link>
-      </header>
+      <EventPageHeader />
 
       <main className="eventPageMain">
         <section className="eventPageHero">
@@ -202,7 +304,7 @@ function EventPage() {
             </div>
             <div className="eventPageGrid">
               {event.distances.map((distance) => (
-                <article className="eventPageCard" key={distance.id}>
+                <article className="eventPageCard" key={distance.code}>
                   <h3>{distance.title}</h3>
                   {distance.distanceMeters && distance.title !== `${distance.distanceMeters} м` && (
                     <p>{distance.distanceMeters} м</p>
@@ -220,7 +322,7 @@ function EventPage() {
             <h2>Что входит в стартовый пакет</h2>
             <div className="eventPageGrid">
               {event.starterKit.map((item) => (
-                <article className="eventPageCard" key={item.id}>
+                <article className="eventPageCard" key={item.code}>
                   <span className="eventPageCardIndex">
                     {String(item.sortOrder).padStart(2, '0')}
                   </span>
@@ -238,7 +340,7 @@ function EventPage() {
             <h2>Кто поддерживает событие</h2>
             <div className="eventPageGrid">
               {event.partners.map((partner) => (
-                <article className="eventPageCard" key={partner.id}>
+                <article className="eventPageCard" key={`${partner.name}-${partner.sortOrder}`}>
                   <h3>{partner.name}</h3>
                   {partner.category && <p>{partner.category}</p>}
                 </article>

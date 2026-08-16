@@ -341,6 +341,34 @@
   margin-top: 26px;
 }
 
+.eventPageMessage {
+  min-height: 320px;
+}
+
+.eventPageLoader {
+  width: 36px;
+  height: 36px;
+  margin: 0 auto 24px;
+  display: block;
+  border: 2px solid rgba(255, 214, 0, 0.2);
+  border-top-color: #FFD600;
+  border-radius: 50%;
+  box-shadow: 0 0 20px rgba(255, 214, 0, 0.14);
+  animation: eventPageLoaderSpin 800ms linear infinite;
+}
+
+@keyframes eventPageLoaderSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eventPageLoader {
+    animation: none;
+  }
+}
+
 @media (max-width: 900px) {
   .eventPageHero {
     grid-template-columns: 1fr;
