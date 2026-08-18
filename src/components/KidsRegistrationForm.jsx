@@ -1,4 +1,10 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import {
+  confirmLiabilityDocument,
+  createLiabilityDocumentUpload,
+  reserveKidsRegistration,
+  uploadLiabilityDocument,
+} from '../api/registration'
 import { calculateAgeOnDate } from '../utils/age'
 import './KidsRegistrationForm.css'
 
@@ -158,10 +164,37 @@ function getDistanceDetails(distance) {
   return details.join(' · ')
 }
 
+function getSubmissionErrorMessage(code) {
+  const messages = {
+    event_not_open: 'Регистрация на это мероприятие сейчас недоступна.',
+    registration_not_started: 'Регистрация ещё не началась.',
+    registration_closed: 'Регистрация уже завершена.',
+    sold_out: 'Свободных мест больше нет.',
+    age_not_allowed: 'Возраст участника не подходит для выбранной дистанции.',
+    registration_expired: 'Время бронирования истекло. Нажмите кнопку ещё раз, чтобы создать новую бронь.',
+    registration_not_pending: 'Эта регистрация уже не ожидает оплату.',
+    payment_already_started: 'Оплата для этой регистрации уже была начата.',
+    unsupported_file_type: 'Неподдерживаемый формат файла расписки.',
+    invalid_uploaded_file: 'Загруженный файл не прошёл проверку.',
+    uploaded_file_not_found: 'Не удалось найти загруженный файл. Попробуйте отправить форму ещё раз.',
+    document_upload_failed: 'Не удалось загрузить расписку. Попробуйте ещё раз.',
+    document_upload_network_error: 'Соединение прервалось при загрузке расписки. Попробуйте ещё раз.',
+    network_error: 'Не удалось связаться с сервером. Проверьте интернет и попробуйте ещё раз.',
+  }
+
+  return messages[code] ?? 'Не удалось завершить регистрацию. Попробуйте ещё раз.'
+}
+
 function KidsRegistrationForm({ event }) {
   const [formValues, setFormValues] = useState(INITIAL_FORM_VALUES)
   const [formErrors, setFormErrors] = useState({})
   const [submitMessage, setSubmitMessage] = useState('')
+  const [submitError, setSubmitError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submissionComplete, setSubmissionComplete] = useState(false)
+  const idempotencyKeyRef = useRef(null)
+  const registrationSessionRef = useRef(null)
+  const uploadedDocumentRef = useRef(null)
   const distances = event.distances ?? []
   const distanceDescribedBy = [
     distances.length === 0 ? 'distance-help' : null,
@@ -183,6 +216,10 @@ function KidsRegistrationForm({ event }) {
   }
 
   const handleChange = (eventChange) => {
+    if (isSubmitting || submissionComplete) {
+      return
+    }
+
     const { name, type, value, checked } = eventChange.target
     setFormValues((currentValues) => ({
       ...currentValues,
@@ -190,35 +227,144 @@ function KidsRegistrationForm({ event }) {
     }))
     clearFieldError(name)
     setSubmitMessage('')
+    setSubmitError('')
   }
 
   const handleFileChange = (eventChange) => {
+    if (isSubmitting || submissionComplete) {
+      return
+    }
+
     const file = eventChange.target.files?.[0] ?? null
     setFormValues((currentValues) => ({ ...currentValues, liabilityDocument: file }))
     clearFieldError('liabilityDocument')
     setSubmitMessage('')
+    setSubmitError('')
   }
 
-  const handleSubmit = (submitEvent) => {
+  const handleSubmit = async (submitEvent) => {
     submitEvent.preventDefault()
+
+    if (isSubmitting || submissionComplete) {
+      return
+    }
+
     const nextErrors = validateForm(formValues, event)
     setFormErrors(nextErrors)
+    setSubmitError('')
 
     if (Object.keys(nextErrors).length > 0) {
       setSubmitMessage('')
       return
     }
 
-    setSubmitMessage(
-      'Форма заполнена корректно. Подключение сохранения и оплаты будет добавлено следующим этапом.',
+    const selectedDistance = distances.find(
+      (distance) => String(distance.id) === formValues.distanceId,
     )
+
+    if (!selectedDistance) {
+      setSubmitError('Не удалось определить выбранную дистанцию.')
+      return
+    }
+
+    setIsSubmitting(true)
+    setSubmitMessage('Сохраняем данные участника…')
+
+    try {
+      let registrationSession = registrationSessionRef.current
+
+      if (!registrationSession) {
+        idempotencyKeyRef.current ??= crypto.randomUUID()
+
+        registrationSession = await reserveKidsRegistration({
+          eventSlug: event.slug,
+          distanceCode: selectedDistance.code ?? selectedDistance.id,
+          child: {
+            lastName: formValues.childLastName.trim(),
+            firstName: formValues.childFirstName.trim(),
+            middleName: formValues.childMiddleName.trim() || null,
+            dateOfBirth: formValues.childBirthDate,
+            gender: formValues.childGender,
+          },
+          parent: {
+            fullName: formValues.parentFullName.trim(),
+            phone: formValues.parentPhone.trim(),
+            email: formValues.parentEmail.trim(),
+          },
+          consents: {
+            eventRules: formValues.acceptEventRules,
+            personalData: formValues.acceptPersonalData,
+            parentResponsibility: formValues.acceptResponsibility,
+          },
+          idempotencyKey: idempotencyKeyRef.current,
+        })
+
+        if (!registrationSession?.registrationId || !registrationSession?.flowToken) {
+          throw new Error('invalid_server_response')
+        }
+
+        registrationSessionRef.current = registrationSession
+      }
+
+      let uploadedDocument = uploadedDocumentRef.current
+
+      if (!uploadedDocument) {
+        setSubmitMessage('Место зарезервировано. Загружаем расписку…')
+
+        const { uploadInfo, uploadFile } = await createLiabilityDocumentUpload({
+          registrationId: registrationSession.registrationId,
+          flowToken: registrationSession.flowToken,
+          file: formValues.liabilityDocument,
+        })
+
+        await uploadLiabilityDocument({
+          signedUrl: uploadInfo.signedUrl,
+          file: uploadFile,
+        })
+
+        uploadedDocument = {
+          storagePath: uploadInfo.path,
+          originalFilename: formValues.liabilityDocument.name,
+        }
+        uploadedDocumentRef.current = uploadedDocument
+      }
+
+      setSubmitMessage('Расписка загружена. Проверяем файл…')
+
+      await confirmLiabilityDocument({
+        registrationId: registrationSession.registrationId,
+        flowToken: registrationSession.flowToken,
+        storagePath: uploadedDocument.storagePath,
+        originalFilename: uploadedDocument.originalFilename,
+      })
+
+      setSubmissionComplete(true)
+      setSubmitMessage('Данные и расписка сохранены. Следующий шаг — оплата.')
+    } catch (error) {
+      if (error?.code === 'registration_expired') {
+        idempotencyKeyRef.current = null
+        registrationSessionRef.current = null
+        uploadedDocumentRef.current = null
+      }
+
+      setSubmitMessage('')
+      setSubmitError(getSubmissionErrorMessage(error?.code ?? error?.message))
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const inputClassName = (name) =>
     `kidsRegistrationInput${formErrors[name] ? ' kidsRegistrationInputError' : ''}`
 
   return (
-    <form className="kidsRegistrationForm" onSubmit={handleSubmit} noValidate autoComplete="off">
+    <form
+      className="kidsRegistrationForm"
+      onSubmit={handleSubmit}
+      noValidate
+      autoComplete="off"
+      aria-busy={isSubmitting}
+    >
       <header className="kidsRegistrationHeading">
         <p className="kidsRegistrationEyebrow">Форма участия</p>
         <h2>Регистрация участника</h2>
@@ -513,7 +659,7 @@ function KidsRegistrationForm({ event }) {
             required
           />
           <span className="kidsRegistrationHelp" id="liabilityDocument-help">
-            PDF, JPG, JPEG или PNG, до {MAX_FILE_SIZE_LABEL}. Файл остаётся только в этом окне браузера.
+            PDF, JPG, JPEG или PNG, до {MAX_FILE_SIZE_LABEL}. До отправки файл хранится только в этом окне браузера.
           </span>
           {formValues.liabilityDocument && (
             <span className="kidsRegistrationFileName">Выбран файл: {formValues.liabilityDocument.name}</span>
@@ -598,14 +744,28 @@ function KidsRegistrationForm({ event }) {
         </p>
       )}
 
+      {submitError && (
+        <p className="kidsRegistrationFormAlert" role="alert">
+          {submitError}
+        </p>
+      )}
+
       {submitMessage && (
         <p className="kidsRegistrationSuccess" role="status" aria-live="polite">
           {submitMessage}
         </p>
       )}
 
-      <button className="kidsRegistrationSubmit" type="submit">
-        Продолжить регистрацию
+      <button
+        className="kidsRegistrationSubmit"
+        type="submit"
+        disabled={isSubmitting || submissionComplete}
+      >
+        {submissionComplete
+          ? 'Данные сохранены'
+          : isSubmitting
+            ? 'Сохраняем регистрацию…'
+            : 'Продолжить регистрацию'}
       </button>
     </form>
   )
