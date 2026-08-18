@@ -1,6 +1,6 @@
 begin;
 
-create function public.room262_create_adult_registration_reservation(
+create or replace function public.room262_create_adult_registration_reservation(
   p_event_slug text,
   p_distance_code text,
   p_participant_last_name text,
@@ -258,7 +258,7 @@ begin
       message = 'distance_not_found';
   end if;
 
-  v_amount_minor := pg_catalog.coalesce(
+  v_amount_minor := coalesce(
     v_distance_price_minor,
     v_event_price_minor
   );
