@@ -6,12 +6,24 @@ const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+
 const FLOW_TOKEN_PATTERN = /^[A-Za-z0-9_-]{43}$/
 
 const ALLOWED_FILE_TYPES = {
   'application/pdf': 'pdf',
   'image/jpeg': 'jpg',
   'image/png': 'png',
+}
+
+const DOCUMENT_TYPES = {
+  liability_waiver: {
+    ownerTable: 'children',
+    folder: 'liability-waiver',
+  },
+  health_declaration: {
+    ownerTable: 'participants',
+    folder: 'health-declaration',
+  },
 }
 
 function hashFlowToken(flowToken) {
@@ -32,7 +44,13 @@ export default async function handler(request, response) {
     return response.status(405).json({ error: 'method_not_allowed' })
   }
 
-  const { registrationId, flowToken, mimeType, sizeBytes } = request.body || {}
+  const {
+    registrationId,
+    flowToken,
+    mimeType,
+    sizeBytes,
+    documentType = 'liability_waiver',
+  } = request.body || {}
 
   if (
     typeof registrationId !== 'string' ||
@@ -43,7 +61,9 @@ export default async function handler(request, response) {
     !Object.hasOwn(ALLOWED_FILE_TYPES, mimeType) ||
     !Number.isInteger(sizeBytes) ||
     sizeBytes <= 0 ||
-    sizeBytes > MAX_FILE_SIZE_BYTES
+    sizeBytes > MAX_FILE_SIZE_BYTES ||
+    typeof documentType !== 'string' ||
+    !Object.hasOwn(DOCUMENT_TYPES, documentType)
   ) {
     return response.status(400).json({ error: 'invalid_request' })
   }
@@ -82,6 +102,7 @@ export default async function handler(request, response) {
     console.error('Registration lookup for document upload failed', {
       code: registrationError.code ?? 'unknown',
     })
+
     return response.status(500).json({ error: 'internal_error' })
   }
 
@@ -90,7 +111,9 @@ export default async function handler(request, response) {
   }
 
   if (registration.status !== 'pending_payment') {
-    return response.status(409).json({ error: 'registration_not_pending' })
+    return response.status(409).json({
+      error: 'registration_not_pending',
+    })
   }
 
   const nowMs = Date.now()
@@ -99,24 +122,62 @@ export default async function handler(request, response) {
     isExpired(registration.reservation_expires_at, nowMs) ||
     isExpired(registration.flow_token_expires_at, nowMs)
   ) {
-    return response.status(410).json({ error: 'registration_expired' })
+    return response.status(410).json({
+      error: 'registration_expired',
+    })
   }
 
   if (registration.payment_started_at) {
-    return response.status(409).json({ error: 'payment_already_started' })
+    return response.status(409).json({
+      error: 'payment_already_started',
+    })
+  }
+
+  const documentConfig = DOCUMENT_TYPES[documentType]
+
+  const { data: owner, error: ownerError } = await supabase
+    .from(documentConfig.ownerTable)
+    .select('registration_id')
+    .eq('registration_id', registrationId)
+    .maybeSingle()
+
+  if (ownerError) {
+    console.error('Document owner lookup failed', {
+      code: ownerError.code ?? 'unknown',
+    })
+
+    return response.status(500).json({ error: 'internal_error' })
+  }
+
+  if (!owner) {
+    return response.status(409).json({
+      error: 'document_type_not_allowed',
+    })
   }
 
   const extension = ALLOWED_FILE_TYPES[mimeType]
-  const storagePath = `${registrationId}/liability-waiver/${randomUUID()}.${extension}`
 
-  const { data: signedUpload, error: signedUploadError } = await supabase.storage
-    .from(BUCKET)
-    .createSignedUploadUrl(storagePath, { upsert: false })
+  const storagePath =
+    `${registrationId}/${documentConfig.folder}/` +
+    `${randomUUID()}.${extension}`
 
-  if (signedUploadError || !signedUpload?.signedUrl || !signedUpload?.path) {
+  const { data: signedUpload, error: signedUploadError } =
+    await supabase.storage
+      .from(BUCKET)
+      .createSignedUploadUrl(storagePath, { upsert: false })
+
+  if (
+    signedUploadError ||
+    !signedUpload?.signedUrl ||
+    !signedUpload?.path
+  ) {
     console.error('Creating signed document upload URL failed', {
-      code: signedUploadError?.statusCode ?? signedUploadError?.status ?? 'unknown',
+      code:
+        signedUploadError?.statusCode ??
+        signedUploadError?.status ??
+        'unknown',
     })
+
     return response.status(500).json({ error: 'internal_error' })
   }
 
@@ -126,6 +187,7 @@ export default async function handler(request, response) {
     signedUrl: signedUpload.signedUrl,
     mimeType,
     sizeBytes,
+    documentType,
     expiresInSeconds: 7200,
     nextStep: 'upload_file',
   })
