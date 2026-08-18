@@ -216,7 +216,7 @@ function KidsRegistrationForm({ event }) {
   }
 
   const handleChange = (eventChange) => {
-    if (isSubmitting || submissionComplete) {
+    if (isSubmitting || submissionComplete || registrationSessionRef.current) {
       return
     }
 
@@ -234,6 +234,8 @@ function KidsRegistrationForm({ event }) {
     if (isSubmitting || submissionComplete) {
       return
     }
+
+    uploadedDocumentRef.current = null
 
     const file = eventChange.target.files?.[0] ?? null
     setFormValues((currentValues) => ({ ...currentValues, liabilityDocument: file }))
