@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router'
 import { EVENT_FETCH_STATUSES, fetchEventBySlug } from '../api/events'
+import AdultRegistrationForm from '../components/AdultRegistrationForm'
 import KidsRegistrationForm from '../components/KidsRegistrationForm'
 import { EVENT_STATUSES } from '../data/events'
 import './RegistrationPage.css'
@@ -240,8 +241,10 @@ function RegistrationPage() {
         </section>
 
         {registrationIsOpen ? (
-          event.eventType === 'kids_run' ? (
+          event.registrationFormType === 'kids' ? (
             <KidsRegistrationForm event={event} />
+          ) : event.registrationFormType === 'participant' ? (
+            <AdultRegistrationForm event={event} />
           ) : (
             <section className="registrationPageGate" aria-live="polite">
               <p className="registrationPageEyebrow">Регистрация</p>
