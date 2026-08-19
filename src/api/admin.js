@@ -78,3 +78,8 @@ export function logoutAdmin({ signal } = {}) {
     signal,
   })
 }
+export function getAdminEvents({ signal } = {}) {
+  return requestJson('/api/admin/events', {
+    signal,
+  })
+}

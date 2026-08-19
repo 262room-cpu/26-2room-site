@@ -221,3 +221,27 @@
     padding: 20px;
   }
 }
+.adminEventsList {
+  margin-top: 20px;
+  display: grid;
+  gap: 10px;
+}
+
+.adminEventItem {
+  display: grid;
+  gap: 6px;
+  padding: 14px 16px;
+  border: 1px solid rgba(255, 214, 0, 0.14);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.adminEventItem strong {
+  color: #fff;
+  font-size: 16px;
+}
+
+.adminEventItem span {
+  color: #a1a1aa;
+  font-size: 13px;
+}

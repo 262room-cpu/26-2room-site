@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import {
   AdminAuthError,
+  getAdminEvents,
   getAdminSession,
   loginAdmin,
   logoutAdmin,
@@ -14,6 +15,9 @@ function AdminPage() {
   const [loginMessage, setLoginMessage] = useState('')
   const [logoutStatus, setLogoutStatus] = useState('idle')
   const [logoutMessage, setLogoutMessage] = useState('')
+  const [eventsStatus, setEventsStatus] = useState('idle')
+  const [events, setEvents] = useState([])
+  const [eventsMessage, setEventsMessage] = useState('')
 
   useEffect(() => {
     const controller = new AbortController()
@@ -36,6 +40,56 @@ function AdminPage() {
       controller.abort()
     }
   }, [])
+
+  useEffect(() => {
+    if (sessionStatus !== 'authenticated') {
+      return undefined
+    }
+
+    const controller = new AbortController()
+    let isActive = true
+
+    setEventsStatus('loading')
+    setEventsMessage('')
+
+    getAdminEvents({ signal: controller.signal })
+      .then((result) => {
+        if (!isActive) {
+          return
+        }
+
+        if (!Array.isArray(result.events)) {
+          throw new AdminAuthError('invalid_server_response')
+        }
+
+        setEvents(result.events)
+        setEventsStatus('ready')
+      })
+      .catch((error) => {
+        if (!isActive) {
+          return
+        }
+
+        if (
+          error instanceof AdminAuthError &&
+          error.status === 401
+        ) {
+          setEvents([])
+          setEventsStatus('idle')
+          setSessionStatus('unauthenticated')
+          return
+        }
+
+        setEvents([])
+        setEventsStatus('error')
+        setEventsMessage('Не удалось загрузить мероприятия.')
+      })
+
+    return () => {
+      isActive = false
+      controller.abort()
+    }
+  }, [sessionStatus])
 
   const handleLogin = async (event) => {
     event.preventDefault()
@@ -185,10 +239,35 @@ function AdminPage() {
         <div className="adminPageGrid">
           <section className="adminPageSection">
             <h2>Мероприятия</h2>
-            <p>
-              Создание и редактирование города, даты, дистанций,
-              стоимости, лимитов и статуса регистрации.
-            </p>
+
+            {eventsStatus === 'loading' && (
+              <p>Загружаем мероприятия...</p>
+            )}
+
+            {eventsStatus === 'error' && (
+              <p className="adminAuthMessage">
+                {eventsMessage}
+              </p>
+            )}
+
+            {eventsStatus === 'ready' && events.length === 0 && (
+              <p>Мероприятий пока нет.</p>
+            )}
+
+            {eventsStatus === 'ready' && events.length > 0 && (
+              <div className="adminEventsList">
+                {events.map((event) => (
+                  <article
+                    className="adminEventItem"
+                    key={event.id}
+                  >
+                    <strong>{event.title}</strong>
+                    <span>{event.city}</span>
+                    <span>{event.status}</span>
+                  </article>
+                ))}
+              </div>
+            )}
           </section>
 
           <section className="adminPageSection">
