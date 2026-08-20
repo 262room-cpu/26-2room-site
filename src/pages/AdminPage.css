@@ -245,3 +245,35 @@
   color: #a1a1aa;
   font-size: 13px;
 }
+.adminEventItem {
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+
+.adminEventItem:hover,
+.adminEventItem[aria-pressed='true'] {
+  border-color: rgba(255, 214, 0, 0.55);
+  background: rgba(255, 214, 0, 0.06);
+}
+
+.adminEventDetailSection {
+  grid-column: 1 / -1;
+}
+
+.adminEventDetail {
+  margin-top: 18px;
+  display: grid;
+  gap: 8px;
+}
+
+.adminEventDetail h3 {
+  margin: 0;
+  color: #fff;
+  font-size: 20px;
+}
+
+.adminEventDetail p {
+  margin: 0;
+}

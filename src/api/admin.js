@@ -78,8 +78,19 @@ export function logoutAdmin({ signal } = {}) {
     signal,
   })
 }
+
 export function getAdminEvents({ signal } = {}) {
   return requestJson('/api/admin/events', {
+    signal,
+  })
+}
+
+export function getAdminEvent(eventId, { signal } = {}) {
+  const query = new URLSearchParams({
+    id: eventId,
+  })
+
+  return requestJson(`/api/admin/event?${query.toString()}`, {
     signal,
   })
 }

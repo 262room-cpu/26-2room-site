@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import {
   AdminAuthError,
+  getAdminEvent,
   getAdminEvents,
   getAdminSession,
   loginAdmin,
@@ -15,9 +16,13 @@ function AdminPage() {
   const [loginMessage, setLoginMessage] = useState('')
   const [logoutStatus, setLogoutStatus] = useState('idle')
   const [logoutMessage, setLogoutMessage] = useState('')
-  const [eventsStatus, setEventsStatus] = useState('idle')
+  const [eventsStatus, setEventsStatus] = useState('loading')
   const [events, setEvents] = useState([])
   const [eventsMessage, setEventsMessage] = useState('')
+  const [selectedEventId, setSelectedEventId] = useState(null)
+  const [eventDetailStatus, setEventDetailStatus] = useState('idle')
+  const [eventDetail, setEventDetail] = useState(null)
+  const [eventDetailMessage, setEventDetailMessage] = useState('')
 
   useEffect(() => {
     const controller = new AbortController()
@@ -48,9 +53,6 @@ function AdminPage() {
 
     const controller = new AbortController()
     let isActive = true
-
-    setEventsStatus('loading')
-    setEventsMessage('')
 
     getAdminEvents({ signal: controller.signal })
       .then((result) => {
@@ -91,6 +93,39 @@ function AdminPage() {
     }
   }, [sessionStatus])
 
+  const handleSelectEvent = async (eventId) => {
+    setSelectedEventId(eventId)
+    setEventDetailStatus('loading')
+    setEventDetail(null)
+    setEventDetailMessage('')
+
+    try {
+      const result = await getAdminEvent(eventId)
+
+      if (!result.event || typeof result.event !== 'object') {
+        throw new AdminAuthError('invalid_server_response')
+      }
+
+      setEventDetail(result)
+      setEventDetailStatus('ready')
+    } catch (error) {
+      if (
+        error instanceof AdminAuthError &&
+        error.status === 401
+      ) {
+        setSelectedEventId(null)
+        setEventDetail(null)
+        setEventDetailStatus('idle')
+        setSessionStatus('unauthenticated')
+        return
+      }
+
+      setEventDetail(null)
+      setEventDetailStatus('error')
+      setEventDetailMessage('Не удалось загрузить мероприятие.')
+    }
+  }
+
   const handleLogin = async (event) => {
     event.preventDefault()
 
@@ -110,6 +145,8 @@ function AdminPage() {
         throw new AdminAuthError('invalid_server_response')
       }
 
+      setEventsStatus('loading')
+      setEventsMessage('')
       setLoginStatus('idle')
       setSessionStatus('authenticated')
     } catch (error) {
@@ -257,18 +294,54 @@ function AdminPage() {
             {eventsStatus === 'ready' && events.length > 0 && (
               <div className="adminEventsList">
                 {events.map((event) => (
-                  <article
+                  <button
                     className="adminEventItem"
+                    type="button"
                     key={event.id}
+                    onClick={() => handleSelectEvent(event.id)}
+                    aria-pressed={selectedEventId === event.id}
                   >
                     <strong>{event.title}</strong>
                     <span>{event.city}</span>
                     <span>{event.status}</span>
-                  </article>
+                  </button>
                 ))}
               </div>
             )}
           </section>
+
+          {selectedEventId && (
+            <section className="adminPageSection adminEventDetailSection">
+              <h2>Карточка мероприятия</h2>
+
+              {eventDetailStatus === 'loading' && (
+                <p>Загружаем данные мероприятия...</p>
+              )}
+
+              {eventDetailStatus === 'error' && (
+                <p className="adminAuthMessage">
+                  {eventDetailMessage}
+                </p>
+              )}
+
+              {eventDetailStatus === 'ready' && eventDetail && (
+                <div className="adminEventDetail">
+                  <h3>{eventDetail.event.title}</h3>
+                  <p>{eventDetail.event.city}</p>
+                  <p>Статус: {eventDetail.event.status}</p>
+                  <p>
+                    Дистанций: {eventDetail.distances?.length ?? 0}
+                  </p>
+                  <p>
+                    Документов: {eventDetail.documents?.length ?? 0}
+                  </p>
+                  <p>
+                    Согласий: {eventDetail.consents?.length ?? 0}
+                  </p>
+                </div>
+              )}
+            </section>
+          )}
 
           <section className="adminPageSection">
             <h2>Регистрации</h2>
