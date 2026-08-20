@@ -51,6 +51,7 @@ const EVENT_STATUSES = new Set([
 const REGISTRATION_FORM_TYPES = new Set([
   'kids',
   'participant',
+  'mixed',
 ])
 const DATE_STATUSES = new Set([
   'tentative',
@@ -380,6 +381,20 @@ function mapEvent(event) {
   }
 }
 
+function mapGroup(group) {
+  return {
+    id: group.id,
+    eventId: group.event_id,
+    code: group.code,
+    title: group.title,
+    registrationFormType: group.registration_form_type,
+    capacity: group.capacity,
+    sortOrder: group.sort_order,
+    createdAt: group.created_at,
+    updatedAt: group.updated_at,
+  }
+}
+
 export default async function handler(request, response) {
   response.setHeader('Cache-Control', 'no-store')
   response.setHeader(
@@ -483,6 +498,38 @@ export default async function handler(request, response) {
         .json({ error: 'internal_error' })
     }
 
+    const nextRegistrationFormType = update.registration_form_type
+
+    if (
+      nextRegistrationFormType &&
+      nextRegistrationFormType !== 'mixed'
+    ) {
+      const { data: incompatibleGroup, error: groupError } =
+        await supabase
+          .from('event_registration_groups')
+          .select('id')
+          .eq('event_id', eventId)
+          .neq('registration_form_type', nextRegistrationFormType)
+          .limit(1)
+          .maybeSingle()
+
+      if (groupError) {
+        console.error('Admin event group consistency query failed', {
+          code: groupError.code ?? 'unknown',
+        })
+
+        return response
+          .status(500)
+          .json({ error: 'internal_error' })
+      }
+
+      if (incompatibleGroup) {
+        return response
+          .status(400)
+          .json({ error: 'incompatible_registration_groups' })
+      }
+    }
+
     const {
       data: updatedEvent,
       error: updateError,
@@ -525,14 +572,23 @@ export default async function handler(request, response) {
   }
 
   const [
+    groupsResult,
     distancesResult,
     documentsResult,
     consentsResult,
   ] = await Promise.all([
     supabase
+      .from('event_registration_groups')
+      .select(
+        'id,event_id,code,title,registration_form_type,capacity,sort_order,created_at,updated_at',
+      )
+      .eq('event_id', eventId)
+      .order('sort_order', { ascending: true }),
+
+    supabase
       .from('event_distances')
       .select(
-        'id,code,title,distance_meters,min_age,max_age,capacity,price_minor,sort_order',
+        'id,group_id,code,title,distance_meters,min_age,max_age,capacity,price_minor,sort_order',
       )
       .eq('event_id', eventId)
       .order('sort_order', { ascending: true }),
@@ -555,6 +611,7 @@ export default async function handler(request, response) {
   ])
 
   if (
+    groupsResult.error ||
     distancesResult.error ||
     documentsResult.error ||
     consentsResult.error
@@ -569,8 +626,11 @@ export default async function handler(request, response) {
   return response.status(200).json({
     event: mapEvent(event),
 
+    groups: (groupsResult.data ?? []).map(mapGroup),
+
     distances: (distancesResult.data ?? []).map((distance) => ({
       id: distance.id,
+      groupId: distance.group_id,
       code: distance.code,
       title: distance.title,
       distanceMeters: distance.distance_meters,

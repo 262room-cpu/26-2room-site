@@ -24,7 +24,7 @@ export const ecosystem = [
   {
     icon: 'APP',
     title: 'App',
-    text: 'Будущее приложение для поиска стартов, избранного, фильтров и напоминаний.',
+    text: 'Приложение для поиска стартов, избранного, фильтров и напоминаний.',
   },
   {
     icon: 'SITE',
@@ -74,7 +74,7 @@ export const platformCards = [
   },
   {
     title: 'В приложении',
-    badge: 'Coming soon',
+    badge: 'App Store · Google Play',
     highlight: true,
     items: [
       'полный календарь стартов',

@@ -21,6 +21,7 @@ const RPC_ERROR_CODES = [
   'registration_not_started',
   'registration_closed',
   'distance_not_found',
+  'group_sold_out',
   'sold_out',
   'age_not_allowed',
   'invalid_request',
@@ -194,6 +195,7 @@ function sendRpcError(response, code) {
     code === 'event_date_not_confirmed' ||
     code === 'registration_not_started' ||
     code === 'registration_closed' ||
+    code === 'group_sold_out' ||
     code === 'sold_out' ||
     code === 'idempotency_conflict'
   ) {

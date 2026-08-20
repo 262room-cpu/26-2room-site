@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import {
   AdminAuthError,
   createAdminDistance,
+  createAdminGroup,
   getAdminEvent,
   getAdminEvents,
   getAdminSession,
@@ -9,6 +10,7 @@ import {
   logoutAdmin,
   updateAdminDistance,
   updateAdminEvent,
+  updateAdminGroup,
 } from '../api/admin'
 import './AdminPage.css'
 
@@ -28,7 +30,12 @@ const EVENT_STATUS_LABELS = Object.fromEntries(
 const REGISTRATION_FORM_OPTIONS = [
   ['kids', 'Детская регистрация'],
   ['participant', 'Взрослая регистрация'],
+  ['mixed', 'Смешанная регистрация'],
 ]
+
+const GROUP_FORM_OPTIONS = REGISTRATION_FORM_OPTIONS.filter(
+  ([value]) => value !== 'mixed',
+)
 
 class EventFormError extends Error {}
 
@@ -241,6 +248,7 @@ function integerInputToValue(
 
 function createDistanceForm(distance) {
   return {
+    groupId: distance.groupId ?? '',
     code: distance.code ?? '',
     title: distance.title ?? '',
     distanceMeters: String(distance.distanceMeters ?? ''),
@@ -273,10 +281,11 @@ function getNextDistanceSortOrder(distances) {
   return highestSortOrder >= 32767 ? null : highestSortOrder + 1
 }
 
-function createNewDistanceForm(distances) {
+function createNewDistanceForm(distances, groups = []) {
   const nextSortOrder = getNextDistanceSortOrder(distances)
 
   return {
+    groupId: groups.length === 1 ? groups[0].id : '',
     title: '',
     code: '',
     distanceMeters: '',
@@ -290,8 +299,13 @@ function createNewDistanceForm(distances) {
 }
 
 function buildDistanceChanges(form) {
+  const groupId = form.groupId.trim()
   const code = form.code.trim()
   const title = form.title.trim()
+
+  if (!groupId) {
+    throw new EventFormError('Выберите группу регистрации.')
+  }
 
   if (!code || !title) {
     throw new EventFormError('Название и код не должны быть пустыми.')
@@ -315,6 +329,7 @@ function buildDistanceChanges(form) {
   }
 
   return {
+    groupId,
     code,
     title,
     distanceMeters: integerInputToValue(form.distanceMeters, {
@@ -331,6 +346,83 @@ function buildDistanceChanges(form) {
       max: 2147483647,
     }),
     priceMinor: priceInputToMinor(form.price),
+    sortOrder: integerInputToValue(form.sortOrder, {
+      label: 'Порядок',
+      max: 32767,
+    }),
+  }
+}
+
+function createGroupForm(group) {
+  return {
+    code: group.code ?? '',
+    title: group.title ?? '',
+    registrationFormType:
+      group.registrationFormType ?? 'participant',
+    capacity: String(group.capacity ?? ''),
+    sortOrder: String(group.sortOrder ?? 0),
+  }
+}
+
+function createGroupForms(groups) {
+  return Object.fromEntries(
+    (Array.isArray(groups) ? groups : []).map((group) => [
+      group.id,
+      createGroupForm(group),
+    ]),
+  )
+}
+
+function getNextGroupSortOrder(groups) {
+  if (!Array.isArray(groups) || groups.length === 0) {
+    return 0
+  }
+
+  const highestSortOrder = Math.max(
+    ...groups.map((group) => group.sortOrder),
+  )
+
+  return highestSortOrder >= 32767 ? null : highestSortOrder + 1
+}
+
+function createNewGroupForm(groups, eventRegistrationFormType) {
+  const nextSortOrder = getNextGroupSortOrder(groups)
+
+  return {
+    code: '',
+    title: '',
+    registrationFormType:
+      eventRegistrationFormType === 'participant'
+        ? 'participant'
+        : 'kids',
+    capacity: '',
+    sortOrder:
+      nextSortOrder === null ? '' : String(nextSortOrder),
+  }
+}
+
+function buildGroupChanges(form) {
+  const code = form.code.trim()
+  const title = form.title.trim()
+
+  if (!code || !title) {
+    throw new EventFormError('Название и код не должны быть пустыми.')
+  }
+
+  if (!['kids', 'participant'].includes(form.registrationFormType)) {
+    throw new EventFormError('Выберите тип регистрации группы.')
+  }
+
+  return {
+    code,
+    title,
+    registrationFormType: form.registrationFormType,
+    capacity: integerInputToValue(form.capacity, {
+      label: 'Общий лимит группы',
+      nullable: true,
+      min: 1,
+      max: 2147483647,
+    }),
     sortOrder: integerInputToValue(form.sortOrder, {
       label: 'Порядок',
       max: 32767,
@@ -502,6 +594,15 @@ function AdminPage() {
   const [eventForm, setEventForm] = useState(null)
   const [eventSaveStatus, setEventSaveStatus] = useState('idle')
   const [eventSaveMessage, setEventSaveMessage] = useState('')
+  const [groupForms, setGroupForms] = useState({})
+  const [groupSaveStates, setGroupSaveStates] = useState({})
+  const [newGroupForm, setNewGroupForm] = useState(() =>
+    createNewGroupForm([], 'participant'),
+  )
+  const [newGroupSaveState, setNewGroupSaveState] = useState({
+    status: 'idle',
+    message: '',
+  })
   const [distanceForms, setDistanceForms] = useState({})
   const [distanceSaveStates, setDistanceSaveStates] = useState({})
   const [newDistanceForm, setNewDistanceForm] = useState(() =>
@@ -589,6 +690,10 @@ function AdminPage() {
     setEventForm(null)
     setEventSaveStatus('idle')
     setEventSaveMessage('')
+    setGroupForms({})
+    setGroupSaveStates({})
+    setNewGroupForm(createNewGroupForm([], 'participant'))
+    setNewGroupSaveState({ status: 'idle', message: '' })
     setDistanceForms({})
     setDistanceSaveStates({})
     setNewDistanceForm(createNewDistanceForm([]))
@@ -603,8 +708,17 @@ function AdminPage() {
 
       setEventDetail(result)
       setEventForm(createEventForm(result.event))
+      setGroupForms(createGroupForms(result.groups))
+      setNewGroupForm(
+        createNewGroupForm(
+          result.groups,
+          result.event.registrationFormType,
+        ),
+      )
       setDistanceForms(createDistanceForms(result.distances))
-      setNewDistanceForm(createNewDistanceForm(result.distances))
+      setNewDistanceForm(
+        createNewDistanceForm(result.distances, result.groups),
+      )
       setEventDetailStatus('ready')
     } catch (error) {
       if (
@@ -615,6 +729,10 @@ function AdminPage() {
         setEventDetail(null)
         setEventDetailStatus('idle')
         setEventForm(null)
+        setGroupForms({})
+        setGroupSaveStates({})
+        setNewGroupForm(createNewGroupForm([], 'participant'))
+        setNewGroupSaveState({ status: 'idle', message: '' })
         setDistanceForms({})
         setDistanceSaveStates({})
         setNewDistanceForm(createNewDistanceForm([]))
@@ -624,6 +742,8 @@ function AdminPage() {
       }
 
       setEventDetail(null)
+      setGroupForms({})
+      setNewGroupForm(createNewGroupForm([], 'participant'))
       setDistanceForms({})
       setNewDistanceForm(createNewDistanceForm([]))
       setEventDetailStatus('error')
@@ -699,6 +819,13 @@ function AdminPage() {
         event: result.event,
       }))
       setEventForm(createEventForm(result.event))
+      setNewGroupForm((currentForm) => ({
+        ...currentForm,
+        registrationFormType:
+          result.event.registrationFormType === 'mixed'
+            ? currentForm.registrationFormType
+            : result.event.registrationFormType,
+      }))
       setEvents((currentEvents) =>
         currentEvents.map((event) =>
           event.id === result.event.id
@@ -716,6 +843,10 @@ function AdminPage() {
         setEventDetailStatus('idle')
         setEventForm(null)
         setEventSaveStatus('idle')
+        setGroupForms({})
+        setGroupSaveStates({})
+        setNewGroupForm(createNewGroupForm([], 'participant'))
+        setNewGroupSaveState({ status: 'idle', message: '' })
         setDistanceForms({})
         setDistanceSaveStates({})
         setNewDistanceForm(createNewDistanceForm([]))
@@ -726,10 +857,252 @@ function AdminPage() {
 
       setEventSaveStatus('error')
       setEventSaveMessage(
-        error instanceof AdminAuthError && error.status === 404
-          ? 'Мероприятие не найдено.'
-          : 'Не удалось сохранить. Проверьте данные и попробуйте ещё раз.',
+        error instanceof AdminAuthError &&
+          error.code === 'incompatible_registration_groups'
+          ? 'Сначала измените тип несовместимых групп регистрации.'
+          : error instanceof AdminAuthError && error.status === 404
+            ? 'Мероприятие не найдено.'
+            : 'Не удалось сохранить. Проверьте данные и попробуйте ещё раз.',
       )
+    }
+  }
+
+  const handleGroupFormChange = (groupId, changeEvent) => {
+    const { name, value } = changeEvent.target
+
+    setGroupForms((currentForms) => ({
+      ...currentForms,
+      [groupId]: {
+        ...currentForms[groupId],
+        [name]: value,
+      },
+    }))
+    setGroupSaveStates((currentStates) => ({
+      ...currentStates,
+      [groupId]: { status: 'idle', message: '' },
+    }))
+  }
+
+  const handleSaveGroup = async (submitEvent, groupId) => {
+    submitEvent.preventDefault()
+
+    const form = groupForms[groupId]
+    const eventId = eventDetail?.event?.id
+
+    if (!form || !eventId) {
+      return
+    }
+
+    let changes
+
+    try {
+      changes = buildGroupChanges(form)
+    } catch (error) {
+      setGroupSaveStates((currentStates) => ({
+        ...currentStates,
+        [groupId]: {
+          status: 'error',
+          message:
+            error instanceof EventFormError
+              ? error.message
+              : 'Проверьте заполненные данные.',
+        },
+      }))
+      return
+    }
+
+    setGroupSaveStates((currentStates) => ({
+      ...currentStates,
+      [groupId]: { status: 'saving', message: '' },
+    }))
+
+    try {
+      const result = await updateAdminGroup(eventId, groupId, changes)
+
+      if (!result.group || typeof result.group !== 'object') {
+        throw new AdminAuthError('invalid_server_response')
+      }
+
+      setEventDetail((currentDetail) => ({
+        ...currentDetail,
+        groups: (currentDetail?.groups ?? []).map((group) =>
+          group.id === result.group.id ? result.group : group,
+        ),
+      }))
+      setGroupForms((currentForms) => ({
+        ...currentForms,
+        [groupId]: createGroupForm(result.group),
+      }))
+      setGroupSaveStates((currentStates) => ({
+        ...currentStates,
+        [groupId]: { status: 'success', message: 'Сохранено' },
+      }))
+    } catch (error) {
+      if (error instanceof AdminAuthError && error.status === 401) {
+        setEvents([])
+        setSelectedEventId(null)
+        setEventDetail(null)
+        setEventDetailStatus('idle')
+        setEventForm(null)
+        setEventSaveStatus('idle')
+        setGroupForms({})
+        setGroupSaveStates({})
+        setNewGroupForm(createNewGroupForm([], 'participant'))
+        setNewGroupSaveState({ status: 'idle', message: '' })
+        setDistanceForms({})
+        setDistanceSaveStates({})
+        setNewDistanceForm(createNewDistanceForm([]))
+        setNewDistanceSaveState({ status: 'idle', message: '' })
+        setSessionStatus('unauthenticated')
+        return
+      }
+
+      let message = 'Не удалось сохранить группу. Проверьте данные.'
+
+      if (
+        error instanceof AdminAuthError &&
+        error.code === 'group_code_conflict'
+      ) {
+        message = 'Группа с таким кодом уже существует.'
+      } else if (
+        error instanceof AdminAuthError &&
+        error.code === 'incompatible_registration_type'
+      ) {
+        message = 'Тип группы несовместим с типом регистрации мероприятия.'
+      } else if (
+        error instanceof AdminAuthError &&
+        error.status === 404
+      ) {
+        message = 'Группа не найдена.'
+      }
+
+      setGroupSaveStates((currentStates) => ({
+        ...currentStates,
+        [groupId]: { status: 'error', message },
+      }))
+    }
+  }
+
+  const handleNewGroupFormChange = (changeEvent) => {
+    const { name, value } = changeEvent.target
+
+    setNewGroupForm((currentForm) => ({
+      ...currentForm,
+      [name]: value,
+    }))
+    setNewGroupSaveState({ status: 'idle', message: '' })
+  }
+
+  const handleCreateGroup = async (submitEvent) => {
+    submitEvent.preventDefault()
+
+    const eventId = eventDetail?.event?.id
+    const currentGroups = eventDetail?.groups ?? []
+
+    if (!eventId) {
+      return
+    }
+
+    if (getNextGroupSortOrder(currentGroups) === null) {
+      setNewGroupSaveState({
+        status: 'error',
+        message:
+          'Нельзя вычислить следующий порядок: достигнут лимит 32767.',
+      })
+      return
+    }
+
+    let changes
+
+    try {
+      changes = buildGroupChanges(newGroupForm)
+    } catch (error) {
+      setNewGroupSaveState({
+        status: 'error',
+        message:
+          error instanceof EventFormError
+            ? error.message
+            : 'Проверьте заполненные данные.',
+      })
+      return
+    }
+
+    setNewGroupSaveState({ status: 'saving', message: '' })
+
+    try {
+      const result = await createAdminGroup(eventId, changes)
+
+      if (!result.group || typeof result.group !== 'object') {
+        throw new AdminAuthError('invalid_server_response')
+      }
+
+      const updatedGroups = [...currentGroups, result.group]
+
+      setEventDetail((currentDetail) => ({
+        ...currentDetail,
+        groups: [...(currentDetail?.groups ?? []), result.group],
+      }))
+      setGroupForms((currentForms) => ({
+        ...currentForms,
+        [result.group.id]: createGroupForm(result.group),
+      }))
+      setNewGroupForm(
+        createNewGroupForm(
+          updatedGroups,
+          eventDetail.event.registrationFormType,
+        ),
+      )
+      setNewDistanceForm((currentForm) => ({
+        ...currentForm,
+        groupId:
+          updatedGroups.length === 1
+            ? result.group.id
+            : currentForm.groupId,
+      }))
+      setNewGroupSaveState({
+        status: 'success',
+        message: 'Группа добавлена',
+      })
+    } catch (error) {
+      if (error instanceof AdminAuthError && error.status === 401) {
+        setEvents([])
+        setSelectedEventId(null)
+        setEventDetail(null)
+        setEventDetailStatus('idle')
+        setEventForm(null)
+        setEventSaveStatus('idle')
+        setGroupForms({})
+        setGroupSaveStates({})
+        setNewGroupForm(createNewGroupForm([], 'participant'))
+        setNewGroupSaveState({ status: 'idle', message: '' })
+        setDistanceForms({})
+        setDistanceSaveStates({})
+        setNewDistanceForm(createNewDistanceForm([]))
+        setNewDistanceSaveState({ status: 'idle', message: '' })
+        setSessionStatus('unauthenticated')
+        return
+      }
+
+      let message = 'Не удалось добавить группу. Проверьте данные.'
+
+      if (
+        error instanceof AdminAuthError &&
+        error.code === 'group_code_conflict'
+      ) {
+        message = 'Группа с таким кодом уже существует.'
+      } else if (
+        error instanceof AdminAuthError &&
+        error.code === 'incompatible_registration_type'
+      ) {
+        message = 'Тип группы несовместим с типом регистрации мероприятия.'
+      } else if (
+        error instanceof AdminAuthError &&
+        error.status === 404
+      ) {
+        message = 'Мероприятие не найдено.'
+      }
+
+      setNewGroupSaveState({ status: 'error', message })
     }
   }
 
@@ -817,6 +1190,10 @@ function AdminPage() {
         setEventDetailStatus('idle')
         setEventForm(null)
         setEventSaveStatus('idle')
+        setGroupForms({})
+        setGroupSaveStates({})
+        setNewGroupForm(createNewGroupForm([], 'participant'))
+        setNewGroupSaveState({ status: 'idle', message: '' })
         setDistanceForms({})
         setDistanceSaveStates({})
         setNewDistanceForm(createNewDistanceForm([]))
@@ -832,6 +1209,16 @@ function AdminPage() {
         error.code === 'distance_code_conflict'
       ) {
         message = 'Дистанция с таким кодом уже существует.'
+      } else if (
+        error instanceof AdminAuthError &&
+        error.code === 'incompatible_registration_type'
+      ) {
+        message = 'Группа дистанции несовместима с типом мероприятия.'
+      } else if (
+        error instanceof AdminAuthError &&
+        error.code === 'group_not_found'
+      ) {
+        message = 'Выбранная группа не найдена.'
       } else if (
         error instanceof AdminAuthError &&
         error.status === 404
@@ -915,7 +1302,9 @@ function AdminPage() {
         ...currentForms,
         [result.distance.id]: createDistanceForm(result.distance),
       }))
-      setNewDistanceForm(createNewDistanceForm(updatedDistances))
+      setNewDistanceForm(
+        createNewDistanceForm(updatedDistances, eventDetail.groups),
+      )
       setNewDistanceSaveState({
         status: 'success',
         message: 'Дистанция добавлена',
@@ -928,6 +1317,10 @@ function AdminPage() {
         setEventDetailStatus('idle')
         setEventForm(null)
         setEventSaveStatus('idle')
+        setGroupForms({})
+        setGroupSaveStates({})
+        setNewGroupForm(createNewGroupForm([], 'participant'))
+        setNewGroupSaveState({ status: 'idle', message: '' })
         setDistanceForms({})
         setDistanceSaveStates({})
         setNewDistanceForm(createNewDistanceForm([]))
@@ -943,6 +1336,16 @@ function AdminPage() {
         error.code === 'distance_code_conflict'
       ) {
         message = 'Дистанция с таким кодом уже существует.'
+      } else if (
+        error instanceof AdminAuthError &&
+        error.code === 'incompatible_registration_type'
+      ) {
+        message = 'Группа дистанции несовместима с типом мероприятия.'
+      } else if (
+        error instanceof AdminAuthError &&
+        error.code === 'group_not_found'
+      ) {
+        message = 'Выбранная группа не найдена.'
       } else if (
         error instanceof AdminAuthError &&
         error.status === 404
@@ -1009,6 +1412,10 @@ function AdminPage() {
       setEventDetailStatus('idle')
       setEventForm(null)
       setEventSaveStatus('idle')
+      setGroupForms({})
+      setGroupSaveStates({})
+      setNewGroupForm(createNewGroupForm([], 'participant'))
+      setNewGroupSaveState({ status: 'idle', message: '' })
       setDistanceForms({})
       setDistanceSaveStates({})
       setNewDistanceForm(createNewDistanceForm([]))
@@ -1025,6 +1432,14 @@ function AdminPage() {
     Object.values(distanceSaveStates).some(
       ({ status }) => status === 'saving',
     )
+  const isGroupSaving =
+    newGroupSaveState.status === 'saving' ||
+    Object.values(groupSaveStates).some(
+      ({ status }) => status === 'saving',
+    )
+  const isNextGroupSortOrderUnavailable =
+    eventDetail !== null &&
+    getNextGroupSortOrder(eventDetail.groups) === null
   const isNextDistanceSortOrderUnavailable =
     eventDetail !== null &&
     getNextDistanceSortOrder(eventDetail.distances) === null
@@ -1148,7 +1563,9 @@ function AdminPage() {
                     onClick={() => handleSelectEvent(event.id)}
                     aria-pressed={selectedEventId === event.id}
                     disabled={
-                      eventSaveStatus === 'saving' || isDistanceSaving
+                      eventSaveStatus === 'saving' ||
+                      isGroupSaving ||
+                      isDistanceSaving
                     }
                   >
                     <strong>{event.title}</strong>
@@ -1185,6 +1602,9 @@ function AdminPage() {
                   onSubmit={handleSaveEvent}
                 >
                   <div className="adminEventCounts">
+                    <span>
+                      Групп: {eventDetail.groups?.length ?? 0}
+                    </span>
                     <span>
                       Дистанций: {eventDetail.distances?.length ?? 0}
                     </span>
@@ -1256,6 +1676,13 @@ function AdminPage() {
                             ),
                           )}
                         </select>
+                        {eventForm.registrationFormType === 'mixed' && (
+                          <small>
+                            В одном мероприятии могут одновременно
+                            регистрироваться дети и взрослые через разные
+                            группы дистанций.
+                          </small>
+                        )}
                       </label>
 
                       <label className="adminEventField">
@@ -1497,7 +1924,11 @@ function AdminPage() {
                     <button
                       className="adminEventSaveButton"
                       type="submit"
-                      disabled={eventSaveStatus === 'saving'}
+                      disabled={
+                        eventSaveStatus === 'saving' ||
+                        isGroupSaving ||
+                        isDistanceSaving
+                      }
                     >
                       {eventSaveStatus === 'saving'
                         ? 'Сохраняем...'
@@ -1524,6 +1955,309 @@ function AdminPage() {
                 </form>
 
                 <section
+                  className="adminDistancesSection adminGroupsSection"
+                  aria-labelledby="admin-groups-title"
+                >
+                  <div className="adminDistancesHeader">
+                    <div>
+                      <p className="adminPageEyebrow">Регистрация</p>
+                      <h3 id="admin-groups-title">
+                        Группы регистрации
+                      </h3>
+                    </div>
+                    <span>{eventDetail.groups?.length ?? 0}</span>
+                  </div>
+
+                  <p className="adminSectionHint">
+                    Лимит группы действует на все дистанции этой группы
+                    вместе. Например, лимит 500 для двух детских дистанций
+                    означает максимум 500 регистраций суммарно.
+                  </p>
+
+                  <form
+                    className="adminDistanceCard adminDistanceCreateCard"
+                    onSubmit={handleCreateGroup}
+                  >
+                    <div className="adminDistanceCardHeader">
+                      <h4>Добавить группу</h4>
+                      <span>Новая</span>
+                    </div>
+
+                    <div className="adminGroupFormGrid">
+                      <label className="adminEventField adminGroupFieldWide">
+                        <span>Название</span>
+                        <input
+                          name="title"
+                          type="text"
+                          value={newGroupForm.title}
+                          onChange={handleNewGroupFormChange}
+                          required
+                        />
+                      </label>
+
+                      <label className="adminEventField">
+                        <span>Код</span>
+                        <input
+                          name="code"
+                          type="text"
+                          value={newGroupForm.code}
+                          onChange={handleNewGroupFormChange}
+                          required
+                        />
+                      </label>
+
+                      <label className="adminEventField">
+                        <span>Тип регистрации</span>
+                        <select
+                          name="registrationFormType"
+                          value={newGroupForm.registrationFormType}
+                          onChange={handleNewGroupFormChange}
+                        >
+                          {GROUP_FORM_OPTIONS.map(([value, label]) => (
+                            <option value={value} key={value}>
+                              {label}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+
+                      <label className="adminEventField">
+                        <span>Общий лимит группы</span>
+                        <input
+                          name="capacity"
+                          type="number"
+                          min="1"
+                          max="2147483647"
+                          step="1"
+                          value={newGroupForm.capacity}
+                          onChange={handleNewGroupFormChange}
+                        />
+                        <small>Пусто — общего лимита группы нет.</small>
+                      </label>
+
+                      <label className="adminEventField">
+                        <span>Порядок</span>
+                        <input
+                          name="sortOrder"
+                          type="number"
+                          min="0"
+                          max="32767"
+                          step="1"
+                          value={newGroupForm.sortOrder}
+                          onChange={handleNewGroupFormChange}
+                          required
+                        />
+                      </label>
+                    </div>
+
+                    <div className="adminEventFormActions">
+                      <button
+                        className="adminEventSaveButton"
+                        type="submit"
+                        disabled={
+                          eventSaveStatus === 'saving' ||
+                          isGroupSaving ||
+                          isDistanceSaving ||
+                          isNextGroupSortOrderUnavailable
+                        }
+                      >
+                        {newGroupSaveState.status === 'saving'
+                          ? 'Добавляем...'
+                          : 'Добавить группу'}
+                      </button>
+
+                      {newGroupSaveState.message && (
+                        <p
+                          className={
+                            newGroupSaveState.status === 'success'
+                              ? 'adminSaveSuccess'
+                              : 'adminAuthMessage'
+                          }
+                          role={
+                            newGroupSaveState.status === 'error'
+                              ? 'alert'
+                              : 'status'
+                          }
+                        >
+                          {newGroupSaveState.message}
+                        </p>
+                      )}
+                    </div>
+
+                    {isNextGroupSortOrderUnavailable && (
+                      <p className="adminAuthMessage" role="alert">
+                        Нельзя вычислить следующий порядок: достигнут
+                        лимит 32767.
+                      </p>
+                    )}
+                  </form>
+
+                  {(eventDetail.groups?.length ?? 0) === 0 && (
+                    <p>У мероприятия пока нет групп регистрации.</p>
+                  )}
+
+                  {(eventDetail.groups?.length ?? 0) > 0 && (
+                    <div className="adminDistanceCards">
+                      {eventDetail.groups.map((group) => {
+                        const form = groupForms[group.id]
+                        const saveState = groupSaveStates[group.id] ?? {
+                          status: 'idle',
+                          message: '',
+                        }
+
+                        if (!form) {
+                          return null
+                        }
+
+                        return (
+                          <form
+                            className="adminDistanceCard"
+                            key={group.id}
+                            onSubmit={(submitEvent) =>
+                              handleSaveGroup(submitEvent, group.id)
+                            }
+                          >
+                            <div className="adminDistanceCardHeader">
+                              <h4>{form.title || 'Без названия'}</h4>
+                              <span>{form.code || 'Без кода'}</span>
+                            </div>
+
+                            <div className="adminGroupFormGrid">
+                              <label className="adminEventField adminGroupFieldWide">
+                                <span>Название</span>
+                                <input
+                                  name="title"
+                                  type="text"
+                                  value={form.title}
+                                  onChange={(changeEvent) =>
+                                    handleGroupFormChange(
+                                      group.id,
+                                      changeEvent,
+                                    )
+                                  }
+                                  required
+                                />
+                              </label>
+
+                              <label className="adminEventField">
+                                <span>Код</span>
+                                <input
+                                  name="code"
+                                  type="text"
+                                  value={form.code}
+                                  onChange={(changeEvent) =>
+                                    handleGroupFormChange(
+                                      group.id,
+                                      changeEvent,
+                                    )
+                                  }
+                                  required
+                                />
+                              </label>
+
+                              <label className="adminEventField">
+                                <span>Тип регистрации</span>
+                                <select
+                                  name="registrationFormType"
+                                  value={form.registrationFormType}
+                                  onChange={(changeEvent) =>
+                                    handleGroupFormChange(
+                                      group.id,
+                                      changeEvent,
+                                    )
+                                  }
+                                >
+                                  {GROUP_FORM_OPTIONS.map(
+                                    ([value, label]) => (
+                                      <option value={value} key={value}>
+                                        {label}
+                                      </option>
+                                    ),
+                                  )}
+                                </select>
+                              </label>
+
+                              <label className="adminEventField">
+                                <span>Общий лимит группы</span>
+                                <input
+                                  name="capacity"
+                                  type="number"
+                                  min="1"
+                                  max="2147483647"
+                                  step="1"
+                                  value={form.capacity}
+                                  onChange={(changeEvent) =>
+                                    handleGroupFormChange(
+                                      group.id,
+                                      changeEvent,
+                                    )
+                                  }
+                                />
+                                <small>
+                                  Пусто — общего лимита группы нет.
+                                </small>
+                              </label>
+
+                              <label className="adminEventField">
+                                <span>Порядок</span>
+                                <input
+                                  name="sortOrder"
+                                  type="number"
+                                  min="0"
+                                  max="32767"
+                                  step="1"
+                                  value={form.sortOrder}
+                                  onChange={(changeEvent) =>
+                                    handleGroupFormChange(
+                                      group.id,
+                                      changeEvent,
+                                    )
+                                  }
+                                  required
+                                />
+                              </label>
+                            </div>
+
+                            <div className="adminEventFormActions">
+                              <button
+                                className="adminEventSaveButton"
+                                type="submit"
+                                disabled={
+                                  eventSaveStatus === 'saving' ||
+                                  isGroupSaving ||
+                                  isDistanceSaving
+                                }
+                              >
+                                {saveState.status === 'saving'
+                                  ? 'Сохраняем...'
+                                  : 'Сохранить группу'}
+                              </button>
+
+                              {saveState.message && (
+                                <p
+                                  className={
+                                    saveState.status === 'success'
+                                      ? 'adminSaveSuccess'
+                                      : 'adminAuthMessage'
+                                  }
+                                  role={
+                                    saveState.status === 'error'
+                                      ? 'alert'
+                                      : 'status'
+                                  }
+                                >
+                                  {saveState.message}
+                                </p>
+                              )}
+                            </div>
+                          </form>
+                        )
+                      })}
+                    </div>
+                  )}
+                </section>
+
+                <section
                   className="adminDistancesSection"
                   aria-labelledby="admin-distances-title"
                 >
@@ -1545,6 +2279,23 @@ function AdminPage() {
                     </div>
 
                     <div className="adminDistanceFormGrid">
+                      <label className="adminEventField adminDistanceFieldWide">
+                        <span>Группа</span>
+                        <select
+                          name="groupId"
+                          value={newDistanceForm.groupId}
+                          onChange={handleNewDistanceFormChange}
+                          required
+                        >
+                          <option value="">Выберите группу</option>
+                          {(eventDetail.groups ?? []).map((group) => (
+                            <option value={group.id} key={group.id}>
+                              {group.title}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+
                       <label className="adminEventField adminDistanceFieldWide">
                         <span>Название</span>
                         <input
@@ -1618,6 +2369,7 @@ function AdminPage() {
                           value={newDistanceForm.capacity}
                           onChange={handleNewDistanceFormChange}
                         />
+                        <small>Лимит только этой дистанции.</small>
                       </label>
 
                       <label className="adminEventField">
@@ -1654,8 +2406,11 @@ function AdminPage() {
                         className="adminEventSaveButton"
                         type="submit"
                         disabled={
+                          eventSaveStatus === 'saving' ||
+                          isGroupSaving ||
                           isDistanceSaving ||
-                          isNextDistanceSortOrderUnavailable
+                          isNextDistanceSortOrderUnavailable ||
+                          (eventDetail.groups?.length ?? 0) === 0
                         }
                       >
                         {newDistanceSaveState.status === 'saving'
@@ -1685,6 +2440,12 @@ function AdminPage() {
                       <p className="adminAuthMessage" role="alert">
                         Нельзя вычислить следующий порядок: достигнут
                         лимит 32767.
+                      </p>
+                    )}
+
+                    {(eventDetail.groups?.length ?? 0) === 0 && (
+                      <p className="adminAuthMessage" role="alert">
+                        Сначала добавьте группу регистрации.
                       </p>
                     )}
                   </form>
@@ -1724,6 +2485,35 @@ function AdminPage() {
                             </div>
 
                             <div className="adminDistanceFormGrid">
+                              <label className="adminEventField adminDistanceFieldWide">
+                                <span>Группа</span>
+                                <select
+                                  name="groupId"
+                                  value={form.groupId}
+                                  onChange={(changeEvent) =>
+                                    handleDistanceFormChange(
+                                      distance.id,
+                                      changeEvent,
+                                    )
+                                  }
+                                  required
+                                >
+                                  <option value="">
+                                    Выберите группу
+                                  </option>
+                                  {(eventDetail.groups ?? []).map(
+                                    (group) => (
+                                      <option
+                                        value={group.id}
+                                        key={group.id}
+                                      >
+                                        {group.title}
+                                      </option>
+                                    ),
+                                  )}
+                                </select>
+                              </label>
+
                               <label className="adminEventField adminDistanceFieldWide">
                                 <span>Название</span>
                                 <input
@@ -1827,6 +2617,9 @@ function AdminPage() {
                                     )
                                   }
                                 />
+                                <small>
+                                  Лимит только этой дистанции.
+                                </small>
                               </label>
 
                               <label className="adminEventField">
@@ -1872,7 +2665,11 @@ function AdminPage() {
                               <button
                                 className="adminEventSaveButton"
                                 type="submit"
-                                disabled={isDistanceSaving}
+                                disabled={
+                                  eventSaveStatus === 'saving' ||
+                                  isGroupSaving ||
+                                  isDistanceSaving
+                                }
                               >
                                 {saveState.status === 'saving'
                                   ? 'Сохраняем...'

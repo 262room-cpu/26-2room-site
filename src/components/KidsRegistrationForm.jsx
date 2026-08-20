@@ -170,6 +170,7 @@ function getSubmissionErrorMessage(code) {
     registration_not_started: 'Регистрация ещё не началась.',
     registration_closed: 'Регистрация уже завершена.',
     sold_out: 'Свободных мест больше нет.',
+    group_sold_out: 'Все места в этой категории заняты.',
     age_not_allowed: 'Возраст участника не подходит для выбранной дистанции.',
     registration_expired: 'Время бронирования истекло. Нажмите кнопку ещё раз, чтобы создать новую бронь.',
     registration_not_pending: 'Эта регистрация уже не ожидает оплату.',

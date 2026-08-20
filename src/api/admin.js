@@ -142,3 +142,35 @@ export function createAdminDistance(
     signal,
   })
 }
+
+export function createAdminGroup(
+  eventId,
+  changes,
+  { signal } = {},
+) {
+  const query = new URLSearchParams({ eventId })
+
+  return requestJson(`/api/admin/group?${query.toString()}`, {
+    method: 'POST',
+    body: changes,
+    signal,
+  })
+}
+
+export function updateAdminGroup(
+  eventId,
+  groupId,
+  changes,
+  { signal } = {},
+) {
+  const query = new URLSearchParams({
+    eventId,
+    id: groupId,
+  })
+
+  return requestJson(`/api/admin/group?${query.toString()}`, {
+    method: 'PATCH',
+    body: changes,
+    signal,
+  })
+}

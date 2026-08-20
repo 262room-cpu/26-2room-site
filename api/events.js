@@ -52,6 +52,7 @@ const EVENT_SELECT = [
 ].join(',')
 
 const DISTANCE_SELECT = [
+  'group_id',
   'code',
   'title',
   'distance_meters',
@@ -59,6 +60,15 @@ const DISTANCE_SELECT = [
   'max_age',
   'capacity',
   'price_minor',
+  'sort_order',
+].join(',')
+
+const GROUP_SELECT = [
+  'id',
+  'code',
+  'title',
+  'registration_form_type',
+  'capacity',
   'sort_order',
 ].join(',')
 
@@ -90,6 +100,7 @@ function normalizeTime(value) {
 
 function mapDistance(distance) {
   return {
+    groupId: distance.group_id,
     code: distance.code,
     title: distance.title,
     distanceMeters: distance.distance_meters,
@@ -98,6 +109,17 @@ function mapDistance(distance) {
     capacity: normalizeNullable(distance.capacity),
     priceMinor: normalizeNullable(distance.price_minor),
     sortOrder: distance.sort_order,
+  }
+}
+
+function mapRegistrationGroup(group) {
+  return {
+    id: group.id,
+    code: group.code,
+    title: group.title,
+    registrationFormType: group.registration_form_type,
+    capacity: normalizeNullable(group.capacity),
+    sortOrder: group.sort_order,
   }
 }
 
@@ -141,7 +163,13 @@ export function mapEventListItem(event) {
   }
 }
 
-export function mapEvent(event, distances, starterKit, partners) {
+export function mapEvent(
+  event,
+  groups,
+  distances,
+  starterKit,
+  partners,
+) {
   const eventWindowStart = normalizeTime(event.event_window_start)
   const eventWindowEnd = normalizeTime(event.event_window_end)
   const eventWindow =
@@ -177,6 +205,7 @@ export function mapEvent(event, distances, starterKit, partners) {
     coverImage: normalizeNullable(event.cover_image_path),
     participantNote: normalizeNullable(event.participant_note),
     distanceSelectionNote: normalizeNullable(event.distance_selection_note),
+    registrationGroups: groups.map(mapRegistrationGroup),
     distances: distances.map(mapDistance),
     starterKit: starterKit.map(mapKitItem),
     partners: partners.map(mapPartner),
@@ -252,7 +281,17 @@ export default async function handler(request, response) {
     return response.status(404).json({ error: 'event_not_found' })
   }
 
-  const [distancesResult, kitResult, partnersResult] = await Promise.all([
+  const [
+    groupsResult,
+    distancesResult,
+    kitResult,
+    partnersResult,
+  ] = await Promise.all([
+    supabase
+      .from('event_registration_groups')
+      .select(GROUP_SELECT)
+      .eq('event_id', event.id)
+      .order('sort_order', { ascending: true }),
     supabase
       .from('event_distances')
       .select(DISTANCE_SELECT)
@@ -271,6 +310,7 @@ export default async function handler(request, response) {
   ])
 
   const failedChildQuery = [
+    ['registration_groups', groupsResult.error],
     ['distances', distancesResult.error],
     ['starter_kit', kitResult.error],
     ['partners', partnersResult.error],
@@ -284,6 +324,7 @@ export default async function handler(request, response) {
   return response.status(200).json(
     mapEvent(
       event,
+      groupsResult.data ?? [],
       distancesResult.data ?? [],
       kitResult.data ?? [],
       partnersResult.data ?? [],

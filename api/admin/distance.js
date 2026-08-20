@@ -12,6 +12,7 @@ const INTEGER_MAX = 2147483647
 const DISTANCE_SELECT = [
   'id',
   'event_id',
+  'group_id',
   'code',
   'title',
   'distance_meters',
@@ -25,6 +26,7 @@ const DISTANCE_SELECT = [
 ].join(',')
 
 const EDITABLE_FIELDS = {
+  groupId: { column: 'group_id', type: 'group_id' },
   code: { column: 'code', type: 'required_text' },
   title: { column: 'title', type: 'required_text' },
   distanceMeters: {
@@ -56,6 +58,7 @@ function mapDistance(distance) {
   return {
     id: distance.id,
     eventId: distance.event_id,
+    groupId: distance.group_id,
     code: distance.code,
     title: distance.title,
     distanceMeters: distance.distance_meters,
@@ -98,6 +101,11 @@ function normalizeInteger(
 
 function normalizeField(field, value) {
   switch (EDITABLE_FIELDS[field].type) {
+    case 'group_id':
+      if (typeof value !== 'string' || !value.trim()) {
+        throw new DistanceValidationError()
+      }
+      return value.trim()
     case 'required_text':
       return normalizeRequiredText(value)
     case 'positive_integer':
@@ -170,12 +178,17 @@ function buildDistanceUpdate(body, currentDistance) {
 
   validateAgeRange(candidate.minAge, candidate.maxAge)
 
-  return update
+  return { candidate, update }
 }
 
 function buildDistanceInsert(body, eventId) {
   const { values } = normalizeDistanceBody(body)
-  const requiredFields = ['code', 'title', 'distanceMeters']
+  const requiredFields = [
+    'groupId',
+    'code',
+    'title',
+    'distanceMeters',
+  ]
 
   if (
     requiredFields.some(
@@ -192,6 +205,7 @@ function buildDistanceInsert(body, eventId) {
 
   return {
     event_id: eventId,
+    group_id: values.groupId,
     code: values.code,
     title: values.title,
     distance_meters: values.distanceMeters,
@@ -205,6 +219,19 @@ function buildDistanceInsert(body, eventId) {
 
 function readQueryParameter(value) {
   return Array.isArray(value) ? value[0] : value
+}
+
+function isGroupTypeCompatible(eventType, groupType) {
+  return eventType === 'mixed' || eventType === groupType
+}
+
+async function getEventGroup(supabase, eventId, groupId) {
+  return supabase
+    .from('event_registration_groups')
+    .select('id,registration_form_type')
+    .eq('id', groupId)
+    .eq('event_id', eventId)
+    .maybeSingle()
 }
 
 export default async function handler(request, response) {
@@ -274,34 +301,35 @@ export default async function handler(request, response) {
       .json({ error: 'internal_error' })
   }
 
+  const { data: event, error: eventError } = await supabase
+    .from('events')
+    .select('id,registration_form_type')
+    .eq('id', eventId)
+    .maybeSingle()
+
+  if (eventError) {
+    console.error('Admin distance event query failed', {
+      code: eventError.code ?? 'unknown',
+    })
+
+    if (eventError.code === '22P02') {
+      return response
+        .status(400)
+        .json({ error: 'invalid_event_identity' })
+    }
+
+    return response
+      .status(500)
+      .json({ error: 'internal_error' })
+  }
+
+  if (!event) {
+    return response
+      .status(404)
+      .json({ error: 'event_not_found' })
+  }
+
   if (request.method === 'POST') {
-    const { data: event, error: eventError } = await supabase
-      .from('events')
-      .select('id')
-      .eq('id', eventId)
-      .maybeSingle()
-
-    if (eventError) {
-      console.error('Admin distance event query failed', {
-        code: eventError.code ?? 'unknown',
-      })
-
-      if (eventError.code === '22P02') {
-        return response
-          .status(400)
-          .json({ error: 'invalid_event_identity' })
-      }
-
-      return response
-        .status(500)
-        .json({ error: 'internal_error' })
-    }
-
-    if (!event) {
-      return response
-        .status(404)
-        .json({ error: 'event_not_found' })
-    }
 
     let insert
 
@@ -319,6 +347,45 @@ export default async function handler(request, response) {
       return response
         .status(500)
         .json({ error: 'internal_error' })
+    }
+
+    const { data: group, error: groupError } = await getEventGroup(
+      supabase,
+      eventId,
+      insert.group_id,
+    )
+
+    if (groupError) {
+      console.error('Admin distance group query failed', {
+        code: groupError.code ?? 'unknown',
+      })
+
+      if (groupError.code === '22P02') {
+        return response
+          .status(400)
+          .json({ error: 'invalid_group_identity' })
+      }
+
+      return response
+        .status(500)
+        .json({ error: 'internal_error' })
+    }
+
+    if (!group) {
+      return response
+        .status(404)
+        .json({ error: 'group_not_found' })
+    }
+
+    if (
+      !isGroupTypeCompatible(
+        event.registration_form_type,
+        group.registration_form_type,
+      )
+    ) {
+      return response
+        .status(400)
+        .json({ error: 'incompatible_registration_type' })
     }
 
     const {
@@ -395,9 +462,13 @@ export default async function handler(request, response) {
   }
 
   let update
+  let candidate
 
   try {
-    update = buildDistanceUpdate(request.body, distance)
+    ({ update, candidate } = buildDistanceUpdate(
+      request.body,
+      distance,
+    ))
   } catch (error) {
     if (error instanceof DistanceValidationError) {
       return response
@@ -410,6 +481,45 @@ export default async function handler(request, response) {
     return response
       .status(500)
       .json({ error: 'internal_error' })
+  }
+
+  const { data: group, error: groupError } = await getEventGroup(
+    supabase,
+    eventId,
+    candidate.groupId,
+  )
+
+  if (groupError) {
+    console.error('Admin distance group query failed', {
+      code: groupError.code ?? 'unknown',
+    })
+
+    if (groupError.code === '22P02') {
+      return response
+        .status(400)
+        .json({ error: 'invalid_group_identity' })
+    }
+
+    return response
+      .status(500)
+      .json({ error: 'internal_error' })
+  }
+
+  if (!group) {
+    return response
+      .status(404)
+      .json({ error: 'group_not_found' })
+  }
+
+  if (
+    !isGroupTypeCompatible(
+      event.registration_form_type,
+      group.registration_form_type,
+    )
+  ) {
+    return response
+      .status(400)
+      .json({ error: 'incompatible_registration_type' })
   }
 
   const {

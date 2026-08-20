@@ -1,0 +1,100 @@
+.mixedRegistrationChooser,
+.mixedRegistrationEmpty {
+  border: 1px solid rgba(255, 214, 0, 0.2);
+  border-radius: 8px;
+  padding: 28px;
+  background: rgba(10, 10, 10, 0.82);
+}
+
+.mixedRegistrationChooser h2,
+.mixedRegistrationEmpty h2 {
+  margin: 0;
+  color: #fff;
+  font-size: 30px;
+}
+
+.mixedRegistrationChooser > p:not(.registrationPageEyebrow),
+.mixedRegistrationEmpty p {
+  max-width: 680px;
+  margin: 12px 0 0;
+  color: #a1a1aa;
+  line-height: 1.6;
+}
+
+.mixedRegistrationOptions {
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.mixedRegistrationOptions button {
+  min-height: 160px;
+  display: grid;
+  align-content: center;
+  gap: 10px;
+  border: 1px solid rgba(255, 214, 0, 0.22);
+  border-radius: 8px;
+  padding: 22px;
+  background: rgba(255, 214, 0, 0.04);
+  color: #fff;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+.mixedRegistrationOptions button:hover:not(:disabled),
+.mixedRegistrationOptions button:focus-visible {
+  border-color: #FFD600;
+  background: rgba(255, 214, 0, 0.09);
+  outline: none;
+}
+
+.mixedRegistrationOptions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.mixedRegistrationOptions strong {
+  color: #FFD600;
+  font-size: 19px;
+}
+
+.mixedRegistrationOptions span {
+  color: #d4d4d8;
+  line-height: 1.5;
+}
+
+.mixedRegistrationOptions small {
+  color: #8f8f98;
+  font-weight: 700;
+}
+
+.mixedRegistrationSelected {
+  display: grid;
+  gap: 16px;
+}
+
+.mixedRegistrationBack {
+  justify-self: start;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #FFD600;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+@media (max-width: 720px) {
+  .mixedRegistrationOptions {
+    grid-template-columns: 1fr;
+  }
+
+  .mixedRegistrationChooser,
+  .mixedRegistrationEmpty {
+    padding: 20px;
+  }
+}

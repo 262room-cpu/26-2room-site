@@ -251,6 +251,8 @@ function getSubmissionErrorMessage(code) {
       'Регистрация уже завершена.',
     sold_out:
       'Свободных мест больше нет.',
+    group_sold_out:
+      'Все места в этой категории заняты.',
     age_not_allowed:
       'Возраст участника не подходит для выбранной дистанции.',
     adult_required:

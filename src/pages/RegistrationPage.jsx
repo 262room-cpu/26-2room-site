@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router'
 import { EVENT_FETCH_STATUSES, fetchEventBySlug } from '../api/events'
 import AdultRegistrationForm from '../components/AdultRegistrationForm'
 import KidsRegistrationForm from '../components/KidsRegistrationForm'
+import MixedRegistrationForm from '../components/MixedRegistrationForm'
 import { EVENT_STATUSES } from '../data/events'
 import './RegistrationPage.css'
 
@@ -245,6 +246,8 @@ function RegistrationPage() {
             <KidsRegistrationForm event={event} />
           ) : event.registrationFormType === 'participant' ? (
             <AdultRegistrationForm event={event} />
+          ) : event.registrationFormType === 'mixed' ? (
+            <MixedRegistrationForm event={event} />
           ) : (
             <section className="registrationPageGate" aria-live="polite">
               <p className="registrationPageEyebrow">Регистрация</p>
