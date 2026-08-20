@@ -1,0 +1,318 @@
+import {
+  AdminAuthConfigurationError,
+  isAdminRequest,
+} from '../_admin-auth.js'
+import {
+  getSupabaseAdmin,
+  SupabaseConfigurationError,
+} from '../_supabase.js'
+
+const SMALLINT_MAX = 32767
+const INTEGER_MAX = 2147483647
+const DISTANCE_SELECT = [
+  'id',
+  'event_id',
+  'code',
+  'title',
+  'distance_meters',
+  'min_age',
+  'max_age',
+  'capacity',
+  'price_minor',
+  'sort_order',
+  'created_at',
+  'updated_at',
+].join(',')
+
+const EDITABLE_FIELDS = {
+  code: { column: 'code', type: 'required_text' },
+  title: { column: 'title', type: 'required_text' },
+  distanceMeters: {
+    column: 'distance_meters',
+    type: 'positive_integer',
+  },
+  minAge: { column: 'min_age', type: 'nullable_smallint' },
+  maxAge: { column: 'max_age', type: 'nullable_smallint' },
+  capacity: {
+    column: 'capacity',
+    type: 'nullable_positive_integer',
+  },
+  priceMinor: {
+    column: 'price_minor',
+    type: 'nullable_nonnegative_integer',
+  },
+  sortOrder: { column: 'sort_order', type: 'sort_order' },
+}
+
+class DistanceValidationError extends Error {
+  constructor(code = 'invalid_distance_data') {
+    super(code)
+    this.name = 'DistanceValidationError'
+    this.code = code
+  }
+}
+
+function mapDistance(distance) {
+  return {
+    id: distance.id,
+    eventId: distance.event_id,
+    code: distance.code,
+    title: distance.title,
+    distanceMeters: distance.distance_meters,
+    minAge: distance.min_age,
+    maxAge: distance.max_age,
+    capacity: distance.capacity,
+    priceMinor: distance.price_minor,
+    sortOrder: distance.sort_order,
+    createdAt: distance.created_at,
+    updatedAt: distance.updated_at,
+  }
+}
+
+function normalizeRequiredText(value) {
+  if (typeof value !== 'string' || !value.trim()) {
+    throw new DistanceValidationError()
+  }
+
+  return value.trim()
+}
+
+function normalizeInteger(
+  value,
+  { nullable = false, min = 0, max = Number.MAX_SAFE_INTEGER } = {},
+) {
+  if (value === null && nullable) {
+    return null
+  }
+
+  if (
+    !Number.isSafeInteger(value) ||
+    value < min ||
+    value > max
+  ) {
+    throw new DistanceValidationError()
+  }
+
+  return value
+}
+
+function normalizeField(field, value) {
+  switch (EDITABLE_FIELDS[field].type) {
+    case 'required_text':
+      return normalizeRequiredText(value)
+    case 'positive_integer':
+      return normalizeInteger(value, { min: 1, max: INTEGER_MAX })
+    case 'nullable_smallint':
+      return normalizeInteger(value, {
+        nullable: true,
+        max: SMALLINT_MAX,
+      })
+    case 'nullable_positive_integer':
+      return normalizeInteger(value, {
+        nullable: true,
+        min: 1,
+        max: INTEGER_MAX,
+      })
+    case 'nullable_nonnegative_integer':
+      return normalizeInteger(value, { nullable: true })
+    case 'sort_order':
+      return normalizeInteger(value, { max: SMALLINT_MAX })
+    default:
+      throw new DistanceValidationError('unsupported_field')
+  }
+}
+
+function buildDistanceUpdate(body, currentDistance) {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) {
+    throw new DistanceValidationError()
+  }
+
+  const fields = Object.keys(body)
+
+  if (fields.length === 0) {
+    throw new DistanceValidationError('no_changes')
+  }
+
+  const candidate = mapDistance(currentDistance)
+  const update = {}
+
+  for (const field of fields) {
+    const config = EDITABLE_FIELDS[field]
+
+    if (!config) {
+      throw new DistanceValidationError('unsupported_field')
+    }
+
+    const normalized = normalizeField(field, body[field])
+    candidate[field] = normalized
+    update[config.column] = normalized
+  }
+
+  if (
+    candidate.minAge !== null &&
+    candidate.maxAge !== null &&
+    candidate.minAge > candidate.maxAge
+  ) {
+    throw new DistanceValidationError('invalid_age_range')
+  }
+
+  return update
+}
+
+function readQueryParameter(value) {
+  return Array.isArray(value) ? value[0] : value
+}
+
+export default async function handler(request, response) {
+  response.setHeader('Cache-Control', 'no-store')
+  response.setHeader(
+    'Content-Type',
+    'application/json; charset=utf-8',
+  )
+
+  if (request.method !== 'PATCH') {
+    response.setHeader('Allow', 'PATCH')
+    return response
+      .status(405)
+      .json({ error: 'method_not_allowed' })
+  }
+
+  try {
+    if (!isAdminRequest(request)) {
+      return response
+        .status(401)
+        .json({ error: 'unauthorized' })
+    }
+  } catch (error) {
+    if (error instanceof AdminAuthConfigurationError) {
+      return response
+        .status(503)
+        .json({ error: 'admin_auth_unavailable' })
+    }
+
+    console.error('Admin authentication check failed')
+
+    return response
+      .status(500)
+      .json({ error: 'internal_error' })
+  }
+
+  const eventId = readQueryParameter(request.query.eventId)
+  const distanceId = readQueryParameter(request.query.id)
+
+  if (!eventId || !distanceId) {
+    return response
+      .status(400)
+      .json({ error: 'distance_identity_required' })
+  }
+
+  let supabase
+
+  try {
+    supabase = getSupabaseAdmin()
+  } catch (error) {
+    if (error instanceof SupabaseConfigurationError) {
+      return response
+        .status(503)
+        .json({ error: 'service_unavailable' })
+    }
+
+    console.error('Admin distance API initialization failed')
+
+    return response
+      .status(500)
+      .json({ error: 'internal_error' })
+  }
+
+  const { data: distance, error: distanceError } = await supabase
+    .from('event_distances')
+    .select(DISTANCE_SELECT)
+    .eq('id', distanceId)
+    .eq('event_id', eventId)
+    .maybeSingle()
+
+  if (distanceError) {
+    console.error('Admin distance query failed', {
+      code: distanceError.code ?? 'unknown',
+    })
+
+    if (distanceError.code === '22P02') {
+      return response
+        .status(400)
+        .json({ error: 'invalid_distance_identity' })
+    }
+
+    return response
+      .status(500)
+      .json({ error: 'internal_error' })
+  }
+
+  if (!distance) {
+    return response
+      .status(404)
+      .json({ error: 'distance_not_found' })
+  }
+
+  let update
+
+  try {
+    update = buildDistanceUpdate(request.body, distance)
+  } catch (error) {
+    if (error instanceof DistanceValidationError) {
+      return response
+        .status(400)
+        .json({ error: error.code })
+    }
+
+    console.error('Admin distance validation failed')
+
+    return response
+      .status(500)
+      .json({ error: 'internal_error' })
+  }
+
+  const {
+    data: updatedDistance,
+    error: updateError,
+  } = await supabase
+    .from('event_distances')
+    .update(update)
+    .eq('id', distanceId)
+    .eq('event_id', eventId)
+    .select(DISTANCE_SELECT)
+    .maybeSingle()
+
+  if (updateError) {
+    console.error('Admin distance update failed', {
+      code: updateError.code ?? 'unknown',
+    })
+
+    if (updateError.code === '23505') {
+      return response
+        .status(409)
+        .json({ error: 'distance_code_conflict' })
+    }
+
+    if (
+      ['22P02', '22003', '23514'].includes(updateError.code)
+    ) {
+      return response
+        .status(400)
+        .json({ error: 'invalid_distance_data' })
+    }
+
+    return response
+      .status(500)
+      .json({ error: 'internal_error' })
+  }
+
+  if (!updatedDistance) {
+    return response
+      .status(404)
+      .json({ error: 'distance_not_found' })
+  }
+
+  return response.status(200).json({
+    distance: mapDistance(updatedDistance),
+  })
+}

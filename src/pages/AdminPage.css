@@ -413,6 +413,100 @@
   font-weight: 800;
 }
 
+.adminDistancesSection {
+  margin-top: 30px;
+  border-top: 1px solid rgba(255, 214, 0, 0.18);
+  padding-top: 28px;
+}
+
+.adminDistancesHeader,
+.adminDistanceCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.adminDistancesHeader .adminPageEyebrow {
+  margin-bottom: 8px;
+}
+
+.adminDistancesHeader h3,
+.adminDistanceCardHeader h4 {
+  margin: 0;
+  color: #fff;
+  letter-spacing: 0;
+}
+
+.adminDistancesHeader h3 {
+  font-size: 28px;
+}
+
+.adminDistancesHeader > span,
+.adminDistanceCardHeader > span {
+  flex: 0 0 auto;
+  border: 1px solid rgba(255, 214, 0, 0.25);
+  border-radius: 999px;
+  padding: 7px 11px;
+  background: rgba(255, 214, 0, 0.06);
+  color: #FFD600;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.adminDistanceCards {
+  margin-top: 18px;
+  display: grid;
+  gap: 16px;
+}
+
+.adminDistanceCard {
+  min-width: 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.018);
+}
+
+.adminDistanceCardHeader {
+  margin-bottom: 18px;
+}
+
+.adminDistanceCardHeader h4 {
+  font-size: 18px;
+}
+
+.adminDistanceFormGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.adminDistanceFieldWide {
+  grid-column: span 2;
+}
+
+.adminEventField small {
+  color: #8f8f98;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.adminDistanceCard .adminEventFormActions {
+  margin-top: 18px;
+}
+
+.adminDistanceCard .adminEventSaveButton {
+  min-width: 204px;
+}
+
+@media (max-width: 920px) {
+  .adminDistanceFormGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 720px) {
   .adminEventFormGrid {
     grid-template-columns: 1fr;
@@ -430,10 +524,27 @@
   .adminEventSaveButton {
     width: 100%;
   }
+
+  .adminDistanceFormGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .adminDistanceFieldWide {
+    grid-column: auto;
+  }
 }
 
 @media (max-width: 520px) {
   .adminEventFormGroup {
     padding: 16px;
+  }
+
+  .adminDistanceCard {
+    padding: 16px;
+  }
+
+  .adminDistancesHeader,
+  .adminDistanceCardHeader {
+    align-items: flex-start;
   }
 }

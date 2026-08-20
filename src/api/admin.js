@@ -110,3 +110,21 @@ export function updateAdminEvent(
     signal,
   })
 }
+
+export function updateAdminDistance(
+  eventId,
+  distanceId,
+  changes,
+  { signal } = {},
+) {
+  const query = new URLSearchParams({
+    eventId,
+    id: distanceId,
+  })
+
+  return requestJson(`/api/admin/distance?${query.toString()}`, {
+    method: 'PATCH',
+    body: changes,
+    signal,
+  })
+}

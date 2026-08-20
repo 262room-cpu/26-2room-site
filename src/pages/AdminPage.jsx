@@ -6,6 +6,7 @@ import {
   getAdminSession,
   loginAdmin,
   logoutAdmin,
+  updateAdminDistance,
   updateAdminEvent,
 } from '../api/admin'
 import './AdminPage.css'
@@ -205,6 +206,109 @@ function priceInputToMinor(value) {
   return amountMinor
 }
 
+function integerInputToValue(
+  value,
+  {
+    label,
+    nullable = false,
+    min = 0,
+    max = Number.MAX_SAFE_INTEGER,
+  },
+) {
+  const normalized = value.trim()
+
+  if (!normalized && nullable) {
+    return null
+  }
+
+  if (!/^\d+$/.test(normalized)) {
+    throw new EventFormError(`${label}: укажите целое число.`)
+  }
+
+  const number = Number(normalized)
+
+  if (
+    !Number.isSafeInteger(number) ||
+    number < min ||
+    number > max
+  ) {
+    throw new EventFormError(`${label}: значение вне допустимого диапазона.`)
+  }
+
+  return number
+}
+
+function createDistanceForm(distance) {
+  return {
+    code: distance.code ?? '',
+    title: distance.title ?? '',
+    distanceMeters: String(distance.distanceMeters ?? ''),
+    minAge: String(distance.minAge ?? ''),
+    maxAge: String(distance.maxAge ?? ''),
+    capacity: String(distance.capacity ?? ''),
+    price: priceMinorToInput(distance.priceMinor),
+    sortOrder: String(distance.sortOrder ?? 0),
+  }
+}
+
+function createDistanceForms(distances) {
+  return Object.fromEntries(
+    (Array.isArray(distances) ? distances : []).map((distance) => [
+      distance.id,
+      createDistanceForm(distance),
+    ]),
+  )
+}
+
+function buildDistanceChanges(form) {
+  const code = form.code.trim()
+  const title = form.title.trim()
+
+  if (!code || !title) {
+    throw new EventFormError('Название и код не должны быть пустыми.')
+  }
+
+  const minAge = integerInputToValue(form.minAge, {
+    label: 'Минимальный возраст',
+    nullable: true,
+    max: 32767,
+  })
+  const maxAge = integerInputToValue(form.maxAge, {
+    label: 'Максимальный возраст',
+    nullable: true,
+    max: 32767,
+  })
+
+  if (minAge !== null && maxAge !== null && minAge > maxAge) {
+    throw new EventFormError(
+      'Минимальный возраст не может быть больше максимального.',
+    )
+  }
+
+  return {
+    code,
+    title,
+    distanceMeters: integerInputToValue(form.distanceMeters, {
+      label: 'Дистанция',
+      min: 1,
+      max: 2147483647,
+    }),
+    minAge,
+    maxAge,
+    capacity: integerInputToValue(form.capacity, {
+      label: 'Лимит участников',
+      nullable: true,
+      min: 1,
+      max: 2147483647,
+    }),
+    priceMinor: priceInputToMinor(form.price),
+    sortOrder: integerInputToValue(form.sortOrder, {
+      label: 'Порядок',
+      max: 32767,
+    }),
+  }
+}
+
 function createEventForm(event) {
   const timezone = event.timezone ?? ''
 
@@ -369,6 +473,8 @@ function AdminPage() {
   const [eventForm, setEventForm] = useState(null)
   const [eventSaveStatus, setEventSaveStatus] = useState('idle')
   const [eventSaveMessage, setEventSaveMessage] = useState('')
+  const [distanceForms, setDistanceForms] = useState({})
+  const [distanceSaveStates, setDistanceSaveStates] = useState({})
 
   useEffect(() => {
     const controller = new AbortController()
@@ -447,6 +553,8 @@ function AdminPage() {
     setEventForm(null)
     setEventSaveStatus('idle')
     setEventSaveMessage('')
+    setDistanceForms({})
+    setDistanceSaveStates({})
 
     try {
       const result = await getAdminEvent(eventId)
@@ -457,6 +565,7 @@ function AdminPage() {
 
       setEventDetail(result)
       setEventForm(createEventForm(result.event))
+      setDistanceForms(createDistanceForms(result.distances))
       setEventDetailStatus('ready')
     } catch (error) {
       if (
@@ -467,11 +576,14 @@ function AdminPage() {
         setEventDetail(null)
         setEventDetailStatus('idle')
         setEventForm(null)
+        setDistanceForms({})
+        setDistanceSaveStates({})
         setSessionStatus('unauthenticated')
         return
       }
 
       setEventDetail(null)
+      setDistanceForms({})
       setEventDetailStatus('error')
       setEventDetailMessage('Не удалось загрузить мероприятие.')
     }
@@ -562,6 +674,8 @@ function AdminPage() {
         setEventDetailStatus('idle')
         setEventForm(null)
         setEventSaveStatus('idle')
+        setDistanceForms({})
+        setDistanceSaveStates({})
         setSessionStatus('unauthenticated')
         return
       }
@@ -572,6 +686,117 @@ function AdminPage() {
           ? 'Мероприятие не найдено.'
           : 'Не удалось сохранить. Проверьте данные и попробуйте ещё раз.',
       )
+    }
+  }
+
+  const handleDistanceFormChange = (distanceId, changeEvent) => {
+    const { name, value } = changeEvent.target
+
+    setDistanceForms((currentForms) => ({
+      ...currentForms,
+      [distanceId]: {
+        ...currentForms[distanceId],
+        [name]: value,
+      },
+    }))
+    setDistanceSaveStates((currentStates) => ({
+      ...currentStates,
+      [distanceId]: { status: 'idle', message: '' },
+    }))
+  }
+
+  const handleSaveDistance = async (submitEvent, distanceId) => {
+    submitEvent.preventDefault()
+
+    const form = distanceForms[distanceId]
+    const eventId = eventDetail?.event?.id
+
+    if (!form || !eventId) {
+      return
+    }
+
+    let changes
+
+    try {
+      changes = buildDistanceChanges(form)
+    } catch (error) {
+      setDistanceSaveStates((currentStates) => ({
+        ...currentStates,
+        [distanceId]: {
+          status: 'error',
+          message:
+            error instanceof EventFormError
+              ? error.message
+              : 'Проверьте заполненные данные.',
+        },
+      }))
+      return
+    }
+
+    setDistanceSaveStates((currentStates) => ({
+      ...currentStates,
+      [distanceId]: { status: 'saving', message: '' },
+    }))
+
+    try {
+      const result = await updateAdminDistance(
+        eventId,
+        distanceId,
+        changes,
+      )
+
+      if (!result.distance || typeof result.distance !== 'object') {
+        throw new AdminAuthError('invalid_server_response')
+      }
+
+      setEventDetail((currentDetail) => ({
+        ...currentDetail,
+        distances: (currentDetail?.distances ?? []).map((distance) =>
+          distance.id === result.distance.id
+            ? result.distance
+            : distance,
+        ),
+      }))
+      setDistanceForms((currentForms) => ({
+        ...currentForms,
+        [distanceId]: createDistanceForm(result.distance),
+      }))
+      setDistanceSaveStates((currentStates) => ({
+        ...currentStates,
+        [distanceId]: { status: 'success', message: 'Сохранено' },
+      }))
+    } catch (error) {
+      if (error instanceof AdminAuthError && error.status === 401) {
+        setEvents([])
+        setSelectedEventId(null)
+        setEventDetail(null)
+        setEventDetailStatus('idle')
+        setEventForm(null)
+        setEventSaveStatus('idle')
+        setDistanceForms({})
+        setDistanceSaveStates({})
+        setSessionStatus('unauthenticated')
+        return
+      }
+
+      let message = 'Не удалось сохранить дистанцию. Проверьте данные.'
+
+      if (
+        error instanceof AdminAuthError &&
+        error.code === 'distance_code_conflict'
+      ) {
+        message = 'Дистанция с таким кодом уже существует.'
+      } else if (
+        error instanceof AdminAuthError &&
+        error.status === 404
+      ) {
+        message = 'Дистанция не найдена.'
+      }
+
+      setDistanceSaveStates((currentStates) => ({
+        ...currentStates,
+        [distanceId]: { status: 'error', message },
+      }))
     }
   }
 
@@ -630,12 +855,18 @@ function AdminPage() {
       setEventDetailStatus('idle')
       setEventForm(null)
       setEventSaveStatus('idle')
+      setDistanceForms({})
+      setDistanceSaveStates({})
       setSessionStatus('unauthenticated')
     } catch {
       setLogoutStatus('idle')
       setLogoutMessage('Не удалось выйти. Попробуйте ещё раз.')
     }
   }
+
+  const isDistanceSaving = Object.values(distanceSaveStates).some(
+    ({ status }) => status === 'saving',
+  )
 
   if (sessionStatus === 'checking') {
     return (
@@ -755,7 +986,9 @@ function AdminPage() {
                     key={event.id}
                     onClick={() => handleSelectEvent(event.id)}
                     aria-pressed={selectedEventId === event.id}
-                    disabled={eventSaveStatus === 'saving'}
+                    disabled={
+                      eventSaveStatus === 'saving' || isDistanceSaving
+                    }
                   >
                     <strong>{event.title}</strong>
                     <span>{event.city}</span>
@@ -785,6 +1018,7 @@ function AdminPage() {
               {eventDetailStatus === 'ready' &&
                 eventDetail &&
                 eventForm && (
+                <>
                 <form
                   className="adminEventForm"
                   onSubmit={handleSaveEvent}
@@ -1127,6 +1361,233 @@ function AdminPage() {
                     )}
                   </div>
                 </form>
+
+                <section
+                  className="adminDistancesSection"
+                  aria-labelledby="admin-distances-title"
+                >
+                  <div className="adminDistancesHeader">
+                    <div>
+                      <p className="adminPageEyebrow">Параметры забега</p>
+                      <h3 id="admin-distances-title">Дистанции</h3>
+                    </div>
+                    <span>{eventDetail.distances?.length ?? 0}</span>
+                  </div>
+
+                  {(eventDetail.distances?.length ?? 0) === 0 && (
+                    <p>У мероприятия пока нет дистанций.</p>
+                  )}
+
+                  {(eventDetail.distances?.length ?? 0) > 0 && (
+                    <div className="adminDistanceCards">
+                      {eventDetail.distances.map((distance) => {
+                        const form = distanceForms[distance.id]
+                        const saveState =
+                          distanceSaveStates[distance.id] ?? {
+                            status: 'idle',
+                            message: '',
+                          }
+
+                        if (!form) {
+                          return null
+                        }
+
+                        return (
+                          <form
+                            className="adminDistanceCard"
+                            key={distance.id}
+                            onSubmit={(submitEvent) =>
+                              handleSaveDistance(
+                                submitEvent,
+                                distance.id,
+                              )
+                            }
+                          >
+                            <div className="adminDistanceCardHeader">
+                              <h4>{form.title || 'Без названия'}</h4>
+                              <span>{form.code || 'Без кода'}</span>
+                            </div>
+
+                            <div className="adminDistanceFormGrid">
+                              <label className="adminEventField adminDistanceFieldWide">
+                                <span>Название</span>
+                                <input
+                                  name="title"
+                                  type="text"
+                                  value={form.title}
+                                  onChange={(changeEvent) =>
+                                    handleDistanceFormChange(
+                                      distance.id,
+                                      changeEvent,
+                                    )
+                                  }
+                                  required
+                                />
+                              </label>
+
+                              <label className="adminEventField">
+                                <span>Код</span>
+                                <input
+                                  name="code"
+                                  type="text"
+                                  value={form.code}
+                                  onChange={(changeEvent) =>
+                                    handleDistanceFormChange(
+                                      distance.id,
+                                      changeEvent,
+                                    )
+                                  }
+                                  required
+                                />
+                              </label>
+
+                              <label className="adminEventField">
+                                <span>Дистанция, м</span>
+                                <input
+                                  name="distanceMeters"
+                                  type="number"
+                                  min="1"
+                                  max="2147483647"
+                                  step="1"
+                                  value={form.distanceMeters}
+                                  onChange={(changeEvent) =>
+                                    handleDistanceFormChange(
+                                      distance.id,
+                                      changeEvent,
+                                    )
+                                  }
+                                  required
+                                />
+                              </label>
+
+                              <label className="adminEventField">
+                                <span>Минимальный возраст</span>
+                                <input
+                                  name="minAge"
+                                  type="number"
+                                  min="0"
+                                  max="32767"
+                                  step="1"
+                                  value={form.minAge}
+                                  onChange={(changeEvent) =>
+                                    handleDistanceFormChange(
+                                      distance.id,
+                                      changeEvent,
+                                    )
+                                  }
+                                />
+                              </label>
+
+                              <label className="adminEventField">
+                                <span>Максимальный возраст</span>
+                                <input
+                                  name="maxAge"
+                                  type="number"
+                                  min="0"
+                                  max="32767"
+                                  step="1"
+                                  value={form.maxAge}
+                                  onChange={(changeEvent) =>
+                                    handleDistanceFormChange(
+                                      distance.id,
+                                      changeEvent,
+                                    )
+                                  }
+                                />
+                              </label>
+
+                              <label className="adminEventField">
+                                <span>Лимит участников</span>
+                                <input
+                                  name="capacity"
+                                  type="number"
+                                  min="1"
+                                  max="2147483647"
+                                  step="1"
+                                  value={form.capacity}
+                                  onChange={(changeEvent) =>
+                                    handleDistanceFormChange(
+                                      distance.id,
+                                      changeEvent,
+                                    )
+                                  }
+                                />
+                              </label>
+
+                              <label className="adminEventField">
+                                <span>Цена дистанции</span>
+                                <input
+                                  name="price"
+                                  type="text"
+                                  inputMode="decimal"
+                                  value={form.price}
+                                  onChange={(changeEvent) =>
+                                    handleDistanceFormChange(
+                                      distance.id,
+                                      changeEvent,
+                                    )
+                                  }
+                                />
+                                <small>
+                                  Пусто — базовая цена мероприятия.
+                                </small>
+                              </label>
+
+                              <label className="adminEventField">
+                                <span>Порядок</span>
+                                <input
+                                  name="sortOrder"
+                                  type="number"
+                                  min="0"
+                                  max="32767"
+                                  step="1"
+                                  value={form.sortOrder}
+                                  onChange={(changeEvent) =>
+                                    handleDistanceFormChange(
+                                      distance.id,
+                                      changeEvent,
+                                    )
+                                  }
+                                  required
+                                />
+                              </label>
+                            </div>
+
+                            <div className="adminEventFormActions">
+                              <button
+                                className="adminEventSaveButton"
+                                type="submit"
+                                disabled={saveState.status === 'saving'}
+                              >
+                                {saveState.status === 'saving'
+                                  ? 'Сохраняем...'
+                                  : 'Сохранить дистанцию'}
+                              </button>
+
+                              {saveState.message && (
+                                <p
+                                  className={
+                                    saveState.status === 'success'
+                                      ? 'adminSaveSuccess'
+                                      : 'adminAuthMessage'
+                                  }
+                                  role={
+                                    saveState.status === 'error'
+                                      ? 'alert'
+                                      : 'status'
+                                  }
+                                >
+                                  {saveState.message}
+                                </p>
+                              )}
+                            </div>
+                          </form>
+                        )
+                      })}
+                    </div>
+                  )}
+                </section>
+                </>
               )}
             </section>
           )}
