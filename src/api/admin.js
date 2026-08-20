@@ -94,3 +94,19 @@ export function getAdminEvent(eventId, { signal } = {}) {
     signal,
   })
 }
+
+export function updateAdminEvent(
+  eventId,
+  changes,
+  { signal } = {},
+) {
+  const query = new URLSearchParams({
+    id: eventId,
+  })
+
+  return requestJson(`/api/admin/event?${query.toString()}`, {
+    method: 'PATCH',
+    body: changes,
+    signal,
+  })
+}

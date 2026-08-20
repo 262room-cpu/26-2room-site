@@ -258,6 +258,11 @@
   background: rgba(255, 214, 0, 0.06);
 }
 
+.adminEventItem:disabled {
+  cursor: wait;
+  opacity: 0.66;
+}
+
 .adminEventDetailSection {
   grid-column: 1 / -1;
 }
@@ -276,4 +281,159 @@
 
 .adminEventDetail p {
   margin: 0;
+}
+
+.adminEventForm {
+  margin-top: 22px;
+  display: grid;
+  gap: 22px;
+}
+
+.adminEventCounts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.adminEventCounts span {
+  border: 1px solid rgba(255, 214, 0, 0.16);
+  border-radius: 999px;
+  padding: 7px 11px;
+  background: rgba(255, 214, 0, 0.045);
+  color: #d4d4d8;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.adminEventFormGroup {
+  min-width: 0;
+  margin: 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.018);
+}
+
+.adminEventFormGroup legend {
+  padding: 0 9px;
+  color: #FFD600;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.adminEventFormGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.adminEventField {
+  min-width: 0;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  color: #f4f4f5;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.adminEventFieldWide {
+  grid-column: 1 / -1;
+}
+
+.adminEventField input,
+.adminEventField select,
+.adminEventField textarea {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  padding: 13px 14px;
+  background: #090909;
+  color: #fff;
+  font: inherit;
+  font-weight: 500;
+  line-height: 1.45;
+  outline: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.adminEventField input,
+.adminEventField select {
+  min-height: 48px;
+}
+
+.adminEventField textarea {
+  resize: vertical;
+}
+
+.adminEventField input:focus,
+.adminEventField select:focus,
+.adminEventField textarea:focus {
+  border-color: rgba(255, 214, 0, 0.72);
+  box-shadow: 0 0 0 3px rgba(255, 214, 0, 0.1);
+}
+
+.adminEventFormActions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.adminEventFormActions p {
+  margin: 0;
+}
+
+.adminEventSaveButton {
+  min-width: 156px;
+  min-height: 50px;
+  border: 1px solid #FFD600;
+  border-radius: 8px;
+  padding: 0 22px;
+  background: #FFD600;
+  color: #050505;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(255, 214, 0, 0.12);
+}
+
+.adminEventSaveButton:disabled {
+  cursor: wait;
+  opacity: 0.58;
+}
+
+.adminSaveSuccess {
+  color: #FFD600;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+@media (max-width: 720px) {
+  .adminEventFormGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .adminEventFieldWide {
+    grid-column: auto;
+  }
+
+  .adminEventFormActions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .adminEventSaveButton {
+    width: 100%;
+  }
+}
+
+@media (max-width: 520px) {
+  .adminEventFormGroup {
+    padding: 16px;
+  }
 }
