@@ -122,7 +122,7 @@ function normalizeField(field, value) {
   }
 }
 
-function buildDistanceUpdate(body, currentDistance) {
+function normalizeDistanceBody(body) {
   if (!body || typeof body !== 'object' || Array.isArray(body)) {
     throw new DistanceValidationError()
   }
@@ -133,7 +133,7 @@ function buildDistanceUpdate(body, currentDistance) {
     throw new DistanceValidationError('no_changes')
   }
 
-  const candidate = mapDistance(currentDistance)
+  const values = {}
   const update = {}
 
   for (const field of fields) {
@@ -144,19 +144,63 @@ function buildDistanceUpdate(body, currentDistance) {
     }
 
     const normalized = normalizeField(field, body[field])
-    candidate[field] = normalized
+    values[field] = normalized
     update[config.column] = normalized
   }
 
+  return { values, update }
+}
+
+function validateAgeRange(minAge, maxAge) {
   if (
-    candidate.minAge !== null &&
-    candidate.maxAge !== null &&
-    candidate.minAge > candidate.maxAge
+    minAge !== null &&
+    maxAge !== null &&
+    minAge > maxAge
   ) {
     throw new DistanceValidationError('invalid_age_range')
   }
+}
+
+function buildDistanceUpdate(body, currentDistance) {
+  const { values, update } = normalizeDistanceBody(body)
+  const candidate = {
+    ...mapDistance(currentDistance),
+    ...values,
+  }
+
+  validateAgeRange(candidate.minAge, candidate.maxAge)
 
   return update
+}
+
+function buildDistanceInsert(body, eventId) {
+  const { values } = normalizeDistanceBody(body)
+  const requiredFields = ['code', 'title', 'distanceMeters']
+
+  if (
+    requiredFields.some(
+      (field) => !Object.hasOwn(values, field),
+    )
+  ) {
+    throw new DistanceValidationError('required_fields_missing')
+  }
+
+  const minAge = values.minAge ?? null
+  const maxAge = values.maxAge ?? null
+
+  validateAgeRange(minAge, maxAge)
+
+  return {
+    event_id: eventId,
+    code: values.code,
+    title: values.title,
+    distance_meters: values.distanceMeters,
+    min_age: minAge,
+    max_age: maxAge,
+    capacity: values.capacity ?? null,
+    price_minor: values.priceMinor ?? null,
+    sort_order: values.sortOrder ?? 0,
+  }
 }
 
 function readQueryParameter(value) {
@@ -170,8 +214,8 @@ export default async function handler(request, response) {
     'application/json; charset=utf-8',
   )
 
-  if (request.method !== 'PATCH') {
-    response.setHeader('Allow', 'PATCH')
+  if (!['POST', 'PATCH'].includes(request.method)) {
+    response.setHeader('Allow', 'POST, PATCH')
     return response
       .status(405)
       .json({ error: 'method_not_allowed' })
@@ -200,7 +244,13 @@ export default async function handler(request, response) {
   const eventId = readQueryParameter(request.query.eventId)
   const distanceId = readQueryParameter(request.query.id)
 
-  if (!eventId || !distanceId) {
+  if (!eventId) {
+    return response
+      .status(400)
+      .json({ error: 'event_id_required' })
+  }
+
+  if (request.method === 'PATCH' && !distanceId) {
     return response
       .status(400)
       .json({ error: 'distance_identity_required' })
@@ -222,6 +272,97 @@ export default async function handler(request, response) {
     return response
       .status(500)
       .json({ error: 'internal_error' })
+  }
+
+  if (request.method === 'POST') {
+    const { data: event, error: eventError } = await supabase
+      .from('events')
+      .select('id')
+      .eq('id', eventId)
+      .maybeSingle()
+
+    if (eventError) {
+      console.error('Admin distance event query failed', {
+        code: eventError.code ?? 'unknown',
+      })
+
+      if (eventError.code === '22P02') {
+        return response
+          .status(400)
+          .json({ error: 'invalid_event_identity' })
+      }
+
+      return response
+        .status(500)
+        .json({ error: 'internal_error' })
+    }
+
+    if (!event) {
+      return response
+        .status(404)
+        .json({ error: 'event_not_found' })
+    }
+
+    let insert
+
+    try {
+      insert = buildDistanceInsert(request.body, eventId)
+    } catch (error) {
+      if (error instanceof DistanceValidationError) {
+        return response
+          .status(400)
+          .json({ error: error.code })
+      }
+
+      console.error('Admin distance validation failed')
+
+      return response
+        .status(500)
+        .json({ error: 'internal_error' })
+    }
+
+    const {
+      data: createdDistance,
+      error: insertError,
+    } = await supabase
+      .from('event_distances')
+      .insert(insert)
+      .select(DISTANCE_SELECT)
+      .single()
+
+    if (insertError) {
+      console.error('Admin distance insert failed', {
+        code: insertError.code ?? 'unknown',
+      })
+
+      if (insertError.code === '23505') {
+        return response
+          .status(409)
+          .json({ error: 'distance_code_conflict' })
+      }
+
+      if (
+        ['22P02', '22003', '23514'].includes(insertError.code)
+      ) {
+        return response
+          .status(400)
+          .json({ error: 'invalid_distance_data' })
+      }
+
+      return response
+        .status(500)
+        .json({ error: 'internal_error' })
+    }
+
+    if (!createdDistance) {
+      return response
+        .status(500)
+        .json({ error: 'internal_error' })
+    }
+
+    return response.status(201).json({
+      distance: mapDistance(createdDistance),
+    })
   }
 
   const { data: distance, error: distanceError } = await supabase

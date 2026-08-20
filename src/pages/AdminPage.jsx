@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import {
   AdminAuthError,
+  createAdminDistance,
   getAdminEvent,
   getAdminEvents,
   getAdminSession,
@@ -260,6 +261,34 @@ function createDistanceForms(distances) {
   )
 }
 
+function getNextDistanceSortOrder(distances) {
+  if (!Array.isArray(distances) || distances.length === 0) {
+    return 0
+  }
+
+  const highestSortOrder = Math.max(
+    ...distances.map((distance) => distance.sortOrder),
+  )
+
+  return highestSortOrder >= 32767 ? null : highestSortOrder + 1
+}
+
+function createNewDistanceForm(distances) {
+  const nextSortOrder = getNextDistanceSortOrder(distances)
+
+  return {
+    title: '',
+    code: '',
+    distanceMeters: '',
+    minAge: '',
+    maxAge: '',
+    capacity: '',
+    price: '',
+    sortOrder:
+      nextSortOrder === null ? '' : String(nextSortOrder),
+  }
+}
+
 function buildDistanceChanges(form) {
   const code = form.code.trim()
   const title = form.title.trim()
@@ -475,6 +504,13 @@ function AdminPage() {
   const [eventSaveMessage, setEventSaveMessage] = useState('')
   const [distanceForms, setDistanceForms] = useState({})
   const [distanceSaveStates, setDistanceSaveStates] = useState({})
+  const [newDistanceForm, setNewDistanceForm] = useState(() =>
+    createNewDistanceForm([]),
+  )
+  const [newDistanceSaveState, setNewDistanceSaveState] = useState({
+    status: 'idle',
+    message: '',
+  })
 
   useEffect(() => {
     const controller = new AbortController()
@@ -555,6 +591,8 @@ function AdminPage() {
     setEventSaveMessage('')
     setDistanceForms({})
     setDistanceSaveStates({})
+    setNewDistanceForm(createNewDistanceForm([]))
+    setNewDistanceSaveState({ status: 'idle', message: '' })
 
     try {
       const result = await getAdminEvent(eventId)
@@ -566,6 +604,7 @@ function AdminPage() {
       setEventDetail(result)
       setEventForm(createEventForm(result.event))
       setDistanceForms(createDistanceForms(result.distances))
+      setNewDistanceForm(createNewDistanceForm(result.distances))
       setEventDetailStatus('ready')
     } catch (error) {
       if (
@@ -578,12 +617,15 @@ function AdminPage() {
         setEventForm(null)
         setDistanceForms({})
         setDistanceSaveStates({})
+        setNewDistanceForm(createNewDistanceForm([]))
+        setNewDistanceSaveState({ status: 'idle', message: '' })
         setSessionStatus('unauthenticated')
         return
       }
 
       setEventDetail(null)
       setDistanceForms({})
+      setNewDistanceForm(createNewDistanceForm([]))
       setEventDetailStatus('error')
       setEventDetailMessage('Не удалось загрузить мероприятие.')
     }
@@ -676,6 +718,8 @@ function AdminPage() {
         setEventSaveStatus('idle')
         setDistanceForms({})
         setDistanceSaveStates({})
+        setNewDistanceForm(createNewDistanceForm([]))
+        setNewDistanceSaveState({ status: 'idle', message: '' })
         setSessionStatus('unauthenticated')
         return
       }
@@ -775,6 +819,8 @@ function AdminPage() {
         setEventSaveStatus('idle')
         setDistanceForms({})
         setDistanceSaveStates({})
+        setNewDistanceForm(createNewDistanceForm([]))
+        setNewDistanceSaveState({ status: 'idle', message: '' })
         setSessionStatus('unauthenticated')
         return
       }
@@ -797,6 +843,114 @@ function AdminPage() {
         ...currentStates,
         [distanceId]: { status: 'error', message },
       }))
+    }
+  }
+
+  const handleNewDistanceFormChange = (changeEvent) => {
+    const { name, value } = changeEvent.target
+
+    setNewDistanceForm((currentForm) => ({
+      ...currentForm,
+      [name]: value,
+    }))
+    setNewDistanceSaveState({ status: 'idle', message: '' })
+  }
+
+  const handleCreateDistance = async (submitEvent) => {
+    submitEvent.preventDefault()
+
+    const eventId = eventDetail?.event?.id
+    const currentDistances = eventDetail?.distances ?? []
+
+    if (!eventId) {
+      return
+    }
+
+    if (getNextDistanceSortOrder(currentDistances) === null) {
+      setNewDistanceSaveState({
+        status: 'error',
+        message:
+          'Нельзя вычислить следующий порядок: достигнут лимит 32767.',
+      })
+      return
+    }
+
+    let changes
+
+    try {
+      changes = buildDistanceChanges(newDistanceForm)
+    } catch (error) {
+      setNewDistanceSaveState({
+        status: 'error',
+        message:
+          error instanceof EventFormError
+            ? error.message
+            : 'Проверьте заполненные данные.',
+      })
+      return
+    }
+
+    setNewDistanceSaveState({ status: 'saving', message: '' })
+
+    try {
+      const result = await createAdminDistance(eventId, changes)
+
+      if (!result.distance || typeof result.distance !== 'object') {
+        throw new AdminAuthError('invalid_server_response')
+      }
+
+      const updatedDistances = [
+        ...currentDistances,
+        result.distance,
+      ]
+
+      setEventDetail((currentDetail) => ({
+        ...currentDetail,
+        distances: [
+          ...(currentDetail?.distances ?? []),
+          result.distance,
+        ],
+      }))
+      setDistanceForms((currentForms) => ({
+        ...currentForms,
+        [result.distance.id]: createDistanceForm(result.distance),
+      }))
+      setNewDistanceForm(createNewDistanceForm(updatedDistances))
+      setNewDistanceSaveState({
+        status: 'success',
+        message: 'Дистанция добавлена',
+      })
+    } catch (error) {
+      if (error instanceof AdminAuthError && error.status === 401) {
+        setEvents([])
+        setSelectedEventId(null)
+        setEventDetail(null)
+        setEventDetailStatus('idle')
+        setEventForm(null)
+        setEventSaveStatus('idle')
+        setDistanceForms({})
+        setDistanceSaveStates({})
+        setNewDistanceForm(createNewDistanceForm([]))
+        setNewDistanceSaveState({ status: 'idle', message: '' })
+        setSessionStatus('unauthenticated')
+        return
+      }
+
+      let message = 'Не удалось добавить дистанцию. Проверьте данные.'
+
+      if (
+        error instanceof AdminAuthError &&
+        error.code === 'distance_code_conflict'
+      ) {
+        message = 'Дистанция с таким кодом уже существует.'
+      } else if (
+        error instanceof AdminAuthError &&
+        error.status === 404
+      ) {
+        message = 'Мероприятие не найдено.'
+      }
+
+      setNewDistanceSaveState({ status: 'error', message })
     }
   }
 
@@ -857,6 +1011,8 @@ function AdminPage() {
       setEventSaveStatus('idle')
       setDistanceForms({})
       setDistanceSaveStates({})
+      setNewDistanceForm(createNewDistanceForm([]))
+      setNewDistanceSaveState({ status: 'idle', message: '' })
       setSessionStatus('unauthenticated')
     } catch {
       setLogoutStatus('idle')
@@ -864,9 +1020,14 @@ function AdminPage() {
     }
   }
 
-  const isDistanceSaving = Object.values(distanceSaveStates).some(
-    ({ status }) => status === 'saving',
-  )
+  const isDistanceSaving =
+    newDistanceSaveState.status === 'saving' ||
+    Object.values(distanceSaveStates).some(
+      ({ status }) => status === 'saving',
+    )
+  const isNextDistanceSortOrderUnavailable =
+    eventDetail !== null &&
+    getNextDistanceSortOrder(eventDetail.distances) === null
 
   if (sessionStatus === 'checking') {
     return (
@@ -1374,6 +1535,160 @@ function AdminPage() {
                     <span>{eventDetail.distances?.length ?? 0}</span>
                   </div>
 
+                  <form
+                    className="adminDistanceCard adminDistanceCreateCard"
+                    onSubmit={handleCreateDistance}
+                  >
+                    <div className="adminDistanceCardHeader">
+                      <h4>Добавить дистанцию</h4>
+                      <span>Новая</span>
+                    </div>
+
+                    <div className="adminDistanceFormGrid">
+                      <label className="adminEventField adminDistanceFieldWide">
+                        <span>Название</span>
+                        <input
+                          name="title"
+                          type="text"
+                          value={newDistanceForm.title}
+                          onChange={handleNewDistanceFormChange}
+                          required
+                        />
+                      </label>
+
+                      <label className="adminEventField">
+                        <span>Код</span>
+                        <input
+                          name="code"
+                          type="text"
+                          value={newDistanceForm.code}
+                          onChange={handleNewDistanceFormChange}
+                          required
+                        />
+                      </label>
+
+                      <label className="adminEventField">
+                        <span>Дистанция, м</span>
+                        <input
+                          name="distanceMeters"
+                          type="number"
+                          min="1"
+                          max="2147483647"
+                          step="1"
+                          value={newDistanceForm.distanceMeters}
+                          onChange={handleNewDistanceFormChange}
+                          required
+                        />
+                      </label>
+
+                      <label className="adminEventField">
+                        <span>Минимальный возраст</span>
+                        <input
+                          name="minAge"
+                          type="number"
+                          min="0"
+                          max="32767"
+                          step="1"
+                          value={newDistanceForm.minAge}
+                          onChange={handleNewDistanceFormChange}
+                        />
+                      </label>
+
+                      <label className="adminEventField">
+                        <span>Максимальный возраст</span>
+                        <input
+                          name="maxAge"
+                          type="number"
+                          min="0"
+                          max="32767"
+                          step="1"
+                          value={newDistanceForm.maxAge}
+                          onChange={handleNewDistanceFormChange}
+                        />
+                      </label>
+
+                      <label className="adminEventField">
+                        <span>Лимит участников</span>
+                        <input
+                          name="capacity"
+                          type="number"
+                          min="1"
+                          max="2147483647"
+                          step="1"
+                          value={newDistanceForm.capacity}
+                          onChange={handleNewDistanceFormChange}
+                        />
+                      </label>
+
+                      <label className="adminEventField">
+                        <span>Цена дистанции</span>
+                        <input
+                          name="price"
+                          type="text"
+                          inputMode="decimal"
+                          value={newDistanceForm.price}
+                          onChange={handleNewDistanceFormChange}
+                        />
+                        <small>
+                          Пусто — базовая цена мероприятия.
+                        </small>
+                      </label>
+
+                      <label className="adminEventField">
+                        <span>Порядок</span>
+                        <input
+                          name="sortOrder"
+                          type="number"
+                          min="0"
+                          max="32767"
+                          step="1"
+                          value={newDistanceForm.sortOrder}
+                          onChange={handleNewDistanceFormChange}
+                          required
+                        />
+                      </label>
+                    </div>
+
+                    <div className="adminEventFormActions">
+                      <button
+                        className="adminEventSaveButton"
+                        type="submit"
+                        disabled={
+                          isDistanceSaving ||
+                          isNextDistanceSortOrderUnavailable
+                        }
+                      >
+                        {newDistanceSaveState.status === 'saving'
+                          ? 'Добавляем...'
+                          : 'Добавить дистанцию'}
+                      </button>
+
+                      {newDistanceSaveState.message && (
+                        <p
+                          className={
+                            newDistanceSaveState.status === 'success'
+                              ? 'adminSaveSuccess'
+                              : 'adminAuthMessage'
+                          }
+                          role={
+                            newDistanceSaveState.status === 'error'
+                              ? 'alert'
+                              : 'status'
+                          }
+                        >
+                          {newDistanceSaveState.message}
+                        </p>
+                      )}
+                    </div>
+
+                    {isNextDistanceSortOrderUnavailable && (
+                      <p className="adminAuthMessage" role="alert">
+                        Нельзя вычислить следующий порядок: достигнут
+                        лимит 32767.
+                      </p>
+                    )}
+                  </form>
+
                   {(eventDetail.distances?.length ?? 0) === 0 && (
                     <p>У мероприятия пока нет дистанций.</p>
                   )}
@@ -1557,7 +1872,7 @@ function AdminPage() {
                               <button
                                 className="adminEventSaveButton"
                                 type="submit"
-                                disabled={saveState.status === 'saving'}
+                                disabled={isDistanceSaving}
                               >
                                 {saveState.status === 'saving'
                                   ? 'Сохраняем...'

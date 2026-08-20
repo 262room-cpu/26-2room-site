@@ -128,3 +128,17 @@ export function updateAdminDistance(
     signal,
   })
 }
+
+export function createAdminDistance(
+  eventId,
+  changes,
+  { signal } = {},
+) {
+  const query = new URLSearchParams({ eventId })
+
+  return requestJson(`/api/admin/distance?${query.toString()}`, {
+    method: 'POST',
+    body: changes,
+    signal,
+  })
+}

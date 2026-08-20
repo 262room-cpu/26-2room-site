@@ -468,6 +468,13 @@
   background: rgba(255, 255, 255, 0.018);
 }
 
+.adminDistanceCreateCard {
+  margin-top: 18px;
+  border-color: rgba(255, 214, 0, 0.28);
+  background: rgba(255, 214, 0, 0.035);
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.22);
+}
+
 .adminDistanceCardHeader {
   margin-bottom: 18px;
 }
