@@ -40,6 +40,28 @@ const EVENT_SELECT = [
   'updated_at',
 ].join(',')
 
+const LIST_EVENT_SELECT = [
+  'id',
+  'slug',
+  'title',
+  'subtitle',
+  'event_type',
+  'registration_form_type',
+  'status',
+  'city',
+  'venue',
+  'starts_at',
+  'tentative_date',
+  'date_status',
+  'registration_opens_at',
+  'registration_closes_at',
+  'capacity',
+  'price_minor',
+  'currency',
+  'created_at',
+  'updated_at',
+].join(',')
+
 const EVENT_STATUSES = new Set([
   'draft',
   'coming_soon',
@@ -381,6 +403,38 @@ function mapEvent(event) {
   }
 }
 
+function normalizeNullable(value) {
+  return value === null || value === 'null' ? null : value
+}
+
+function mapListEvent(event) {
+  return {
+    id: event.id,
+    slug: event.slug,
+    title: event.title,
+    subtitle: normalizeNullable(event.subtitle),
+    eventType: event.event_type,
+    registrationFormType: event.registration_form_type,
+    status: event.status,
+    city: event.city,
+    venue: event.venue,
+    startsAt: normalizeNullable(event.starts_at),
+    tentativeDate: normalizeNullable(event.tentative_date),
+    dateStatus: event.date_status,
+    registrationOpensAt: normalizeNullable(
+      event.registration_opens_at,
+    ),
+    registrationClosesAt: normalizeNullable(
+      event.registration_closes_at,
+    ),
+    capacity: normalizeNullable(event.capacity),
+    priceMinor: normalizeNullable(event.price_minor),
+    currency: normalizeNullable(event.currency),
+    createdAt: event.created_at,
+    updatedAt: event.updated_at,
+  }
+}
+
 function mapGroup(group) {
   return {
     id: group.id,
@@ -433,12 +487,6 @@ export default async function handler(request, response) {
     ? request.query.id[0]
     : request.query.id
 
-  if (!eventId) {
-    return response
-      .status(400)
-      .json({ error: 'event_id_required' })
-  }
-
   let supabase
 
   try {
@@ -455,6 +503,34 @@ export default async function handler(request, response) {
     return response
       .status(500)
       .json({ error: 'internal_error' })
+  }
+
+  if (request.method === 'GET' && !eventId) {
+    const { data: events, error } = await supabase
+      .from('events')
+      .select(LIST_EVENT_SELECT)
+      .order('updated_at', { ascending: false })
+      .order('slug', { ascending: true })
+
+    if (error) {
+      console.error('Admin events query failed', {
+        code: error.code ?? 'unknown',
+      })
+
+      return response
+        .status(500)
+        .json({ error: 'internal_error' })
+    }
+
+    return response.status(200).json({
+      events: (events ?? []).map(mapListEvent),
+    })
+  }
+
+  if (!eventId) {
+    return response
+      .status(400)
+      .json({ error: 'event_id_required' })
   }
 
   const { data: event, error: eventError } = await supabase
