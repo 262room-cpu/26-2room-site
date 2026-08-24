@@ -95,6 +95,14 @@ export function getAdminEvent(eventId, { signal } = {}) {
   })
 }
 
+export function createAdminEvent(changes, { signal } = {}) {
+  return requestJson('/api/admin/event', {
+    method: 'POST',
+    body: changes,
+    signal,
+  })
+}
+
 export function updateAdminEvent(
   eventId,
   changes,

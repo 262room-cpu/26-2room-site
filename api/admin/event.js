@@ -7,6 +7,8 @@ import {
   SupabaseConfigurationError,
 } from '../_supabase.js'
 
+const INTEGER_MAX = 2147483647
+
 const EVENT_SELECT = [
   'id',
   'slug',
@@ -78,6 +80,16 @@ const REGISTRATION_FORM_TYPES = new Set([
 const DATE_STATUSES = new Set([
   'tentative',
   'confirmed',
+])
+const CREATE_FIELDS = new Set([
+  'slug',
+  'title',
+  'eventType',
+  'registrationFormType',
+  'shortDescription',
+  'description',
+  'city',
+  'capacity',
 ])
 const EDITABLE_FIELDS = {
   title: { column: 'title', type: 'required_text' },
@@ -264,7 +276,11 @@ function normalizeField(field, value) {
     case 'time':
       return normalizeTime(value)
     case 'capacity':
-      if (!Number.isSafeInteger(value) || value <= 0) {
+      if (
+        !Number.isSafeInteger(value) ||
+        value <= 0 ||
+        value > INTEGER_MAX
+      ) {
         throw new EventValidationError()
       }
       return value
@@ -368,6 +384,80 @@ function buildEventUpdate(body, currentEvent) {
   return update
 }
 
+function buildEventCreate(body) {
+  if (
+    !body ||
+    typeof body !== 'object' ||
+    Array.isArray(body)
+  ) {
+    throw new EventValidationError()
+  }
+
+  const fields = Object.keys(body)
+
+  if (fields.some((field) => !CREATE_FIELDS.has(field))) {
+    throw new EventValidationError('unsupported_field')
+  }
+
+  const slug = normalizeText(body.slug, false)
+
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
+    throw new EventValidationError('invalid_event_slug')
+  }
+
+  const registrationFormType = body.registrationFormType
+
+  if (
+    typeof registrationFormType !== 'string' ||
+    !REGISTRATION_FORM_TYPES.has(registrationFormType)
+  ) {
+    throw new EventValidationError()
+  }
+
+  const capacity = body.capacity
+
+  if (
+    !Number.isSafeInteger(capacity) ||
+    capacity <= 0 ||
+    capacity > INTEGER_MAX
+  ) {
+    throw new EventValidationError()
+  }
+
+  return {
+    slug,
+    registration_code_prefix: null,
+    title: normalizeText(body.title, false),
+    subtitle: null,
+    event_type: normalizeText(body.eventType, false),
+    registration_form_type: registrationFormType,
+    status: 'draft',
+    short_description: normalizeText(
+      body.shortDescription,
+      false,
+    ),
+    description: normalizeText(body.description, false),
+    city: normalizeText(body.city, false),
+    venue: null,
+    address: null,
+    timezone: 'Asia/Almaty',
+    starts_at: null,
+    tentative_date: null,
+    date_status: null,
+    event_window_start: null,
+    event_window_end: null,
+    registration_opens_at: null,
+    registration_closes_at: null,
+    payment_merchant_account_id: null,
+    capacity,
+    price_minor: null,
+    currency: 'KZT',
+    cover_image_path: null,
+    participant_note: null,
+    distance_selection_note: null,
+  }
+}
+
 function mapEvent(event) {
   return {
     id: event.id,
@@ -456,8 +546,8 @@ export default async function handler(request, response) {
     'application/json; charset=utf-8',
   )
 
-  if (!['GET', 'PATCH'].includes(request.method)) {
-    response.setHeader('Allow', 'GET, PATCH')
+  if (!['GET', 'POST', 'PATCH'].includes(request.method)) {
+    response.setHeader('Allow', 'GET, POST, PATCH')
     return response
       .status(405)
       .json({ error: 'method_not_allowed' })
@@ -487,6 +577,12 @@ export default async function handler(request, response) {
     ? request.query.id[0]
     : request.query.id
 
+  if (request.method === 'POST' && eventId) {
+    return response
+      .status(400)
+      .json({ error: 'event_id_not_allowed' })
+  }
+
   let supabase
 
   try {
@@ -503,6 +599,65 @@ export default async function handler(request, response) {
     return response
       .status(500)
       .json({ error: 'internal_error' })
+  }
+
+  if (request.method === 'POST') {
+    let eventToCreate
+
+    try {
+      eventToCreate = buildEventCreate(request.body)
+    } catch (error) {
+      if (error instanceof EventValidationError) {
+        return response
+          .status(400)
+          .json({ error: error.code })
+      }
+
+      console.error('Admin event creation validation failed')
+
+      return response
+        .status(500)
+        .json({ error: 'internal_error' })
+    }
+
+    const { data: createdEvent, error: createError } =
+      await supabase
+        .from('events')
+        .insert(eventToCreate)
+        .select(EVENT_SELECT)
+        .maybeSingle()
+
+    if (createError) {
+      console.error('Admin event creation failed', {
+        code: createError.code ?? 'unknown',
+      })
+
+      if (createError.code === '23505') {
+        return response
+          .status(409)
+          .json({ error: 'event_slug_conflict' })
+      }
+
+      if (['22P02', '23502', '23514'].includes(createError.code)) {
+        return response
+          .status(400)
+          .json({ error: 'invalid_event_data' })
+      }
+
+      return response
+        .status(500)
+        .json({ error: 'internal_error' })
+    }
+
+    if (!createdEvent) {
+      return response
+        .status(500)
+        .json({ error: 'internal_error' })
+    }
+
+    return response.status(201).json({
+      event: mapEvent(createdEvent),
+    })
   }
 
   if (request.method === 'GET' && !eventId) {

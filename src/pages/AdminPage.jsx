@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import {
   AdminAuthError,
   createAdminDistance,
+  createAdminEvent,
   createAdminGroup,
   getAdminEvent,
   getAdminEvents,
@@ -467,6 +468,64 @@ function createEventForm(event) {
   }
 }
 
+function createNewEventForm() {
+  return {
+    title: '',
+    slug: '',
+    eventType: '',
+    registrationFormType: 'participant',
+    city: '',
+    capacity: '',
+    shortDescription: '',
+    description: '',
+  }
+}
+
+function buildNewEventChanges(form) {
+  const slug = form.slug.trim()
+
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
+    throw new EventFormError(
+      'Slug: используйте строчные латинские буквы, цифры и одиночные дефисы.',
+    )
+  }
+
+  const requiredTextFields = [
+    form.title,
+    form.eventType,
+    form.shortDescription,
+    form.description,
+    form.city,
+  ]
+
+  if (requiredTextFields.some((value) => !value.trim())) {
+    throw new EventFormError('Заполните все обязательные поля.')
+  }
+
+  if (
+    !['kids', 'participant', 'mixed'].includes(
+      form.registrationFormType,
+    )
+  ) {
+    throw new EventFormError('Выберите форму регистрации.')
+  }
+
+  return {
+    slug,
+    title: form.title.trim(),
+    eventType: form.eventType.trim(),
+    registrationFormType: form.registrationFormType,
+    shortDescription: form.shortDescription.trim(),
+    description: form.description.trim(),
+    city: form.city.trim(),
+    capacity: integerInputToValue(form.capacity, {
+      label: 'Лимит участников',
+      min: 1,
+      max: 2147483647,
+    }),
+  }
+}
+
 function buildEventChanges(form) {
   const { timezone } = getTimeZoneFormatter(form.timezone)
   const capacity = Number(form.capacity)
@@ -587,6 +646,12 @@ function AdminPage() {
   const [eventsStatus, setEventsStatus] = useState('loading')
   const [events, setEvents] = useState([])
   const [eventsMessage, setEventsMessage] = useState('')
+  const [isNewEventOpen, setIsNewEventOpen] = useState(false)
+  const [newEventForm, setNewEventForm] = useState(createNewEventForm)
+  const [newEventSaveState, setNewEventSaveState] = useState({
+    status: 'idle',
+    message: '',
+  })
   const [selectedEventId, setSelectedEventId] = useState(null)
   const [eventDetailStatus, setEventDetailStatus] = useState('idle')
   const [eventDetail, setEventDetail] = useState(null)
@@ -681,6 +746,117 @@ function AdminPage() {
       controller.abort()
     }
   }, [sessionStatus])
+
+  useEffect(() => {
+    if (sessionStatus === 'authenticated') {
+      return
+    }
+
+    setIsNewEventOpen(false)
+    setNewEventForm(createNewEventForm())
+    setNewEventSaveState({ status: 'idle', message: '' })
+  }, [sessionStatus])
+
+  const handleNewEventFormChange = (changeEvent) => {
+    const { name, value } = changeEvent.target
+
+    setNewEventForm((currentForm) => ({
+      ...currentForm,
+      [name]: value,
+    }))
+    setNewEventSaveState({ status: 'idle', message: '' })
+  }
+
+  const handleCreateEvent = async (submitEvent) => {
+    submitEvent.preventDefault()
+
+    let changes
+
+    try {
+      changes = buildNewEventChanges(newEventForm)
+    } catch (error) {
+      setNewEventSaveState({
+        status: 'error',
+        message:
+          error instanceof EventFormError
+            ? error.message
+            : 'Проверьте заполненные данные.',
+      })
+      return
+    }
+
+    setNewEventSaveState({ status: 'saving', message: '' })
+
+    try {
+      const result = await createAdminEvent(changes)
+
+      if (!result.event || typeof result.event !== 'object') {
+        throw new AdminAuthError('invalid_server_response')
+      }
+
+      const createdDetail = {
+        event: result.event,
+        groups: [],
+        distances: [],
+        documents: [],
+        consents: [],
+      }
+
+      setEvents((currentEvents) => [
+        result.event,
+        ...currentEvents.filter((event) => event.id !== result.event.id),
+      ])
+      setEventsStatus('ready')
+      setEventsMessage('')
+      setSelectedEventId(result.event.id)
+      setEventDetail(createdDetail)
+      setEventDetailStatus('ready')
+      setEventDetailMessage('Мероприятие создано как черновик.')
+      setEventForm(createEventForm(result.event))
+      setEventSaveStatus('idle')
+      setEventSaveMessage('')
+      setGroupForms({})
+      setGroupSaveStates({})
+      setNewGroupForm(
+        createNewGroupForm([], result.event.registrationFormType),
+      )
+      setNewGroupSaveState({ status: 'idle', message: '' })
+      setDistanceForms({})
+      setDistanceSaveStates({})
+      setNewDistanceForm(createNewDistanceForm([]))
+      setNewDistanceSaveState({ status: 'idle', message: '' })
+      setNewEventForm(createNewEventForm())
+      setNewEventSaveState({ status: 'idle', message: '' })
+      setIsNewEventOpen(false)
+    } catch (error) {
+      if (error instanceof AdminAuthError && error.status === 401) {
+        setEvents([])
+        setEventsStatus('idle')
+        setSelectedEventId(null)
+        setEventDetail(null)
+        setEventDetailStatus('idle')
+        setEventForm(null)
+        setSessionStatus('unauthenticated')
+        return
+      }
+
+      let message = 'Не удалось создать мероприятие. Попробуйте ещё раз.'
+
+      if (
+        error instanceof AdminAuthError &&
+        error.code === 'event_slug_conflict'
+      ) {
+        message = 'Мероприятие с таким slug уже существует.'
+      } else if (
+        error instanceof AdminAuthError &&
+        error.status === 400
+      ) {
+        message = 'Проверьте обязательные поля и формат данных.'
+      }
+
+      setNewEventSaveState({ status: 'error', message })
+    }
+  }
 
   const handleSelectEvent = async (eventId) => {
     setSelectedEventId(eventId)
@@ -778,6 +954,7 @@ function AdminPage() {
 
     setEventSaveStatus('idle')
     setEventSaveMessage('')
+    setEventDetailMessage('')
   }
 
   const handleSaveEvent = async (submitEvent) => {
@@ -1537,7 +1714,21 @@ function AdminPage() {
 
         <div className="adminPageGrid">
           <section className="adminPageSection">
-            <h2>Мероприятия</h2>
+            <div className="adminEventsHeader">
+              <h2>Мероприятия</h2>
+              <button
+                className="adminCreateEventToggle"
+                type="button"
+                onClick={() => {
+                  setIsNewEventOpen((isOpen) => !isOpen)
+                  setNewEventSaveState({ status: 'idle', message: '' })
+                }}
+                disabled={newEventSaveState.status === 'saving'}
+                aria-expanded={isNewEventOpen}
+              >
+                {isNewEventOpen ? 'Закрыть' : 'Создать мероприятие'}
+              </button>
+            </div>
 
             {eventsStatus === 'loading' && (
               <p>Загружаем мероприятия...</p>
@@ -1563,6 +1754,7 @@ function AdminPage() {
                     onClick={() => handleSelectEvent(event.id)}
                     aria-pressed={selectedEventId === event.id}
                     disabled={
+                      newEventSaveState.status === 'saving' ||
                       eventSaveStatus === 'saving' ||
                       isGroupSaving ||
                       isDistanceSaving
@@ -1579,9 +1771,163 @@ function AdminPage() {
             )}
           </section>
 
+          {isNewEventOpen && (
+            <section className="adminPageSection adminEventCreateSection">
+              <p className="adminPageEyebrow">Новое мероприятие</p>
+              <h2>Создать черновик</h2>
+              <p className="adminSectionHint">
+                Новое мероприятие создаётся как черновик. Остальные
+                параметры, группы и дистанции настраиваются после
+                создания.
+              </p>
+
+              <form
+                className="adminEventForm adminEventCreateForm"
+                onSubmit={handleCreateEvent}
+                noValidate
+              >
+                <div className="adminEventFormGrid">
+                  <label className="adminEventField">
+                    <span>Название</span>
+                    <input
+                      name="title"
+                      type="text"
+                      value={newEventForm.title}
+                      onChange={handleNewEventFormChange}
+                      required
+                    />
+                  </label>
+
+                  <label className="adminEventField">
+                    <span>Slug</span>
+                    <input
+                      name="slug"
+                      type="text"
+                      value={newEventForm.slug}
+                      onChange={handleNewEventFormChange}
+                      placeholder="karaganda-half-marathon-2026"
+                      pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
+                      required
+                    />
+                  </label>
+
+                  <label className="adminEventField">
+                    <span>Тип мероприятия</span>
+                    <input
+                      name="eventType"
+                      type="text"
+                      value={newEventForm.eventType}
+                      onChange={handleNewEventFormChange}
+                      placeholder="road_race"
+                      required
+                    />
+                  </label>
+
+                  <label className="adminEventField">
+                    <span>Форма регистрации</span>
+                    <select
+                      name="registrationFormType"
+                      value={newEventForm.registrationFormType}
+                      onChange={handleNewEventFormChange}
+                      required
+                    >
+                      {REGISTRATION_FORM_OPTIONS.map(([value, label]) => (
+                        <option value={value} key={value}>
+                          {label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <label className="adminEventField">
+                    <span>Город</span>
+                    <input
+                      name="city"
+                      type="text"
+                      value={newEventForm.city}
+                      onChange={handleNewEventFormChange}
+                      required
+                    />
+                  </label>
+
+                  <label className="adminEventField">
+                    <span>Лимит участников</span>
+                    <input
+                      name="capacity"
+                      type="number"
+                      min="1"
+                      max="2147483647"
+                      step="1"
+                      value={newEventForm.capacity}
+                      onChange={handleNewEventFormChange}
+                      required
+                    />
+                  </label>
+
+                  <label className="adminEventField adminEventFieldWide">
+                    <span>Краткое описание</span>
+                    <textarea
+                      name="shortDescription"
+                      rows="3"
+                      value={newEventForm.shortDescription}
+                      onChange={handleNewEventFormChange}
+                      required
+                    />
+                  </label>
+
+                  <label className="adminEventField adminEventFieldWide">
+                    <span>Полное описание</span>
+                    <textarea
+                      name="description"
+                      rows="5"
+                      value={newEventForm.description}
+                      onChange={handleNewEventFormChange}
+                      required
+                    />
+                  </label>
+                </div>
+
+                <div className="adminEventFormActions">
+                  <button
+                    className="adminEventSaveButton"
+                    type="submit"
+                    disabled={newEventSaveState.status === 'saving'}
+                  >
+                    {newEventSaveState.status === 'saving'
+                      ? 'Создаём...'
+                      : 'Создать черновик'}
+                  </button>
+                  <button
+                    className="adminEventCancelButton"
+                    type="button"
+                    onClick={() => {
+                      setIsNewEventOpen(false)
+                      setNewEventSaveState({ status: 'idle', message: '' })
+                    }}
+                    disabled={newEventSaveState.status === 'saving'}
+                  >
+                    Отмена
+                  </button>
+
+                  {newEventSaveState.message && (
+                    <p className="adminAuthMessage" role="alert">
+                      {newEventSaveState.message}
+                    </p>
+                  )}
+                </div>
+              </form>
+            </section>
+          )}
+
           {selectedEventId && (
             <section className="adminPageSection adminEventDetailSection">
               <h2>Карточка мероприятия</h2>
+
+              {eventDetailStatus === 'ready' && eventDetailMessage && (
+                <p className="adminSaveSuccess" role="status">
+                  {eventDetailMessage}
+                </p>
+              )}
 
               {eventDetailStatus === 'loading' && (
                 <p>Загружаем данные мероприятия...</p>
