@@ -7,6 +7,7 @@ const DISTANCE_CODE_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 const UUID_V4_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const MAX_REQUIREMENTS = 50
 
 const CONSENT_VERSIONS = {
   eventRules: 'event-rules-2026-08-17-v1',
@@ -83,6 +84,38 @@ function isValidIsoDate(value) {
   return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value
 }
 
+function validateConsentPayload(consents) {
+  if (!Array.isArray(consents) || consents.length > MAX_REQUIREMENTS) {
+    return null
+  }
+
+  const normalized = []
+  const consentTypes = new Set()
+
+  for (const consent of consents) {
+    if (!consent || typeof consent !== 'object' || Array.isArray(consent)) {
+      return null
+    }
+
+    const consentType = trimString(consent.consentType, 120)
+    const consentVersion = trimString(consent.consentVersion, 120)
+
+    if (
+      !consentType ||
+      !consentVersion ||
+      typeof consent.accepted !== 'boolean' ||
+      consentTypes.has(consentType)
+    ) {
+      return null
+    }
+
+    consentTypes.add(consentType)
+    normalized.push({ consentType, consentVersion, accepted: consent.accepted })
+  }
+
+  return normalized
+}
+
 function validatePayload(body) {
   if (!body || typeof body !== 'object' || Array.isArray(body)) {
     return null
@@ -105,9 +138,7 @@ function validatePayload(body) {
     !parent ||
     typeof parent !== 'object' ||
     Array.isArray(parent) ||
-    !consents ||
-    typeof consents !== 'object' ||
-    Array.isArray(consents)
+    !Array.isArray(consents)
   ) {
     return null
   }
@@ -119,6 +150,7 @@ function validatePayload(body) {
   const parentFullName = trimString(parent.fullName, 200)
   const parentPhone = trimString(parent.phone, 40)
   const parentEmail = trimString(parent.email, 254)
+  const normalizedConsents = validateConsentPayload(consents)
 
   if (
     !childLastName ||
@@ -130,9 +162,7 @@ function validatePayload(body) {
     !parentPhone ||
     !parentEmail ||
     !EMAIL_PATTERN.test(parentEmail) ||
-    consents.eventRules !== true ||
-    consents.personalData !== true ||
-    consents.parentResponsibility !== true
+    normalizedConsents === null
   ) {
     return null
   }
@@ -153,7 +183,101 @@ function validatePayload(body) {
     parentFullName,
     parentPhone,
     parentEmail,
+    consents: normalizedConsents,
   }
+}
+
+function validateConfiguredConsents(clientConsents, requirements) {
+  if (clientConsents.length !== requirements.length) {
+    return null
+  }
+
+  const clientByType = new Map(
+    clientConsents.map((consent) => [consent.consentType, consent]),
+  )
+
+  const acceptedRequirements = []
+
+  for (const requirement of requirements) {
+    const clientConsent = clientByType.get(requirement.consent_type)
+
+    if (
+      !clientConsent ||
+      clientConsent.consentVersion !== requirement.consent_version ||
+      (requirement.required && !clientConsent.accepted)
+    ) {
+      return null
+    }
+
+    if (clientConsent.accepted) {
+      acceptedRequirements.push(requirement)
+    }
+  }
+
+  return acceptedRequirements
+}
+
+async function syncRegistrationConsents(
+  supabase,
+  registrationId,
+  acceptedRequirements,
+) {
+  const { data: existingConsents, error: existingError } = await supabase
+    .from('registration_consents')
+    .select('consent_type,consent_version')
+    .eq('registration_id', registrationId)
+
+  if (existingError) {
+    return existingError
+  }
+
+  const acceptedTypes = new Set(
+    acceptedRequirements.map((requirement) => requirement.consent_type),
+  )
+  const existingByType = new Map(
+    (existingConsents ?? []).map((consent) => [consent.consent_type, consent]),
+  )
+  const acceptedAt = new Date().toISOString()
+  const rowsToUpsert = acceptedRequirements
+    .filter(
+      (requirement) =>
+        existingByType.get(requirement.consent_type)?.consent_version !==
+        requirement.consent_version,
+    )
+    .map((requirement) => ({
+      registration_id: registrationId,
+      consent_type: requirement.consent_type,
+      consent_version: requirement.consent_version,
+      accepted_at: acceptedAt,
+    }))
+
+  if (rowsToUpsert.length > 0) {
+    const { error: upsertError } = await supabase
+      .from('registration_consents')
+      .upsert(rowsToUpsert, { onConflict: 'registration_id,consent_type' })
+
+    if (upsertError) {
+      return upsertError
+    }
+  }
+
+  const staleTypes = (existingConsents ?? [])
+    .map((consent) => consent.consent_type)
+    .filter((consentType) => !acceptedTypes.has(consentType))
+
+  for (const consentType of staleTypes) {
+    const { error: deleteError } = await supabase
+      .from('registration_consents')
+      .delete()
+      .eq('registration_id', registrationId)
+      .eq('consent_type', consentType)
+
+    if (deleteError) {
+      return deleteError
+    }
+  }
+
+  return null
 }
 
 function getFlowTokenSecret() {
@@ -245,6 +369,50 @@ export default async function handler(request, response) {
   const flowToken = deriveFlowToken(idempotencyKey, flowTokenSecret)
   const flowTokenHash = hashFlowToken(flowToken)
 
+  const { data: event, error: eventError } = await supabase
+    .from('events')
+    .select('id')
+    .eq('slug', payload.eventSlug)
+    .maybeSingle()
+
+  if (eventError) {
+    console.error('Registration consent event lookup failed', {
+      code: eventError.code ?? 'unknown',
+    })
+    return response.status(500).json({ error: 'internal_error' })
+  }
+
+  if (!event) {
+    return response.status(404).json({ error: 'event_not_found' })
+  }
+
+  const { data: consentRequirements, error: consentRequirementsError } =
+    await supabase
+      .from('event_consent_requirements')
+      .select('consent_type,consent_version,required')
+      .eq('event_id', event.id)
+      .order('sort_order', { ascending: true })
+
+  if (consentRequirementsError) {
+    console.error('Registration consent requirements lookup failed', {
+      code: consentRequirementsError.code ?? 'unknown',
+    })
+    return response.status(500).json({ error: 'internal_error' })
+  }
+
+  const acceptedConsentRequirements = validateConfiguredConsents(
+    payload.consents,
+    consentRequirements ?? [],
+  )
+
+  if (!acceptedConsentRequirements) {
+    return response.status(400).json({ error: 'invalid_consents' })
+  }
+
+  const consentVersion = (type, fallback) =>
+    consentRequirements?.find((requirement) => requirement.consent_type === type)
+      ?.consent_version ?? fallback
+
   const { data, error } = await supabase.rpc('room262_create_registration_reservation', {
     p_event_slug: payload.eventSlug,
     p_distance_code: payload.distanceCode,
@@ -258,9 +426,18 @@ export default async function handler(request, response) {
     p_parent_email: payload.parentEmail,
     p_idempotency_key: idempotencyKey,
     p_flow_token_hash: flowTokenHash,
-    p_event_rules_consent_version: CONSENT_VERSIONS.eventRules,
-    p_personal_data_consent_version: CONSENT_VERSIONS.personalData,
-    p_parent_responsibility_consent_version: CONSENT_VERSIONS.parentResponsibility,
+    p_event_rules_consent_version: consentVersion(
+      'event_rules',
+      CONSENT_VERSIONS.eventRules,
+    ),
+    p_personal_data_consent_version: consentVersion(
+      'personal_data',
+      CONSENT_VERSIONS.personalData,
+    ),
+    p_parent_responsibility_consent_version: consentVersion(
+      'parent_responsibility',
+      CONSENT_VERSIONS.parentResponsibility,
+    ),
   })
 
   if (error) {
@@ -282,6 +459,19 @@ export default async function handler(request, response) {
     return response.status(500).json({ error: 'internal_error' })
   }
 
+  const consentSyncError = await syncRegistrationConsents(
+    supabase,
+    registration.registration_id,
+    acceptedConsentRequirements,
+  )
+
+  if (consentSyncError) {
+    console.error('Registration consent synchronization failed', {
+      code: consentSyncError.code ?? 'unknown',
+    })
+    return response.status(500).json({ error: 'internal_error' })
+  }
+
   return response.status(200).json({
     status: registration.status,
     registrationId: registration.registration_id,
@@ -291,6 +481,6 @@ export default async function handler(request, response) {
       minor: registration.amount_minor,
       currency: registration.currency,
     },
-    nextStep: 'upload_liability_waiver',
+    nextStep: 'upload_documents',
   })
 }

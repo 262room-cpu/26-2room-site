@@ -74,6 +74,23 @@ const GROUP_SELECT = [
 
 const KIT_SELECT = ['code', 'name', 'description', 'image_path', 'sort_order'].join(',')
 const PARTNER_SELECT = ['name', 'logo_path', 'website_url', 'category', 'sort_order'].join(',')
+const DOCUMENT_REQUIREMENT_SELECT = [
+  'document_type',
+  'title',
+  'description',
+  'template_url',
+  'required',
+  'sort_order',
+].join(',')
+const CONSENT_REQUIREMENT_SELECT = [
+  'consent_type',
+  'consent_version',
+  'title',
+  'body_text',
+  'document_url',
+  'required',
+  'sort_order',
+].join(',')
 
 function isValidSlug(slug) {
   return (
@@ -143,6 +160,29 @@ function mapPartner(partner) {
   }
 }
 
+function mapDocumentRequirement(requirement) {
+  return {
+    documentType: requirement.document_type,
+    title: requirement.title,
+    description: normalizeNullable(requirement.description),
+    templateUrl: normalizeNullable(requirement.template_url),
+    required: requirement.required,
+    sortOrder: requirement.sort_order,
+  }
+}
+
+function mapConsentRequirement(requirement) {
+  return {
+    consentType: requirement.consent_type,
+    consentVersion: requirement.consent_version,
+    title: requirement.title,
+    bodyText: requirement.body_text,
+    documentUrl: normalizeNullable(requirement.document_url),
+    required: requirement.required,
+    sortOrder: requirement.sort_order,
+  }
+}
+
 export function mapEventListItem(event) {
   return {
     slug: event.slug,
@@ -169,6 +209,8 @@ export function mapEvent(
   distances,
   starterKit,
   partners,
+  documentRequirements = [],
+  consentRequirements = [],
 ) {
   const eventWindowStart = normalizeTime(event.event_window_start)
   const eventWindowEnd = normalizeTime(event.event_window_end)
@@ -209,6 +251,8 @@ export function mapEvent(
     distances: distances.map(mapDistance),
     starterKit: starterKit.map(mapKitItem),
     partners: partners.map(mapPartner),
+    documentRequirements: documentRequirements.map(mapDocumentRequirement),
+    consentRequirements: consentRequirements.map(mapConsentRequirement),
   }
 }
 
@@ -286,6 +330,8 @@ export default async function handler(request, response) {
     distancesResult,
     kitResult,
     partnersResult,
+    documentRequirementsResult,
+    consentRequirementsResult,
   ] = await Promise.all([
     supabase
       .from('event_registration_groups')
@@ -307,6 +353,16 @@ export default async function handler(request, response) {
       .select(PARTNER_SELECT)
       .eq('event_id', event.id)
       .order('sort_order', { ascending: true }),
+    supabase
+      .from('event_document_requirements')
+      .select(DOCUMENT_REQUIREMENT_SELECT)
+      .eq('event_id', event.id)
+      .order('sort_order', { ascending: true }),
+    supabase
+      .from('event_consent_requirements')
+      .select(CONSENT_REQUIREMENT_SELECT)
+      .eq('event_id', event.id)
+      .order('sort_order', { ascending: true }),
   ])
 
   const failedChildQuery = [
@@ -314,6 +370,8 @@ export default async function handler(request, response) {
     ['distances', distancesResult.error],
     ['starter_kit', kitResult.error],
     ['partners', partnersResult.error],
+    ['document_requirements', documentRequirementsResult.error],
+    ['consent_requirements', consentRequirementsResult.error],
   ].find(([, error]) => error)
 
   if (failedChildQuery) {
@@ -328,6 +386,8 @@ export default async function handler(request, response) {
       distancesResult.data ?? [],
       kitResult.data ?? [],
       partnersResult.data ?? [],
+      documentRequirementsResult.data ?? [],
+      consentRequirementsResult.data ?? [],
     ),
   )
 }

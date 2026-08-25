@@ -15,19 +15,29 @@ const ALLOWED_FILE_TYPES = {
   'image/png': 'png',
 }
 
-const DOCUMENT_TYPES = {
-  liability_waiver: {
-    ownerTable: 'children',
-    folder: 'liability-waiver',
-  },
-  health_declaration: {
-    ownerTable: 'participants',
-    folder: 'health-declaration',
-  },
+const LEGACY_DOCUMENT_FOLDERS = {
+  liability_waiver: 'liability-waiver',
+  health_declaration: 'health-declaration',
 }
 
 function hashFlowToken(flowToken) {
   return createHash('sha256').update(flowToken, 'utf8').digest('hex')
+}
+
+function normalizeDocumentType(value) {
+  if (typeof value !== 'string') {
+    return null
+  }
+
+  const normalized = value.trim()
+  return normalized && normalized.length <= 120 ? normalized : null
+}
+
+function getDocumentFolder(documentType) {
+  return (
+    LEGACY_DOCUMENT_FOLDERS[documentType] ??
+    `type-${createHash('sha256').update(documentType, 'utf8').digest('hex').slice(0, 24)}`
+  )
 }
 
 function isExpired(value, nowMs) {
@@ -49,8 +59,9 @@ export default async function handler(request, response) {
     flowToken,
     mimeType,
     sizeBytes,
-    documentType = 'liability_waiver',
+    documentType: rawDocumentType = 'liability_waiver',
   } = request.body || {}
+  const documentType = normalizeDocumentType(rawDocumentType)
 
   if (
     typeof registrationId !== 'string' ||
@@ -62,8 +73,7 @@ export default async function handler(request, response) {
     !Number.isInteger(sizeBytes) ||
     sizeBytes <= 0 ||
     sizeBytes > MAX_FILE_SIZE_BYTES ||
-    typeof documentType !== 'string' ||
-    !Object.hasOwn(DOCUMENT_TYPES, documentType)
+    !documentType
   ) {
     return response.status(400).json({ error: 'invalid_request' })
   }
@@ -88,6 +98,7 @@ export default async function handler(request, response) {
     .select(
       [
         'id',
+        'event_id',
         'status',
         'reservation_expires_at',
         'flow_token_expires_at',
@@ -133,32 +144,32 @@ export default async function handler(request, response) {
     })
   }
 
-  const documentConfig = DOCUMENT_TYPES[documentType]
-
-  const { data: owner, error: ownerError } = await supabase
-    .from(documentConfig.ownerTable)
-    .select('registration_id')
-    .eq('registration_id', registrationId)
+  const { data: requirement, error: requirementError } = await supabase
+    .from('event_document_requirements')
+    .select('document_type')
+    .eq('event_id', registration.event_id)
+    .eq('document_type', documentType)
     .maybeSingle()
 
-  if (ownerError) {
-    console.error('Document owner lookup failed', {
-      code: ownerError.code ?? 'unknown',
+  if (requirementError) {
+    console.error('Document requirement lookup failed', {
+      code: requirementError.code ?? 'unknown',
     })
 
     return response.status(500).json({ error: 'internal_error' })
   }
 
-  if (!owner) {
+  if (!requirement) {
     return response.status(409).json({
       error: 'document_type_not_allowed',
     })
   }
 
   const extension = ALLOWED_FILE_TYPES[mimeType]
+  const documentFolder = getDocumentFolder(documentType)
 
   const storagePath =
-    `${registrationId}/${documentConfig.folder}/` +
+    `${registrationId}/${documentFolder}/` +
     `${randomUUID()}.${extension}`
 
   const { data: signedUpload, error: signedUploadError } =

@@ -292,6 +292,11 @@
   overflow-wrap: anywhere;
 }
 
+.kidsRegistrationFields {
+  display: grid;
+  gap: 16px;
+}
+
 .kidsRegistrationFileName {
   color: #fff4b0;
 }
@@ -309,6 +314,11 @@
 .kidsRegistrationConsents {
   display: grid;
   gap: 14px;
+}
+
+.kidsRegistrationConsent {
+  display: grid;
+  gap: 8px;
 }
 
 .kidsRegistrationConsents label {
@@ -338,6 +348,35 @@
 .kidsRegistrationConsents label:focus-within {
   border-color: rgba(255, 214, 0, 0.68);
   box-shadow: 0 0 0 3px rgba(255, 214, 0, 0.08);
+}
+
+.kidsRegistrationConsents label > span {
+  display: grid;
+  gap: 5px;
+}
+
+.kidsRegistrationConsents label strong {
+  color: #f7f7f7;
+  font-size: 14px;
+}
+
+.kidsRegistrationConsents label small {
+  color: #a8b0bd;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.kidsRegistrationDocumentLink {
+  width: fit-content;
+  color: #FFD600;
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.kidsRegistrationDocumentLink:hover {
+  text-decoration: underline;
 }
 
 .kidsRegistrationFormAlert,

@@ -119,8 +119,8 @@ export async function reserveKidsRegistration(
   )
 }
 
-export async function createLiabilityDocumentUpload(
-  { registrationId, flowToken, file },
+export async function createRegistrationDocumentUpload(
+  { registrationId, flowToken, documentType, file },
   { signal } = {},
 ) {
   const mimeType = getUploadMimeType(file)
@@ -138,6 +138,7 @@ export async function createLiabilityDocumentUpload(
       flowToken,
       mimeType,
       sizeBytes: uploadFile.size,
+      documentType,
     },
     { signal },
   )
@@ -157,7 +158,7 @@ export async function createLiabilityDocumentUpload(
   }
 }
 
-export async function uploadLiabilityDocument(
+export async function uploadRegistrationDocument(
   { signedUrl, file },
   { signal } = {},
 ) {
@@ -185,12 +186,13 @@ export async function uploadLiabilityDocument(
   }
 }
 
-export async function confirmLiabilityDocument(
+export async function confirmRegistrationDocument(
   {
     registrationId,
     flowToken,
     storagePath,
     originalFilename,
+    documentType,
   },
   { signal } = {},
 ) {
@@ -201,6 +203,7 @@ export async function confirmLiabilityDocument(
       flowToken,
       storagePath,
       originalFilename,
+      documentType,
     },
     { signal },
   )

@@ -1,10 +1,10 @@
 import { useRef, useState } from 'react'
+import { reserveAdultRegistration } from '../api/adult-registration'
 import {
-  confirmHealthDeclaration,
-  createHealthDeclarationUpload,
-  reserveAdultRegistration,
-  uploadHealthDeclaration,
-} from '../api/adult-registration'
+  confirmRegistrationDocument,
+  createRegistrationDocumentUpload,
+  uploadRegistrationDocument,
+} from '../api/registration'
 import { calculateAgeOnDate } from '../utils/age'
 import './KidsRegistrationForm.css'
 
@@ -33,10 +33,6 @@ const INITIAL_FORM_VALUES = {
   participantPhone: '',
   participantEmail: '',
   distanceId: '',
-  healthDeclaration: null,
-  acceptEventRules: false,
-  acceptPersonalData: false,
-  acceptHealthResponsibility: false,
 }
 
 function getTodayValue() {
@@ -118,7 +114,7 @@ function getAgeRestrictionError(age, distance) {
   return null
 }
 
-function validateForm(values, event) {
+function validateForm(values, event, documentFiles, consentValues) {
   const errors = {}
   const distances = event.distances ?? []
 
@@ -207,33 +203,25 @@ function validateForm(values, event) {
     }
   }
 
-  if (!values.healthDeclaration) {
-    errors.healthDeclaration =
-      'Приложите подписанную расписку о состоянии здоровья.'
-  } else if (!isAllowedFile(values.healthDeclaration)) {
-    errors.healthDeclaration =
-      'Поддерживаются только PDF, JPG, JPEG и PNG.'
-  } else if (
-    values.healthDeclaration.size >
-    MAX_FILE_SIZE_BYTES
-  ) {
-    errors.healthDeclaration =
-      `Размер файла не должен превышать ${MAX_FILE_SIZE_LABEL}.`
+  for (const requirement of event.documentRequirements ?? []) {
+    const errorKey = `document:${requirement.documentType}`
+    const file = documentFiles[requirement.documentType]
+
+    if (requirement.required && !file) {
+      errors[errorKey] = 'Приложите обязательный документ.'
+    } else if (file && !isAllowedFile(file)) {
+      errors[errorKey] = 'Поддерживаются только PDF, JPG, JPEG и PNG.'
+    } else if (file && file.size > MAX_FILE_SIZE_BYTES) {
+      errors[errorKey] =
+        `Размер файла не должен превышать ${MAX_FILE_SIZE_LABEL}.`
+    }
   }
 
-  if (!values.acceptEventRules) {
-    errors.acceptEventRules =
-      'Подтвердите ознакомление с правилами мероприятия.'
-  }
-
-  if (!values.acceptPersonalData) {
-    errors.acceptPersonalData =
-      'Подтвердите согласие на обработку персональных данных.'
-  }
-
-  if (!values.acceptHealthResponsibility) {
-    errors.acceptHealthResponsibility =
-      'Подтвердите ответственность за состояние здоровья.'
+  for (const requirement of event.consentRequirements ?? []) {
+    if (requirement.required && !consentValues[requirement.consentType]) {
+      errors[`consent:${requirement.consentType}`] =
+        'Подтвердите обязательное согласие.'
+    }
   }
 
   return errors
@@ -253,6 +241,8 @@ function getSubmissionErrorMessage(code) {
       'Свободных мест больше нет.',
     group_sold_out:
       'Все места в этой категории заняты.',
+    invalid_consents:
+      'Проверьте согласия и попробуйте отправить форму ещё раз.',
     age_not_allowed:
       'Возраст участника не подходит для выбранной дистанции.',
     adult_required:
@@ -288,17 +278,20 @@ function getSubmissionErrorMessage(code) {
 function AdultRegistrationForm({ event }) {
   const [formValues, setFormValues] =
     useState(INITIAL_FORM_VALUES)
+  const [documentFiles, setDocumentFiles] = useState({})
+  const [consentValues, setConsentValues] = useState({})
 
   const [formErrors, setFormErrors] = useState({})
   const [submitMessage, setSubmitMessage] = useState('')
   const [submitError, setSubmitError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [registrationLocked, setRegistrationLocked] = useState(false)
   const [submissionComplete, setSubmissionComplete] =
     useState(false)
 
   const idempotencyKeyRef = useRef(null)
   const registrationSessionRef = useRef(null)
-  const uploadedDocumentRef = useRef(null)
+  const uploadedDocumentsRef = useRef(new Map())
 
   const distances = event.distances ?? []
 
@@ -344,22 +337,36 @@ function AdultRegistrationForm({ event }) {
     setSubmitError('')
   }
 
-  const handleFileChange = (eventChange) => {
+  const handleFileChange = (documentType, eventChange) => {
     if (isSubmitting || submissionComplete) {
       return
     }
 
-    uploadedDocumentRef.current = null
+    uploadedDocumentsRef.current.delete(documentType)
 
     const file =
       eventChange.target.files?.[0] ?? null
 
-    setFormValues((currentValues) => ({
-      ...currentValues,
-      healthDeclaration: file,
+    setDocumentFiles((currentFiles) => ({
+      ...currentFiles,
+      [documentType]: file,
     }))
 
-    clearFieldError('healthDeclaration')
+    clearFieldError(`document:${documentType}`)
+    setSubmitMessage('')
+    setSubmitError('')
+  }
+
+  const handleConsentChange = (consentType, checked) => {
+    if (isSubmitting || submissionComplete || registrationSessionRef.current) {
+      return
+    }
+
+    setConsentValues((currentValues) => ({
+      ...currentValues,
+      [consentType]: checked,
+    }))
+    clearFieldError(`consent:${consentType}`)
     setSubmitMessage('')
     setSubmitError('')
   }
@@ -371,8 +378,12 @@ function AdultRegistrationForm({ event }) {
       return
     }
 
-    const nextErrors =
-      validateForm(formValues, event)
+    const nextErrors = validateForm(
+      formValues,
+      event,
+      documentFiles,
+      consentValues,
+    )
 
     setFormErrors(nextErrors)
     setSubmitError('')
@@ -429,14 +440,11 @@ function AdultRegistrationForm({ event }) {
               email:
                 formValues.participantEmail.trim(),
             },
-            consents: {
-              eventRules:
-                formValues.acceptEventRules,
-              personalData:
-                formValues.acceptPersonalData,
-              healthResponsibility:
-                formValues.acceptHealthResponsibility,
-            },
+            consents: (event.consentRequirements ?? []).map((requirement) => ({
+              consentType: requirement.consentType,
+              consentVersion: requirement.consentVersion,
+              accepted: Boolean(consentValues[requirement.consentType]),
+            })),
             idempotencyKey:
               idempotencyKeyRef.current,
           })
@@ -452,63 +460,60 @@ function AdultRegistrationForm({ event }) {
 
         registrationSessionRef.current =
           registrationSession
+        setRegistrationLocked(true)
       }
 
-      let uploadedDocument =
-        uploadedDocumentRef.current
-
-      if (!uploadedDocument) {
-        setSubmitMessage(
-          'Место зарезервировано. Загружаем расписку о здоровье…',
-        )
-
-        const {
-          uploadInfo,
-          uploadFile,
-        } =
-          await createHealthDeclarationUpload({
-            registrationId:
-              registrationSession.registrationId,
-            flowToken:
-              registrationSession.flowToken,
-            file:
-              formValues.healthDeclaration,
-          })
-
-        await uploadHealthDeclaration({
-          signedUrl: uploadInfo.signedUrl,
-          file: uploadFile,
-        })
-
-        uploadedDocument = {
-          storagePath: uploadInfo.path,
-          originalFilename:
-            formValues.healthDeclaration.name,
-        }
-
-        uploadedDocumentRef.current =
-          uploadedDocument
-      }
-
-      setSubmitMessage(
-        'Расписка загружена. Проверяем файл…',
+      const selectedDocuments = (event.documentRequirements ?? []).filter(
+        (requirement) => documentFiles[requirement.documentType],
       )
 
-      await confirmHealthDeclaration({
-        registrationId:
-          registrationSession.registrationId,
-        flowToken:
-          registrationSession.flowToken,
-        storagePath:
-          uploadedDocument.storagePath,
-        originalFilename:
-          uploadedDocument.originalFilename,
-      })
+      for (const requirement of selectedDocuments) {
+        const file = documentFiles[requirement.documentType]
+        let uploadedDocument = uploadedDocumentsRef.current.get(
+          requirement.documentType,
+        )
+
+        if (!uploadedDocument) {
+          setSubmitMessage(`Загружаем документ «${requirement.title}»…`)
+
+          const { uploadInfo, uploadFile } =
+            await createRegistrationDocumentUpload({
+              registrationId: registrationSession.registrationId,
+              flowToken: registrationSession.flowToken,
+              documentType: requirement.documentType,
+              file,
+            })
+
+          await uploadRegistrationDocument({
+            signedUrl: uploadInfo.signedUrl,
+            file: uploadFile,
+          })
+
+          uploadedDocument = {
+            storagePath: uploadInfo.path,
+            originalFilename: file.name,
+          }
+          uploadedDocumentsRef.current.set(
+            requirement.documentType,
+            uploadedDocument,
+          )
+        }
+
+        setSubmitMessage(`Проверяем документ «${requirement.title}»…`)
+
+        await confirmRegistrationDocument({
+          registrationId: registrationSession.registrationId,
+          flowToken: registrationSession.flowToken,
+          documentType: requirement.documentType,
+          storagePath: uploadedDocument.storagePath,
+          originalFilename: uploadedDocument.originalFilename,
+        })
+      }
 
       setSubmissionComplete(true)
 
       setSubmitMessage(
-        'Данные и расписка о здоровье сохранены. Следующий шаг — оплата.',
+        'Данные и документы сохранены. Следующий шаг — оплата.',
       )
     } catch (error) {
       if (
@@ -516,7 +521,8 @@ function AdultRegistrationForm({ event }) {
       ) {
         idempotencyKeyRef.current = null
         registrationSessionRef.current = null
-        uploadedDocumentRef.current = null
+        setRegistrationLocked(false)
+        uploadedDocumentsRef.current = new Map()
       }
 
       setSubmitMessage('')
@@ -603,7 +609,7 @@ function AdultRegistrationForm({ event }) {
                 isSubmitting ||
                 submissionComplete ||
                 Boolean(
-                  registrationSessionRef.current,
+                  registrationLocked,
                 )
               }
               required
@@ -641,7 +647,7 @@ function AdultRegistrationForm({ event }) {
                 isSubmitting ||
                 submissionComplete ||
                 Boolean(
-                  registrationSessionRef.current,
+                  registrationLocked,
                 )
               }
               required
@@ -677,7 +683,7 @@ function AdultRegistrationForm({ event }) {
                 isSubmitting ||
                 submissionComplete ||
                 Boolean(
-                  registrationSessionRef.current,
+                  registrationLocked,
                 )
               }
             />
@@ -708,7 +714,7 @@ function AdultRegistrationForm({ event }) {
                 isSubmitting ||
                 submissionComplete ||
                 Boolean(
-                  registrationSessionRef.current,
+                  registrationLocked,
                 )
               }
               required
@@ -744,7 +750,7 @@ function AdultRegistrationForm({ event }) {
                   isSubmitting ||
                   submissionComplete ||
                   Boolean(
-                    registrationSessionRef.current,
+                    registrationLocked,
                   )
                 }
               />
@@ -768,7 +774,7 @@ function AdultRegistrationForm({ event }) {
                   isSubmitting ||
                   submissionComplete ||
                   Boolean(
-                    registrationSessionRef.current,
+                    registrationLocked,
                   )
                 }
               />
@@ -832,7 +838,7 @@ function AdultRegistrationForm({ event }) {
                     isSubmitting ||
                     submissionComplete ||
                     Boolean(
-                      registrationSessionRef.current,
+                    registrationLocked,
                     )
                   }
                 />
@@ -902,7 +908,7 @@ function AdultRegistrationForm({ event }) {
                 isSubmitting ||
                 submissionComplete ||
                 Boolean(
-                  registrationSessionRef.current,
+                  registrationLocked,
                 )
               }
               required
@@ -939,7 +945,7 @@ function AdultRegistrationForm({ event }) {
                 isSubmitting ||
                 submissionComplete ||
                 Boolean(
-                  registrationSessionRef.current,
+                  registrationLocked,
                 )
               }
               required
@@ -954,193 +960,107 @@ function AdultRegistrationForm({ event }) {
         </div>
       </section>
 
-      <section
-        className="kidsRegistrationSection"
-        aria-labelledby="health-title"
-      >
-        <div className="kidsRegistrationSectionHeading">
-          <span>04</span>
-
-          <div>
-            <h3 id="health-title">
-              Расписка о состоянии здоровья
-            </h3>
-
-            <p>
-              Приложите подписанный документ перед
-              продолжением регистрации.
-            </p>
+      {(event.documentRequirements ?? []).length > 0 && (
+        <section className="kidsRegistrationSection" aria-labelledby="documents-title">
+          <div className="kidsRegistrationSectionHeading">
+            <span>04</span>
+            <div>
+              <h3 id="documents-title">Документы</h3>
+              <p>Загрузите документы, настроенные организатором мероприятия.</p>
+            </div>
           </div>
-        </div>
 
-        <p className="kidsRegistrationNotice">
-          Участник подтверждает, что оценивает
-          состояние своего здоровья и возможность
-          участия в выбранной спортивной дистанции.
-        </p>
+          <div className="kidsRegistrationFields">
+            {(event.documentRequirements ?? []).map((requirement, index) => {
+              const errorKey = `document:${requirement.documentType}`
+              const inputId = `adult-document-${index}`
+              const file = documentFiles[requirement.documentType]
 
-        <label
-          className="kidsRegistrationField kidsRegistrationFieldWide"
-          htmlFor="healthDeclaration"
-        >
-          <span>
-            Файл расписки{' '}
-            <small>обязательно</small>
-          </span>
-
-          <input
-            className={inputClassName(
-              'healthDeclaration',
-            )}
-            id="healthDeclaration"
-            name="healthDeclaration"
-            type="file"
-            accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
-            onChange={handleFileChange}
-            disabled={
-              isSubmitting ||
-              submissionComplete
-            }
-            required
-          />
-
-          <span className="kidsRegistrationHelp">
-            PDF, JPG, JPEG или PNG. Максимальный
-            размер — {MAX_FILE_SIZE_LABEL}.
-          </span>
-
-          {formValues.healthDeclaration && (
-            <span className="kidsRegistrationFileName">
-              {
-                formValues.healthDeclaration
-                  .name
-              }
-            </span>
-          )}
-
-          {formErrors.healthDeclaration && (
-            <em className="kidsRegistrationError">
-              {formErrors.healthDeclaration}
-            </em>
-          )}
-        </label>
-      </section>
-
-      <section
-        className="kidsRegistrationSection"
-        aria-labelledby="consents-title"
-      >
-        <div className="kidsRegistrationSectionHeading">
-          <span>05</span>
-
-          <div>
-            <h3 id="consents-title">
-              Подтверждения
-            </h3>
-
-            <p>
-              Для отправки регистрации необходимо
-              подтвердить все пункты.
-            </p>
+              return (
+                <label className="kidsRegistrationField kidsRegistrationFieldWide" htmlFor={inputId} key={requirement.documentType}>
+                  <span>
+                    {requirement.title}{' '}
+                    <small>{requirement.required ? 'обязательно' : 'необязательно'}</small>
+                  </span>
+                  {requirement.description && (
+                    <span className="kidsRegistrationHelp">{requirement.description}</span>
+                  )}
+                  {requirement.templateUrl && (
+                    <a className="kidsRegistrationDocumentLink" href={requirement.templateUrl} target="_blank" rel="noreferrer">
+                      Открыть шаблон документа
+                    </a>
+                  )}
+                  <input
+                    className={inputClassName(errorKey)}
+                    id={inputId}
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                    onChange={(changeEvent) => handleFileChange(requirement.documentType, changeEvent)}
+                    disabled={isSubmitting || submissionComplete}
+                    aria-invalid={Boolean(formErrors[errorKey])}
+                    required={requirement.required}
+                  />
+                  <span className="kidsRegistrationHelp">
+                    PDF, JPG, JPEG или PNG. Максимальный размер — {MAX_FILE_SIZE_LABEL}.
+                  </span>
+                  {file && (
+                    <span className="kidsRegistrationFileName">{file.name}</span>
+                  )}
+                  {formErrors[errorKey] && (
+                    <em className="kidsRegistrationError">{formErrors[errorKey]}</em>
+                  )}
+                </label>
+              )
+            })}
           </div>
-        </div>
+        </section>
+      )}
 
-        <div className="kidsRegistrationConsents">
-          <label>
-            <input
-              type="checkbox"
-              name="acceptEventRules"
-              checked={
-                formValues.acceptEventRules
-              }
-              onChange={handleChange}
-              disabled={
-                isSubmitting ||
-                submissionComplete ||
-                Boolean(
-                  registrationSessionRef.current,
-                )
-              }
-            />
+      {(event.consentRequirements ?? []).length > 0 && (
+        <section className="kidsRegistrationSection" aria-labelledby="consents-title">
+          <div className="kidsRegistrationSectionHeading">
+            <span>05</span>
+            <div>
+              <h3 id="consents-title">Подтверждения</h3>
+              <p>Обязательные согласия нужно подтвердить для продолжения.</p>
+            </div>
+          </div>
 
-            <span>
-              Я ознакомился и согласен с правилами
-              проведения мероприятия.
-            </span>
-          </label>
+          <div className="kidsRegistrationConsents">
+            {(event.consentRequirements ?? []).map((requirement) => {
+              const errorKey = `consent:${requirement.consentType}`
 
-          {formErrors.acceptEventRules && (
-            <em className="kidsRegistrationError">
-              {formErrors.acceptEventRules}
-            </em>
-          )}
-
-          <label>
-            <input
-              type="checkbox"
-              name="acceptPersonalData"
-              checked={
-                formValues.acceptPersonalData
-              }
-              onChange={handleChange}
-              disabled={
-                isSubmitting ||
-                submissionComplete ||
-                Boolean(
-                  registrationSessionRef.current,
-                )
-              }
-            />
-
-            <span>
-              Я даю согласие на обработку
-              персональных данных, необходимых для
-              регистрации и проведения
-              мероприятия.
-            </span>
-          </label>
-
-          {formErrors.acceptPersonalData && (
-            <em className="kidsRegistrationError">
-              {formErrors.acceptPersonalData}
-            </em>
-          )}
-
-          <label>
-            <input
-              type="checkbox"
-              name="acceptHealthResponsibility"
-              checked={
-                formValues.acceptHealthResponsibility
-              }
-              onChange={handleChange}
-              disabled={
-                isSubmitting ||
-                submissionComplete ||
-                Boolean(
-                  registrationSessionRef.current,
-                )
-              }
-            />
-
-            <span>
-              Я подтверждаю, что самостоятельно
-              оцениваю состояние своего здоровья,
-              отсутствие противопоказаний к
-              участию и принимаю ответственность
-              за участие в выбранной дистанции.
-            </span>
-          </label>
-
-          {formErrors.acceptHealthResponsibility && (
-            <em className="kidsRegistrationError">
-              {
-                formErrors.acceptHealthResponsibility
-              }
-            </em>
-          )}
-        </div>
-      </section>
+              return (
+                <div className="kidsRegistrationConsent" key={requirement.consentType}>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={Boolean(consentValues[requirement.consentType])}
+                      onChange={(changeEvent) => handleConsentChange(requirement.consentType, changeEvent.target.checked)}
+                      disabled={isSubmitting || submissionComplete || registrationLocked}
+                      aria-invalid={Boolean(formErrors[errorKey])}
+                      required={requirement.required}
+                    />
+                    <span>
+                      <strong>{requirement.title}</strong>
+                      <small>{requirement.bodyText}</small>
+                      {!requirement.required && <small>Необязательное согласие</small>}
+                    </span>
+                  </label>
+                  {requirement.documentUrl && (
+                    <a className="kidsRegistrationDocumentLink" href={requirement.documentUrl} target="_blank" rel="noreferrer">
+                      Открыть документ
+                    </a>
+                  )}
+                  {formErrors[errorKey] && (
+                    <em className="kidsRegistrationError">{formErrors[errorKey]}</em>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </section>
+      )}
 
       {submitError && (
         <p

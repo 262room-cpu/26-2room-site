@@ -18,19 +18,29 @@ const MIME_TO_EXTENSION = {
   'image/png': 'png',
 }
 
-const DOCUMENT_TYPES = {
-  liability_waiver: {
-    ownerTable: 'children',
-    folder: 'liability-waiver',
-  },
-  health_declaration: {
-    ownerTable: 'participants',
-    folder: 'health-declaration',
-  },
+const LEGACY_DOCUMENT_FOLDERS = {
+  liability_waiver: 'liability-waiver',
+  health_declaration: 'health-declaration',
 }
 
 function hashFlowToken(flowToken) {
   return createHash('sha256').update(flowToken, 'utf8').digest('hex')
+}
+
+function normalizeDocumentType(value) {
+  if (typeof value !== 'string') {
+    return null
+  }
+
+  const normalized = value.trim()
+  return normalized && normalized.length <= 120 ? normalized : null
+}
+
+function getDocumentFolder(documentType) {
+  return (
+    LEGACY_DOCUMENT_FOLDERS[documentType] ??
+    `type-${createHash('sha256').update(documentType, 'utf8').digest('hex').slice(0, 24)}`
+  )
 }
 
 function isExpired(value, nowMs) {
@@ -80,14 +90,14 @@ function getSize(fileInfo) {
 function isValidStoragePath(
   registrationId,
   storagePath,
-  documentConfig,
+  documentType,
 ) {
   if (typeof storagePath !== 'string') {
     return false
   }
 
   const prefix =
-    `${registrationId}/${documentConfig.folder}/`
+    `${registrationId}/${getDocumentFolder(documentType)}/`
 
   if (!storagePath.startsWith(prefix)) {
     return false
@@ -98,14 +108,68 @@ function isValidStoragePath(
   return STORAGE_FILENAME_PATTERN.test(filename)
 }
 
-function sendExistingDocument(response, document, documentType) {
+function sendDocument(response, document, documentType, progress) {
   return response.status(200).json({
     documentId: document.id,
     registrationId: document.registration_id,
     documentType,
     verified: Boolean(document.verified_at),
-    nextStep: 'payment',
+    requirementsComplete: progress.requirementsComplete,
+    remainingDocumentTypes: progress.remainingDocumentTypes,
+    nextStep: progress.requirementsComplete ? 'payment' : 'upload_documents',
   })
+}
+
+async function getDocumentProgress(supabase, eventId, registrationId) {
+  const [requirementsResult, documentsResult] = await Promise.all([
+    supabase
+      .from('event_document_requirements')
+      .select('document_type')
+      .eq('event_id', eventId)
+      .eq('required', true),
+    supabase
+      .from('registration_documents')
+      .select('document_type')
+      .eq('registration_id', registrationId)
+      .eq('is_current', true),
+  ])
+
+  if (requirementsResult.error || documentsResult.error) {
+    return null
+  }
+
+  const confirmedTypes = new Set(
+    (documentsResult.data ?? []).map((document) => document.document_type),
+  )
+  const remainingDocumentTypes = (requirementsResult.data ?? [])
+    .map((requirement) => requirement.document_type)
+    .filter((documentType) => !confirmedTypes.has(documentType))
+
+  return {
+    requirementsComplete: remainingDocumentTypes.length === 0,
+    remainingDocumentTypes,
+  }
+}
+
+async function sendDocumentWithProgress(
+  response,
+  supabase,
+  eventId,
+  document,
+  documentType,
+) {
+  const progress = await getDocumentProgress(
+    supabase,
+    eventId,
+    document.registration_id,
+  )
+
+  if (!progress) {
+    console.error('Registration document progress lookup failed')
+    return response.status(500).json({ error: 'internal_error' })
+  }
+
+  return sendDocument(response, document, documentType, progress)
 }
 
 export default async function handler(request, response) {
@@ -122,17 +186,13 @@ export default async function handler(request, response) {
     flowToken,
     storagePath,
     originalFilename,
-    documentType = 'liability_waiver',
+    documentType: rawDocumentType = 'liability_waiver',
   } = request.body || {}
+  const documentType = normalizeDocumentType(rawDocumentType)
 
-  if (
-    typeof documentType !== 'string' ||
-    !Object.hasOwn(DOCUMENT_TYPES, documentType)
-  ) {
+  if (!documentType) {
     return response.status(400).json({ error: 'invalid_request' })
   }
-
-  const documentConfig = DOCUMENT_TYPES[documentType]
 
   const normalizedOriginalFilename =
     normalizeOriginalFilename(originalFilename)
@@ -145,7 +205,7 @@ export default async function handler(request, response) {
     !isValidStoragePath(
       registrationId,
       storagePath,
-      documentConfig,
+      documentType,
     ) ||
     !normalizedOriginalFilename
   ) {
@@ -175,6 +235,7 @@ export default async function handler(request, response) {
       .select(
         [
           'id',
+          'event_id',
           'status',
           'reservation_expires_at',
           'flow_token_expires_at',
@@ -225,21 +286,22 @@ export default async function handler(request, response) {
     })
   }
 
-  const { data: owner, error: ownerError } = await supabase
-    .from(documentConfig.ownerTable)
-    .select('registration_id')
-    .eq('registration_id', registrationId)
+  const { data: requirement, error: requirementError } = await supabase
+    .from('event_document_requirements')
+    .select('document_type')
+    .eq('event_id', registration.event_id)
+    .eq('document_type', documentType)
     .maybeSingle()
 
-  if (ownerError) {
-    console.error('Document owner lookup failed', {
-      code: ownerError.code ?? 'unknown',
+  if (requirementError) {
+    console.error('Document requirement lookup failed', {
+      code: requirementError.code ?? 'unknown',
     })
 
     return response.status(500).json({ error: 'internal_error' })
   }
 
-  if (!owner) {
+  if (!requirement) {
     return response.status(409).json({
       error: 'document_type_not_allowed',
     })
@@ -274,8 +336,10 @@ export default async function handler(request, response) {
       })
     }
 
-    return sendExistingDocument(
+    return sendDocumentWithProgress(
       response,
+      supabase,
+      registration.event_id,
       existingByPath,
       documentType,
     )
@@ -386,8 +450,10 @@ export default async function handler(request, response) {
         retryDocument.registration_id === registrationId &&
         retryDocument.document_type === documentType
       ) {
-        return sendExistingDocument(
+        return sendDocumentWithProgress(
           response,
+          supabase,
+          registration.event_id,
           retryDocument,
           documentType,
         )
@@ -405,6 +471,17 @@ export default async function handler(request, response) {
     return response.status(500).json({ error: 'internal_error' })
   }
 
+  const progress = await getDocumentProgress(
+    supabase,
+    registration.event_id,
+    registrationId,
+  )
+
+  if (!progress) {
+    console.error('Registration document progress lookup failed')
+    return response.status(500).json({ error: 'internal_error' })
+  }
+
   return response.status(200).json({
     documentId: insertedDocument.id,
     registrationId,
@@ -412,6 +489,8 @@ export default async function handler(request, response) {
     verified: true,
     mimeType: actualMimeType,
     sizeBytes: actualSizeBytes,
-    nextStep: 'payment',
+    requirementsComplete: progress.requirementsComplete,
+    remainingDocumentTypes: progress.remainingDocumentTypes,
+    nextStep: progress.requirementsComplete ? 'payment' : 'upload_documents',
   })
 }
