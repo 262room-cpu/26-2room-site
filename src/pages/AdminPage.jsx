@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
   AdminAuthError,
   createAdminConsentRequirement,
@@ -17,6 +17,7 @@ import {
   updateAdminEvent,
   updateAdminGroup,
 } from '../api/admin'
+import AdminEventManagement from '../components/AdminEventManagement'
 import './AdminPage.css'
 
 const EVENT_STATUS_OPTIONS = [
@@ -1165,6 +1166,8 @@ function AdminPage() {
         distances: [],
         documents: [],
         consents: [],
+        kitItems: [],
+        partners: [],
       }
 
       setEvents((currentEvents) => [
@@ -2383,6 +2386,10 @@ function AdminPage() {
       setLogoutMessage('Не удалось выйти. Попробуйте ещё раз.')
     }
   }
+
+  const handleAdminUnauthorized = useCallback(() => {
+    setSessionStatus('unauthenticated')
+  }, [])
 
   const isDistanceSaving =
     newDistanceSaveState.status === 'saving' ||
@@ -4091,17 +4098,37 @@ function AdminPage() {
                     )}
                   </div>
                 </section>
+
+                <AdminEventManagement
+                  key={eventDetail.event.id}
+                  eventId={eventDetail.event.id}
+                  kitItems={eventDetail.kitItems ?? []}
+                  partners={eventDetail.partners ?? []}
+                  distances={eventDetail.distances ?? []}
+                  onKitItemsChange={(kitItems) =>
+                    setEventDetail((currentDetail) => ({
+                      ...currentDetail,
+                      kitItems,
+                    }))
+                  }
+                  onPartnersChange={(partners) =>
+                    setEventDetail((currentDetail) => ({
+                      ...currentDetail,
+                      partners,
+                    }))
+                  }
+                  onUnauthorized={handleAdminUnauthorized}
+                  disabled={
+                    eventSaveStatus === 'saving' ||
+                    isGroupSaving ||
+                    isDistanceSaving ||
+                    isRequirementSaving
+                  }
+                />
                 </>
               )}
             </section>
           )}
-
-          <section className="adminPageSection">
-            <h2>Регистрации</h2>
-            <p>
-              Просмотр участников, статусов оплаты и документов.
-            </p>
-          </section>
 
           <section className="adminPageSection">
             <h2>Настройки регистрации</h2>

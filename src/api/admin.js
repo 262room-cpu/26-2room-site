@@ -191,6 +191,109 @@ export function updateAdminConsentRequirement(
   })
 }
 
+export function createAdminKitItem(eventId, changes, { signal } = {}) {
+  const query = new URLSearchParams({ resource: 'kit', eventId })
+
+  return requestJson(`/api/admin/event?${query.toString()}`, {
+    method: 'POST',
+    body: changes,
+    signal,
+  })
+}
+
+export function updateAdminKitItem(
+  eventId,
+  itemId,
+  changes,
+  { signal } = {},
+) {
+  const query = new URLSearchParams({
+    resource: 'kit',
+    eventId,
+    itemId,
+  })
+
+  return requestJson(`/api/admin/event?${query.toString()}`, {
+    method: 'PATCH',
+    body: changes,
+    signal,
+  })
+}
+
+export function createAdminPartner(eventId, changes, { signal } = {}) {
+  const query = new URLSearchParams({ resource: 'partner', eventId })
+
+  return requestJson(`/api/admin/event?${query.toString()}`, {
+    method: 'POST',
+    body: changes,
+    signal,
+  })
+}
+
+export function updateAdminPartner(
+  eventId,
+  itemId,
+  changes,
+  { signal } = {},
+) {
+  const query = new URLSearchParams({
+    resource: 'partner',
+    eventId,
+    itemId,
+  })
+
+  return requestJson(`/api/admin/event?${query.toString()}`, {
+    method: 'PATCH',
+    body: changes,
+    signal,
+  })
+}
+
+export function getAdminRegistrations(
+  eventId,
+  filters = {},
+  { signal } = {},
+) {
+  const query = new URLSearchParams({
+    resource: 'registrations',
+    eventId,
+    page: String(filters.page ?? 1),
+    pageSize: String(filters.pageSize ?? 50),
+  })
+
+  if (filters.status) {
+    query.set('status', filters.status)
+  }
+
+  if (filters.distanceId) {
+    query.set('distanceId', filters.distanceId)
+  }
+
+  if (filters.search) {
+    query.set('search', filters.search)
+  }
+
+  return requestJson(`/api/admin/event?${query.toString()}`, {
+    signal,
+  })
+}
+
+export function getAdminRegistration(
+  eventId,
+  registrationId,
+  { signal } = {},
+) {
+  const query = new URLSearchParams({
+    resource: 'registration',
+    eventId,
+    registrationId,
+  })
+
+  return requestJson(`/api/admin/event?${query.toString()}`, {
+    signal,
+  })
+}
+
 export function updateAdminDistance(
   eventId,
   distanceId,

@@ -603,10 +603,226 @@
   min-width: 204px;
 }
 
+.adminInlineButton {
+  min-height: 38px;
+  padding: 8px 14px;
+  border: 1px solid rgba(255, 214, 0, 0.3);
+  border-radius: 8px;
+  background: rgba(255, 214, 0, 0.08);
+  color: #ffd600;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.adminInlineButton:hover:not(:disabled) {
+  border-color: rgba(255, 214, 0, 0.6);
+  background: rgba(255, 214, 0, 0.14);
+}
+
+.adminInlineButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.adminRegistrationsSection {
+  min-width: 0;
+}
+
+.adminRegistrationSummary {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.adminRegistrationSummary span {
+  display: flex;
+  min-width: 0;
+  min-height: 78px;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.025);
+  color: #aeb4bd;
+  flex-direction: column;
+  justify-content: space-between;
+  font-size: 12px;
+}
+
+.adminRegistrationSummary strong {
+  color: #ffd600;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.adminRegistrationFilters {
+  display: grid;
+  grid-template-columns: minmax(220px, 2fr) minmax(160px, 1fr) minmax(180px, 1fr) auto;
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 20px;
+}
+
+.adminRegistrationTableWrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+}
+
+.adminRegistrationTable {
+  width: 100%;
+  min-width: 920px;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.adminRegistrationTable th,
+.adminRegistrationTable td {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  color: #d8dce2;
+  font-size: 13px;
+  vertical-align: middle;
+}
+
+.adminRegistrationTable th {
+  color: #8f96a0;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.adminRegistrationTable tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.adminRegistrationTable td strong,
+.adminRegistrationTable td small {
+  display: block;
+}
+
+.adminRegistrationTable td small {
+  margin-top: 3px;
+  color: #858c96;
+}
+
+.adminRegistrationPagination {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: 16px;
+  color: #aeb4bd;
+  font-size: 13px;
+}
+
+.adminRegistrationDetail {
+  margin-top: 22px;
+  padding: 22px;
+  border: 1px solid rgba(255, 214, 0, 0.2);
+  border-radius: 8px;
+  background: #101112;
+  box-shadow: 0 0 28px rgba(255, 214, 0, 0.05);
+}
+
+.adminRegistrationDetailGrid,
+.adminRegistrationRelatedGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.adminRegistrationDetailGroup,
+.adminRegistrationRelatedGrid > div {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.adminRegistrationDetail h5 {
+  margin: 0 0 12px;
+  color: #ffd600;
+  font-size: 14px;
+}
+
+.adminRegistrationDetail dl,
+.adminRegistrationRelatedGrid ul {
+  margin: 0;
+  padding: 0;
+}
+
+.adminRegistrationDetailValue {
+  display: grid;
+  grid-template-columns: minmax(96px, 0.8fr) minmax(0, 1.2fr);
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.adminRegistrationDetailValue:last-child {
+  border-bottom: 0;
+}
+
+.adminRegistrationDetailValue dt {
+  color: #858c96;
+  font-size: 12px;
+}
+
+.adminRegistrationDetailValue dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: #e6e8eb;
+  font-size: 13px;
+}
+
+.adminRegistrationRelatedGrid ul {
+  display: grid;
+  gap: 10px;
+  list-style: none;
+}
+
+.adminRegistrationRelatedGrid li {
+  display: grid;
+  gap: 4px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  color: #9ba2ac;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.adminRegistrationRelatedGrid li:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.adminRegistrationRelatedGrid a {
+  width: fit-content;
+  color: #ffd600;
+  font-weight: 700;
+}
+
 @media (max-width: 920px) {
   .adminDistanceFormGrid,
   .adminGroupFormGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .adminRegistrationSummary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .adminRegistrationFilters,
+  .adminRegistrationDetailGrid,
+  .adminRegistrationRelatedGrid {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -649,6 +865,14 @@
     grid-template-columns: 1fr;
   }
 
+  .adminRegistrationSummary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .adminRegistrationPagination {
+    justify-content: space-between;
+  }
+
   .adminDistanceFieldWide,
   .adminGroupFieldWide,
   .adminRequirementFieldWide {
@@ -662,6 +886,10 @@
   }
 
   .adminDistanceCard {
+    padding: 16px;
+  }
+
+  .adminRegistrationDetail {
     padding: 16px;
   }
 

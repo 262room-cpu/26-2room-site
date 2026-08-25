@@ -9,6 +9,17 @@ import {
 
 const INTEGER_MAX = 2147483647
 const SMALLINT_MAX = 32767
+const DEFAULT_REGISTRATION_PAGE_SIZE = 50
+const MAX_REGISTRATION_PAGE_SIZE = 100
+const REGISTRATION_SEARCH_LIMIT = 2500
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+const REGISTRATION_STATUSES = new Set([
+  'pending_payment',
+  'confirmed',
+  'expired',
+  'cancelled',
+])
 
 const EVENT_SELECT = [
   'id',
@@ -117,6 +128,56 @@ const CONSENT_SELECT = [
   'created_at',
   'updated_at',
 ].join(',')
+const KIT_SELECT = [
+  'id',
+  'event_id',
+  'code',
+  'name',
+  'description',
+  'image_path',
+  'sort_order',
+  'created_at',
+  'updated_at',
+].join(',')
+const PARTNER_SELECT = [
+  'id',
+  'event_id',
+  'name',
+  'logo_path',
+  'website_url',
+  'category',
+  'sort_order',
+  'created_at',
+  'updated_at',
+].join(',')
+const REGISTRATION_LIST_SELECT = [
+  'id',
+  'distance_id',
+  'status',
+  'public_id',
+  'amount_minor',
+  'currency',
+  'reserved_at',
+  'reservation_expires_at',
+  'confirmed_at',
+  'created_at',
+].join(',')
+const REGISTRATION_DETAIL_SELECT = [
+  'id',
+  'distance_id',
+  'status',
+  'public_id',
+  'amount_minor',
+  'currency',
+  'reserved_at',
+  'reservation_expires_at',
+  'payment_started_at',
+  'confirmed_at',
+  'expired_at',
+  'cancelled_at',
+  'created_at',
+  'updated_at',
+].join(',')
 const DOCUMENT_FIELDS = {
   documentType: { column: 'document_type', type: 'required_text' },
   title: { column: 'title', type: 'required_text' },
@@ -135,6 +196,20 @@ const CONSENT_FIELDS = {
   bodyText: { column: 'body_text', type: 'required_text' },
   documentUrl: { column: 'document_url', type: 'nullable_text' },
   required: { column: 'required', type: 'boolean' },
+  sortOrder: { column: 'sort_order', type: 'sort_order' },
+}
+const KIT_FIELDS = {
+  code: { column: 'code', type: 'required_text' },
+  name: { column: 'name', type: 'required_text' },
+  description: { column: 'description', type: 'nullable_text' },
+  imagePath: { column: 'image_path', type: 'nullable_text' },
+  sortOrder: { column: 'sort_order', type: 'sort_order' },
+}
+const PARTNER_FIELDS = {
+  name: { column: 'name', type: 'required_text' },
+  logoPath: { column: 'logo_path', type: 'nullable_text' },
+  websiteUrl: { column: 'website_url', type: 'nullable_text' },
+  category: { column: 'category', type: 'nullable_text' },
   sortOrder: { column: 'sort_order', type: 'sort_order' },
 }
 const EDITABLE_FIELDS = {
@@ -349,6 +424,49 @@ function buildRequirementUpdate(body, resource) {
   const errorCode = resource === 'document'
     ? 'invalid_document_data'
     : 'invalid_consent_data'
+
+  return normalizeRequirementBody(body, fields, errorCode).update
+}
+
+function buildEventItemInsert(body, resource, eventId) {
+  const isKit = resource === 'kit'
+  const fields = isKit ? KIT_FIELDS : PARTNER_FIELDS
+  const errorCode = isKit
+    ? 'invalid_kit_data'
+    : 'invalid_partner_data'
+  const { values } = normalizeRequirementBody(body, fields, errorCode)
+  const requiredFields = isKit ? ['code', 'name'] : ['name']
+
+  if (requiredFields.some((field) => !Object.hasOwn(values, field))) {
+    throw new RequirementValidationError('required_fields_missing')
+  }
+
+  if (isKit) {
+    return {
+      event_id: eventId,
+      code: values.code,
+      name: values.name,
+      description: values.description ?? null,
+      image_path: values.imagePath ?? null,
+      sort_order: values.sortOrder ?? 0,
+    }
+  }
+
+  return {
+    event_id: eventId,
+    name: values.name,
+    logo_path: values.logoPath ?? null,
+    website_url: values.websiteUrl ?? null,
+    category: values.category ?? null,
+    sort_order: values.sortOrder ?? 0,
+  }
+}
+
+function buildEventItemUpdate(body, resource) {
+  const fields = resource === 'kit' ? KIT_FIELDS : PARTNER_FIELDS
+  const errorCode = resource === 'kit'
+    ? 'invalid_kit_data'
+    : 'invalid_partner_data'
 
   return normalizeRequirementBody(body, fields, errorCode).update
 }
@@ -748,6 +866,34 @@ function mapConsentRequirement(consent) {
   }
 }
 
+function mapKitItem(item) {
+  return {
+    id: item.id,
+    eventId: item.event_id,
+    code: item.code,
+    name: item.name,
+    description: item.description,
+    imagePath: item.image_path,
+    sortOrder: item.sort_order,
+    createdAt: item.created_at,
+    updatedAt: item.updated_at,
+  }
+}
+
+function mapPartner(partner) {
+  return {
+    id: partner.id,
+    eventId: partner.event_id,
+    name: partner.name,
+    logoPath: partner.logo_path,
+    websiteUrl: partner.website_url,
+    category: partner.category,
+    sortOrder: partner.sort_order,
+    createdAt: partner.created_at,
+    updatedAt: partner.updated_at,
+  }
+}
+
 function readQueryParameter(value) {
   return Array.isArray(value) ? value[0] : value
 }
@@ -890,6 +1036,784 @@ async function handleRequirementRequest({
     .json({ [responseKey]: mapRequirement(requirement) })
 }
 
+async function handleEventItemRequest({
+  request,
+  response,
+  supabase,
+  resource,
+  eventId,
+  itemId,
+}) {
+  if (!['POST', 'PATCH'].includes(request.method)) {
+    response.setHeader('Allow', 'POST, PATCH')
+    return response
+      .status(405)
+      .json({ error: 'method_not_allowed' })
+  }
+
+  if (!eventId) {
+    return response
+      .status(400)
+      .json({ error: 'event_id_required' })
+  }
+
+  if (request.method === 'POST' && itemId) {
+    return response
+      .status(400)
+      .json({ error: 'item_id_not_allowed' })
+  }
+
+  if (request.method === 'PATCH' && !itemId) {
+    return response
+      .status(400)
+      .json({ error: 'item_id_required' })
+  }
+
+  const { data: event, error: eventError } = await supabase
+    .from('events')
+    .select('id')
+    .eq('id', eventId)
+    .maybeSingle()
+
+  if (eventError) {
+    console.error('Admin event item owner query failed', {
+      code: eventError.code ?? 'unknown',
+    })
+
+    return response
+      .status(500)
+      .json({ error: 'internal_error' })
+  }
+
+  if (!event) {
+    return response
+      .status(404)
+      .json({ error: 'event_not_found' })
+  }
+
+  const isKit = resource === 'kit'
+  const table = isKit ? 'event_kit_items' : 'event_partners'
+  const select = isKit ? KIT_SELECT : PARTNER_SELECT
+  const responseKey = isKit ? 'item' : 'partner'
+  const mapItem = isKit ? mapKitItem : mapPartner
+
+  let values
+
+  try {
+    values = request.method === 'POST'
+      ? buildEventItemInsert(request.body, resource, eventId)
+      : buildEventItemUpdate(request.body, resource)
+  } catch (error) {
+    if (error instanceof RequirementValidationError) {
+      return response
+        .status(400)
+        .json({ error: error.code })
+    }
+
+    console.error('Admin event item validation failed')
+
+    return response
+      .status(500)
+      .json({ error: 'internal_error' })
+  }
+
+  let query = request.method === 'POST'
+    ? supabase.from(table).insert(values)
+    : supabase
+        .from(table)
+        .update(values)
+        .eq('id', itemId)
+        .eq('event_id', eventId)
+
+  query = query.select(select).maybeSingle()
+
+  const { data: item, error: writeError } = await query
+
+  if (writeError) {
+    console.error(`Admin ${resource} item write failed`, {
+      code: writeError.code ?? 'unknown',
+    })
+
+    if (isKit && writeError.code === '23505') {
+      return response
+        .status(409)
+        .json({ error: 'kit_code_conflict' })
+    }
+
+    if (['22P02', '22003', '23502', '23514'].includes(writeError.code)) {
+      return response.status(400).json({
+        error: isKit ? 'invalid_kit_data' : 'invalid_partner_data',
+      })
+    }
+
+    return response
+      .status(500)
+      .json({ error: 'internal_error' })
+  }
+
+  if (!item) {
+    return response
+      .status(404)
+      .json({ error: 'item_not_found' })
+  }
+
+  return response
+    .status(request.method === 'POST' ? 201 : 200)
+    .json({ [responseKey]: mapItem(item) })
+}
+
+function parsePositiveInteger(value, fallback, max = INTEGER_MAX) {
+  if (value === undefined || value === null || value === '') {
+    return fallback
+  }
+
+  if (!/^\d+$/.test(String(value))) {
+    return null
+  }
+
+  const parsed = Number(value)
+
+  return Number.isSafeInteger(parsed) && parsed >= 1 && parsed <= max
+    ? parsed
+    : null
+}
+
+function joinName(lastName, firstName, middleName) {
+  return [lastName, firstName, middleName]
+    .filter((part) => typeof part === 'string' && part.trim())
+    .join(' ')
+}
+
+function chunkValues(values, size = 200) {
+  const chunks = []
+
+  for (let index = 0; index < values.length; index += size) {
+    chunks.push(values.slice(index, index + size))
+  }
+
+  return chunks
+}
+
+async function fetchRowsByRegistrationIds(
+  supabase,
+  table,
+  select,
+  registrationIds,
+) {
+  if (registrationIds.length === 0) {
+    return { data: [], error: null }
+  }
+
+  const results = await Promise.all(
+    chunkValues(registrationIds).map((ids) =>
+      supabase
+        .from(table)
+        .select(select)
+        .in('registration_id', ids),
+    ),
+  )
+  const failedResult = results.find(({ error }) => error)
+
+  return failedResult ?? {
+    data: results.flatMap(({ data }) => data ?? []),
+    error: null,
+  }
+}
+
+async function loadRegistrationProfiles(supabase, registrations) {
+  const registrationIds = registrations.map(({ id }) => id)
+  const [participantsResult, childrenResult, parentsResult] =
+    await Promise.all([
+      fetchRowsByRegistrationIds(
+        supabase,
+        'participants',
+        'registration_id,last_name,first_name,middle_name,phone_display,email_display',
+        registrationIds,
+      ),
+      fetchRowsByRegistrationIds(
+        supabase,
+        'children',
+        'registration_id,last_name,first_name,middle_name',
+        registrationIds,
+      ),
+      fetchRowsByRegistrationIds(
+        supabase,
+        'parents',
+        'registration_id,full_name,phone_display,email_display',
+        registrationIds,
+      ),
+    ])
+
+  if (
+    participantsResult.error ||
+    childrenResult.error ||
+    parentsResult.error
+  ) {
+    return { error: new Error('profile_query_failed') }
+  }
+
+  return {
+    error: null,
+    participants: new Map(
+      participantsResult.data.map((participant) => [
+        participant.registration_id,
+        participant,
+      ]),
+    ),
+    children: new Map(
+      childrenResult.data.map((child) => [child.registration_id, child]),
+    ),
+    parents: new Map(
+      parentsResult.data.map((parent) => [
+        parent.registration_id,
+        parent,
+      ]),
+    ),
+  }
+}
+
+function buildRegistrationProfile(registration, profiles) {
+  const adult = profiles.participants.get(registration.id)
+  const child = profiles.children.get(registration.id)
+  const parent = profiles.parents.get(registration.id)
+
+  if (adult) {
+    return {
+      participantType: 'adult',
+      displayName: joinName(
+        adult.last_name,
+        adult.first_name,
+        adult.middle_name,
+      ),
+      contactPhone: adult.phone_display,
+      contactEmail: adult.email_display,
+    }
+  }
+
+  if (child) {
+    return {
+      participantType: 'child',
+      displayName: joinName(
+        child.last_name,
+        child.first_name,
+        child.middle_name,
+      ),
+      contactPhone: parent?.phone_display ?? null,
+      contactEmail: parent?.email_display ?? null,
+    }
+  }
+
+  return {
+    participantType: null,
+    displayName: 'Участник не указан',
+    contactPhone: null,
+    contactEmail: null,
+  }
+}
+
+function registrationMatchesSearch(registration, profile, search) {
+  const haystack = [
+    registration.public_id,
+    profile.displayName,
+    profile.contactPhone,
+    profile.contactEmail,
+  ]
+    .filter((value) => typeof value === 'string')
+    .join(' ')
+    .toLocaleLowerCase('ru')
+
+  return haystack.includes(search)
+}
+
+function mapRegistrationListRow(
+  registration,
+  profiles,
+  distances,
+  groups,
+) {
+  const profile = buildRegistrationProfile(registration, profiles)
+  const distance = distances.get(registration.distance_id)
+  const group = distance?.group_id
+    ? groups.get(distance.group_id)
+    : null
+
+  return {
+    id: registration.id,
+    publicId: registration.public_id,
+    status: registration.status,
+    distance: distance
+      ? { id: distance.id, title: distance.title }
+      : null,
+    group: group ? { id: group.id, title: group.title } : null,
+    ...profile,
+    amountMinor: registration.amount_minor,
+    currency: registration.currency,
+    reservedAt: registration.reserved_at,
+    reservationExpiresAt: registration.reservation_expires_at,
+    confirmedAt: registration.confirmed_at,
+    createdAt: registration.created_at,
+  }
+}
+
+async function loadRegistrationSummary(supabase, eventId) {
+  const statuses = [
+    null,
+    'pending_payment',
+    'confirmed',
+    'expired',
+    'cancelled',
+  ]
+  const results = await Promise.all(
+    statuses.map((status) => {
+      let query = supabase
+        .from('registrations')
+        .select('id', { count: 'exact', head: true })
+        .eq('event_id', eventId)
+
+      if (status) {
+        query = query.eq('status', status)
+      }
+
+      return query
+    }),
+  )
+
+  if (results.some(({ error }) => error)) {
+    return { error: new Error('summary_query_failed') }
+  }
+
+  return {
+    error: null,
+    summary: Object.fromEntries(
+      statuses.map((status, index) => [
+        status ?? 'total',
+        results[index].count ?? 0,
+      ]),
+    ),
+  }
+}
+
+async function handleRegistrationListRequest({
+  request,
+  response,
+  supabase,
+  eventId,
+}) {
+  if (request.method !== 'GET') {
+    response.setHeader('Allow', 'GET')
+    return response
+      .status(405)
+      .json({ error: 'method_not_allowed' })
+  }
+
+  if (!eventId || !UUID_PATTERN.test(eventId)) {
+    return response
+      .status(400)
+      .json({ error: 'invalid_registration_filters' })
+  }
+
+  const page = parsePositiveInteger(
+    readQueryParameter(request.query.page),
+    1,
+  )
+  const pageSize = parsePositiveInteger(
+    readQueryParameter(request.query.pageSize),
+    DEFAULT_REGISTRATION_PAGE_SIZE,
+    MAX_REGISTRATION_PAGE_SIZE,
+  )
+  const status = readQueryParameter(request.query.status)?.trim() || null
+  const distanceId =
+    readQueryParameter(request.query.distanceId)?.trim() || null
+  const search =
+    readQueryParameter(request.query.search)?.trim().toLocaleLowerCase('ru') ||
+    null
+
+  if (
+    page === null ||
+    pageSize === null ||
+    (status && !REGISTRATION_STATUSES.has(status)) ||
+    (distanceId && !UUID_PATTERN.test(distanceId)) ||
+    (search && search.length > 120)
+  ) {
+    return response
+      .status(400)
+      .json({ error: 'invalid_registration_filters' })
+  }
+
+  const { data: event, error: eventError } = await supabase
+    .from('events')
+    .select('id')
+    .eq('id', eventId)
+    .maybeSingle()
+
+  if (eventError) {
+    console.error('Admin registration event query failed', {
+      code: eventError.code ?? 'unknown',
+    })
+    return response.status(500).json({ error: 'internal_error' })
+  }
+
+  if (!event) {
+    return response.status(404).json({ error: 'event_not_found' })
+  }
+
+  const [distancesResult, groupsResult, summaryResult] = await Promise.all([
+    supabase
+      .from('event_distances')
+      .select('id,title,group_id')
+      .eq('event_id', eventId),
+    supabase
+      .from('event_registration_groups')
+      .select('id,title')
+      .eq('event_id', eventId),
+    loadRegistrationSummary(supabase, eventId),
+  ])
+
+  if (distancesResult.error || groupsResult.error || summaryResult.error) {
+    console.error('Admin registration metadata query failed')
+    return response.status(500).json({ error: 'internal_error' })
+  }
+
+  let registrationsQuery = supabase
+    .from('registrations')
+    .select(REGISTRATION_LIST_SELECT, { count: 'exact' })
+    .eq('event_id', eventId)
+    .order('created_at', { ascending: false })
+    .order('id', { ascending: false })
+
+  if (status) {
+    registrationsQuery = registrationsQuery.eq('status', status)
+  }
+
+  if (distanceId) {
+    registrationsQuery = registrationsQuery.eq('distance_id', distanceId)
+  }
+
+  if (search) {
+    registrationsQuery = registrationsQuery.limit(
+      REGISTRATION_SEARCH_LIMIT,
+    )
+  } else {
+    const offset = (page - 1) * pageSize
+    registrationsQuery = registrationsQuery.range(
+      offset,
+      offset + pageSize - 1,
+    )
+  }
+
+  const { data: registrations, error: registrationsError, count } =
+    await registrationsQuery
+
+  if (registrationsError) {
+    console.error('Admin registrations list query failed', {
+      code: registrationsError.code ?? 'unknown',
+    })
+    return response.status(500).json({ error: 'internal_error' })
+  }
+
+  const profiles = await loadRegistrationProfiles(
+    supabase,
+    registrations ?? [],
+  )
+
+  if (profiles.error) {
+    console.error('Admin registration profile query failed')
+    return response.status(500).json({ error: 'internal_error' })
+  }
+
+  const distanceMap = new Map(
+    (distancesResult.data ?? []).map((distance) => [distance.id, distance]),
+  )
+  const groupMap = new Map(
+    (groupsResult.data ?? []).map((group) => [group.id, group]),
+  )
+  let matchingRegistrations = registrations ?? []
+
+  if (search) {
+    matchingRegistrations = matchingRegistrations.filter((registration) =>
+      registrationMatchesSearch(
+        registration,
+        buildRegistrationProfile(registration, profiles),
+        search,
+      ),
+    )
+  }
+
+  const total = search ? matchingRegistrations.length : count ?? 0
+  const offset = (page - 1) * pageSize
+  const pageRegistrations = search
+    ? matchingRegistrations.slice(offset, offset + pageSize)
+    : matchingRegistrations
+
+  return response.status(200).json({
+    rows: pageRegistrations.map((registration) =>
+      mapRegistrationListRow(
+        registration,
+        profiles,
+        distanceMap,
+        groupMap,
+      ),
+    ),
+    total,
+    page,
+    pageSize,
+    summary: summaryResult.summary,
+  })
+}
+
+async function addDocumentSignedUrls(supabase, documents) {
+  return Promise.all(
+    documents.map(async (document) => {
+      let signedUrl = null
+
+      if (document.is_current) {
+        const { data, error } = await supabase.storage
+          .from(document.storage_bucket)
+          .createSignedUrl(document.storage_path, 300)
+
+        if (error || !data?.signedUrl) {
+          console.error('Admin document signed URL creation failed', {
+            code: error?.statusCode ?? error?.status ?? 'unknown',
+          })
+        } else {
+          signedUrl = data.signedUrl
+        }
+      }
+
+      return {
+        documentType: document.document_type,
+        originalFilename: document.original_filename,
+        mimeType: document.mime_type,
+        sizeBytes: document.size_bytes,
+        uploadedAt: document.uploaded_at,
+        verifiedAt: document.verified_at,
+        isCurrent: document.is_current,
+        signedUrl,
+      }
+    }),
+  )
+}
+
+async function handleRegistrationDetailRequest({
+  request,
+  response,
+  supabase,
+  eventId,
+  registrationId,
+}) {
+  if (request.method !== 'GET') {
+    response.setHeader('Allow', 'GET')
+    return response
+      .status(405)
+      .json({ error: 'method_not_allowed' })
+  }
+
+  if (
+    !eventId ||
+    !UUID_PATTERN.test(eventId) ||
+    !registrationId ||
+    !UUID_PATTERN.test(registrationId)
+  ) {
+    return response
+      .status(400)
+      .json({ error: 'invalid_registration_request' })
+  }
+
+  const { data: registration, error: registrationError } =
+    await supabase
+      .from('registrations')
+      .select(REGISTRATION_DETAIL_SELECT)
+      .eq('id', registrationId)
+      .eq('event_id', eventId)
+      .maybeSingle()
+
+  if (registrationError) {
+    console.error('Admin registration detail query failed', {
+      code: registrationError.code ?? 'unknown',
+    })
+    return response.status(500).json({ error: 'internal_error' })
+  }
+
+  if (!registration) {
+    return response
+      .status(404)
+      .json({ error: 'registration_not_found' })
+  }
+
+  const [
+    distanceResult,
+    participantResult,
+    childResult,
+    parentResult,
+    documentsResult,
+    consentsResult,
+    paymentsResult,
+  ] = await Promise.all([
+    supabase
+      .from('event_distances')
+      .select('id,title,group_id')
+      .eq('id', registration.distance_id)
+      .eq('event_id', eventId)
+      .maybeSingle(),
+    supabase
+      .from('participants')
+      .select(
+        'last_name,first_name,middle_name,birth_date,gender,phone_display,email_display',
+      )
+      .eq('registration_id', registrationId)
+      .maybeSingle(),
+    supabase
+      .from('children')
+      .select('last_name,first_name,middle_name,birth_date,gender')
+      .eq('registration_id', registrationId)
+      .maybeSingle(),
+    supabase
+      .from('parents')
+      .select('full_name,phone_display,email_display')
+      .eq('registration_id', registrationId)
+      .maybeSingle(),
+    supabase
+      .from('registration_documents')
+      .select(
+        'document_type,storage_bucket,storage_path,original_filename,mime_type,size_bytes,is_current,uploaded_at,verified_at',
+      )
+      .eq('registration_id', registrationId)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('registration_consents')
+      .select('consent_type,consent_version,accepted_at')
+      .eq('registration_id', registrationId)
+      .order('created_at', { ascending: true }),
+    supabase
+      .from('payments')
+      .select(
+        'provider,provider_payment_id,status,amount_minor,currency,provider_created_at,paid_at,failed_at,cancelled_at,refunded_at,failure_code,created_at',
+      )
+      .eq('registration_id', registrationId)
+      .order('created_at', { ascending: false }),
+  ])
+
+  const relatedResults = [
+    distanceResult,
+    participantResult,
+    childResult,
+    parentResult,
+    documentsResult,
+    consentsResult,
+    paymentsResult,
+  ]
+
+  if (relatedResults.some(({ error }) => error)) {
+    console.error('Admin registration related data query failed')
+    return response.status(500).json({ error: 'internal_error' })
+  }
+
+  let group = null
+
+  if (distanceResult.data?.group_id) {
+    const { data, error } = await supabase
+      .from('event_registration_groups')
+      .select('id,title')
+      .eq('id', distanceResult.data.group_id)
+      .eq('event_id', eventId)
+      .maybeSingle()
+
+    if (error) {
+      console.error('Admin registration group query failed', {
+        code: error.code ?? 'unknown',
+      })
+      return response.status(500).json({ error: 'internal_error' })
+    }
+
+    group = data
+  }
+
+  const documents = await addDocumentSignedUrls(
+    supabase,
+    documentsResult.data ?? [],
+  )
+  const adult = participantResult.data
+  const child = childResult.data
+  const parent = parentResult.data
+
+  return response.status(200).json({
+    registration: {
+      id: registration.id,
+      publicId: registration.public_id,
+      status: registration.status,
+      amountMinor: registration.amount_minor,
+      currency: registration.currency,
+      reservedAt: registration.reserved_at,
+      reservationExpiresAt: registration.reservation_expires_at,
+      paymentStartedAt: registration.payment_started_at,
+      confirmedAt: registration.confirmed_at,
+      expiredAt: registration.expired_at,
+      cancelledAt: registration.cancelled_at,
+      createdAt: registration.created_at,
+      updatedAt: registration.updated_at,
+      distance: distanceResult.data
+        ? {
+            id: distanceResult.data.id,
+            title: distanceResult.data.title,
+          }
+        : null,
+      group: group ? { id: group.id, title: group.title } : null,
+      participantType: adult ? 'adult' : child ? 'child' : null,
+    },
+    adult: adult
+      ? {
+          displayName: joinName(
+            adult.last_name,
+            adult.first_name,
+            adult.middle_name,
+          ),
+          birthDate: adult.birth_date,
+          gender: adult.gender,
+          phone: adult.phone_display,
+          email: adult.email_display,
+        }
+      : null,
+    child: child
+      ? {
+          displayName: joinName(
+            child.last_name,
+            child.first_name,
+            child.middle_name,
+          ),
+          birthDate: child.birth_date,
+          gender: child.gender,
+          parent: parent
+            ? {
+                fullName: parent.full_name,
+                phone: parent.phone_display,
+                email: parent.email_display,
+              }
+            : null,
+        }
+      : null,
+    documents,
+    consents: (consentsResult.data ?? []).map((consent) => ({
+      consentType: consent.consent_type,
+      consentVersion: consent.consent_version,
+      acceptedAt: consent.accepted_at,
+    })),
+    payments: (paymentsResult.data ?? []).map((payment) => ({
+      provider: payment.provider,
+      providerPaymentId: payment.provider_payment_id,
+      status: payment.status,
+      amountMinor: payment.amount_minor,
+      currency: payment.currency,
+      providerCreatedAt: payment.provider_created_at,
+      paidAt: payment.paid_at,
+      failedAt: payment.failed_at,
+      cancelledAt: payment.cancelled_at,
+      refundedAt: payment.refunded_at,
+      failureCode: payment.failure_code,
+      createdAt: payment.created_at,
+    })),
+  })
+}
+
 export default async function handler(request, response) {
   response.setHeader('Cache-Control', 'no-store')
   response.setHeader(
@@ -932,6 +1856,10 @@ export default async function handler(request, response) {
   const requirementId = readQueryParameter(
     request.query.requirementId,
   )
+  const itemId = readQueryParameter(request.query.itemId)
+  const registrationId = readQueryParameter(
+    request.query.registrationId,
+  )
 
   if (request.method === 'POST' && eventId && !resource) {
     return response
@@ -958,20 +1886,50 @@ export default async function handler(request, response) {
   }
 
   if (resource) {
-    if (!['document', 'consent'].includes(resource)) {
-      return response
-        .status(400)
-        .json({ error: 'invalid_resource' })
+    if (['document', 'consent'].includes(resource)) {
+      return handleRequirementRequest({
+        request,
+        response,
+        supabase,
+        resource,
+        eventId: resourceEventId,
+        requirementId,
+      })
     }
 
-    return handleRequirementRequest({
-      request,
-      response,
-      supabase,
-      resource,
-      eventId: resourceEventId,
-      requirementId,
-    })
+    if (['kit', 'partner'].includes(resource)) {
+      return handleEventItemRequest({
+        request,
+        response,
+        supabase,
+        resource,
+        eventId: resourceEventId,
+        itemId,
+      })
+    }
+
+    if (resource === 'registrations') {
+      return handleRegistrationListRequest({
+        request,
+        response,
+        supabase,
+        eventId: resourceEventId,
+      })
+    }
+
+    if (resource === 'registration') {
+      return handleRegistrationDetailRequest({
+        request,
+        response,
+        supabase,
+        eventId: resourceEventId,
+        registrationId,
+      })
+    }
+
+    return response
+      .status(400)
+      .json({ error: 'invalid_resource' })
   }
 
   if (request.method === 'POST') {
@@ -1180,6 +2138,8 @@ export default async function handler(request, response) {
     distancesResult,
     documentsResult,
     consentsResult,
+    kitResult,
+    partnersResult,
   ] = await Promise.all([
     supabase
       .from('event_registration_groups')
@@ -1212,13 +2172,27 @@ export default async function handler(request, response) {
       )
       .eq('event_id', eventId)
       .order('sort_order', { ascending: true }),
+
+    supabase
+      .from('event_kit_items')
+      .select(KIT_SELECT)
+      .eq('event_id', eventId)
+      .order('sort_order', { ascending: true }),
+
+    supabase
+      .from('event_partners')
+      .select(PARTNER_SELECT)
+      .eq('event_id', eventId)
+      .order('sort_order', { ascending: true }),
   ])
 
   if (
     groupsResult.error ||
     distancesResult.error ||
     documentsResult.error ||
-    consentsResult.error
+    consentsResult.error ||
+    kitResult.error ||
+    partnersResult.error
   ) {
     console.error('Admin event related data query failed')
 
@@ -1265,5 +2239,9 @@ export default async function handler(request, response) {
       required: consent.required,
       sortOrder: consent.sort_order,
     })),
+
+    kitItems: (kitResult.data ?? []).map(mapKitItem),
+
+    partners: (partnersResult.data ?? []).map(mapPartner),
   })
 }
