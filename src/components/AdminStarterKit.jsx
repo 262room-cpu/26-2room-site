@@ -348,79 +348,9 @@ function AdminStarterKit({ eventId, onKitItemsChange, onUnauthorized }) {
       <section className="adminDistancesSection">
         <div className="adminDistancesHeader">
           <div>
-            <p className="adminPageEyebrow">Выбрано: {state.kitItems.length}</p>
-            <h3>В этом мероприятии</h3>
-          </div>
-        </div>
-
-        {state.kitItems.length === 0 ? (
-          <p>В стартовый набор пока ничего не выбрано.</p>
-        ) : (
-          <div className="adminKitSelectedList">
-            {state.kitItems.map((kitItem) => {
-              const catalogItem = state.catalogItems.find(
-                (item) => item.id === kitItem.catalogItemId,
-              )
-              if (!catalogItem) return null
-              return (
-                <div className="adminKitSelectedRow" key={kitItem.id}>
-                  <div>
-                    <strong>{catalogItem.name}</strong>
-                    <small>{catalogItem.code}</small>
-                  </div>
-                  <label className="adminKitOrderField">
-                    <span>Порядок</span>
-                    <input
-                      type="number"
-                      min="0"
-                      max="32767"
-                      value={
-                        orderDrafts[catalogItem.id] ??
-                        String(kitItem.sortOrder)
-                      }
-                      disabled={writesDisabled}
-                      onChange={(event) =>
-                        setOrderDrafts((current) => ({
-                          ...current,
-                          [catalogItem.id]: event.target.value,
-                        }))
-                      }
-                      onBlur={(event) => {
-                        const value = Number(event.target.value)
-                        if (
-                          Number.isInteger(value) &&
-                          value >= 0 &&
-                          value <= 32767
-                        ) {
-                          handleMembership(catalogItem, true, value)
-                        } else {
-                          setOrderDrafts((current) => ({
-                            ...current,
-                            [catalogItem.id]: String(kitItem.sortOrder),
-                          }))
-                        }
-                      }}
-                    />
-                  </label>
-                  <button
-                    className="adminInlineButton"
-                    type="button"
-                    disabled={writesDisabled}
-                    onClick={() => handleMembership(catalogItem, false)}
-                  >
-                    Убрать
-                  </button>
-                </div>
-              )
-            })}
-          </div>
-        )}
-      </section>
-
-      <section className="adminDistancesSection">
-        <div className="adminDistancesHeader">
-          <div>
-            <p className="adminPageEyebrow">Каталог: {state.catalogItems.length}</p>
+            <p className="adminPageEyebrow">
+              Выбрано: {state.kitItems.length} из {state.catalogItems.length}
+            </p>
             <h3>Библиотека</h3>
           </div>
           <button
@@ -470,7 +400,8 @@ function AdminStarterKit({ eventId, onKitItemsChange, onUnauthorized }) {
 
         <div className="adminKitLibraryList">
           {state.catalogItems.map((catalogItem) => {
-            const selected = selectedByCatalogId.has(catalogItem.id)
+            const kitItem = selectedByCatalogId.get(catalogItem.id)
+            const selected = Boolean(kitItem)
             const membershipStatus = membershipStates[catalogItem.id]
             return (
               <div
@@ -499,6 +430,42 @@ function AdminStarterKit({ eventId, onKitItemsChange, onUnauthorized }) {
                   </span>
                 </label>
                 <div className="adminKitLibraryActions">
+                  {selected && (
+                    <label className="adminKitOrderField adminKitLibraryOrder">
+                      <span>Порядок</span>
+                      <input
+                        type="number"
+                        min="0"
+                        max="32767"
+                        value={
+                          orderDrafts[catalogItem.id] ??
+                          String(kitItem.sortOrder)
+                        }
+                        disabled={writesDisabled}
+                        onChange={(event) =>
+                          setOrderDrafts((current) => ({
+                            ...current,
+                            [catalogItem.id]: event.target.value,
+                          }))
+                        }
+                        onBlur={(event) => {
+                          const value = Number(event.target.value)
+                          if (
+                            Number.isInteger(value) &&
+                            value >= 0 &&
+                            value <= 32767
+                          ) {
+                            handleMembership(catalogItem, true, value)
+                          } else {
+                            setOrderDrafts((current) => ({
+                              ...current,
+                              [catalogItem.id]: String(kitItem.sortOrder),
+                            }))
+                          }
+                        }}
+                      />
+                    </label>
+                  )}
                   {!catalogItem.active && <span>Неактивен</span>}
                   {membershipStatus === 'error' && <span>Не сохранено</span>}
                   <button

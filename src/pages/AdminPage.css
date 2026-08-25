@@ -926,13 +926,11 @@
   gap: 22px;
 }
 
-.adminKitSelectedList,
 .adminKitLibraryList {
   display: grid;
   gap: 10px;
 }
 
-.adminKitSelectedRow,
 .adminKitLibraryItem {
   display: grid;
   min-width: 0;
@@ -944,18 +942,11 @@
   background: rgba(255, 255, 255, 0.025);
 }
 
-.adminKitSelectedRow {
-  grid-template-columns: minmax(0, 1fr) 120px auto;
-}
-
-.adminKitSelectedRow strong,
-.adminKitSelectedRow small,
 .adminKitLibrarySelect strong,
 .adminKitLibrarySelect small {
   display: block;
 }
 
-.adminKitSelectedRow small,
 .adminKitLibrarySelect small {
   margin-top: 4px;
   color: #858c96;
@@ -1020,6 +1011,10 @@
   align-items: center;
   color: #d3ad00;
   font-size: 11px;
+}
+
+.adminKitLibraryOrder {
+  width: 110px;
 }
 
 .adminKitEditor {
@@ -1112,12 +1107,12 @@
     min-height: 158px;
   }
 
-  .adminKitSelectedRow,
   .adminKitLibraryItem {
     grid-template-columns: 1fr;
   }
 
   .adminKitLibraryActions {
+    flex-wrap: wrap;
     justify-content: space-between;
   }
 
