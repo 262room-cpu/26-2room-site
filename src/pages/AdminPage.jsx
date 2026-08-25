@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import {
   AdminAuthError,
+  createAdminConsentRequirement,
   createAdminDistance,
+  createAdminDocumentRequirement,
   createAdminEvent,
   createAdminGroup,
   getAdminEvent,
@@ -10,6 +12,8 @@ import {
   loginAdmin,
   logoutAdmin,
   updateAdminDistance,
+  updateAdminConsentRequirement,
+  updateAdminDocumentRequirement,
   updateAdminEvent,
   updateAdminGroup,
 } from '../api/admin'
@@ -431,6 +435,174 @@ function buildGroupChanges(form) {
   }
 }
 
+function getNextRequirementSortOrder(requirements) {
+  if (!Array.isArray(requirements) || requirements.length === 0) {
+    return 0
+  }
+
+  const highestSortOrder = Math.max(
+    ...requirements.map((requirement) => requirement.sortOrder),
+  )
+
+  return highestSortOrder >= 32767 ? null : highestSortOrder + 1
+}
+
+function createDocumentForm(document) {
+  return {
+    title: document.title ?? '',
+    documentType: document.documentType ?? '',
+    description: document.description ?? '',
+    templateUrl: document.templateUrl ?? '',
+    required: document.required ?? true,
+    sortOrder: String(document.sortOrder ?? 0),
+  }
+}
+
+function createDocumentForms(documents) {
+  return Object.fromEntries(
+    (Array.isArray(documents) ? documents : []).map((document) => [
+      document.id,
+      createDocumentForm(document),
+    ]),
+  )
+}
+
+function createNewDocumentForm(documents) {
+  const nextSortOrder = getNextRequirementSortOrder(documents)
+
+  return {
+    title: '',
+    documentType: '',
+    description: '',
+    templateUrl: '',
+    required: true,
+    sortOrder: nextSortOrder === null ? '' : String(nextSortOrder),
+  }
+}
+
+function buildDocumentChanges(form) {
+  const title = form.title.trim()
+  const documentType = form.documentType.trim()
+
+  if (!title || !documentType) {
+    throw new EventFormError(
+      'Название и тип документа не должны быть пустыми.',
+    )
+  }
+
+  return {
+    title,
+    documentType,
+    description: form.description.trim() || null,
+    templateUrl: form.templateUrl.trim() || null,
+    required: form.required,
+    sortOrder: integerInputToValue(form.sortOrder, {
+      label: 'Порядок',
+      max: 32767,
+    }),
+  }
+}
+
+function createConsentForm(consent) {
+  return {
+    title: consent.title ?? '',
+    consentType: consent.consentType ?? '',
+    consentVersion: consent.consentVersion ?? '1',
+    bodyText: consent.bodyText ?? '',
+    documentUrl: consent.documentUrl ?? '',
+    required: consent.required ?? true,
+    sortOrder: String(consent.sortOrder ?? 0),
+  }
+}
+
+function createConsentForms(consents) {
+  return Object.fromEntries(
+    (Array.isArray(consents) ? consents : []).map((consent) => [
+      consent.id,
+      createConsentForm(consent),
+    ]),
+  )
+}
+
+function createNewConsentForm(consents) {
+  const nextSortOrder = getNextRequirementSortOrder(consents)
+
+  return {
+    title: '',
+    consentType: '',
+    consentVersion: '1',
+    bodyText: '',
+    documentUrl: '',
+    required: true,
+    sortOrder: nextSortOrder === null ? '' : String(nextSortOrder),
+  }
+}
+
+function buildConsentChanges(form) {
+  const title = form.title.trim()
+  const consentType = form.consentType.trim()
+  const consentVersion = form.consentVersion.trim()
+  const bodyText = form.bodyText.trim()
+
+  if (!title || !consentType || !consentVersion || !bodyText) {
+    throw new EventFormError(
+      'Название, тип, версия и текст согласия обязательны.',
+    )
+  }
+
+  return {
+    title,
+    consentType,
+    consentVersion,
+    bodyText,
+    documentUrl: form.documentUrl.trim() || null,
+    required: form.required,
+    sortOrder: integerInputToValue(form.sortOrder, {
+      label: 'Порядок',
+      max: 32767,
+    }),
+  }
+}
+
+function getRequirementErrorMessage(error, resource, operation) {
+  const isDocument = resource === 'document'
+
+  if (error instanceof AdminAuthError) {
+    if (
+      error.code === 'document_type_conflict' ||
+      error.code === 'consent_type_conflict'
+    ) {
+      return isDocument
+        ? 'Документ с таким типом уже существует.'
+        : 'Согласие с таким типом уже существует.'
+    }
+
+    if (error.code === 'event_not_found') {
+      return 'Мероприятие не найдено.'
+    }
+
+    if (error.code === 'requirement_not_found') {
+      return isDocument
+        ? 'Документ не найден.'
+        : 'Согласие не найдено.'
+    }
+
+    if (error.status === 400) {
+      return 'Проверьте заполненные данные.'
+    }
+  }
+
+  if (operation === 'create') {
+    return isDocument
+      ? 'Не удалось добавить документ.'
+      : 'Не удалось добавить согласие.'
+  }
+
+  return isDocument
+    ? 'Не удалось сохранить документ.'
+    : 'Не удалось сохранить согласие.'
+}
+
 function createEventForm(event) {
   const timezone = event.timezone ?? ''
 
@@ -636,6 +808,181 @@ function updateEventListItem(event, updatedEvent) {
   }
 }
 
+function DocumentRequirementFields({ form, onChange }) {
+  return (
+    <div className="adminRequirementFormGrid">
+      <label className="adminEventField">
+        <span>Название</span>
+        <input
+          name="title"
+          type="text"
+          value={form.title}
+          onChange={onChange}
+          required
+        />
+      </label>
+
+      <label className="adminEventField">
+        <span>Тип документа</span>
+        <input
+          name="documentType"
+          type="text"
+          value={form.documentType}
+          onChange={onChange}
+          required
+        />
+      </label>
+
+      <label className="adminEventField adminRequirementFieldWide">
+        <span>Описание</span>
+        <textarea
+          name="description"
+          rows="3"
+          value={form.description}
+          onChange={onChange}
+        />
+      </label>
+
+      <label className="adminEventField adminRequirementFieldWide">
+        <span>Ссылка на шаблон</span>
+        <input
+          name="templateUrl"
+          type="url"
+          value={form.templateUrl}
+          onChange={onChange}
+        />
+      </label>
+
+      <label className="adminRequirementCheckbox">
+        <input
+          name="required"
+          type="checkbox"
+          checked={form.required}
+          onChange={onChange}
+        />
+        <span>Обязательный документ</span>
+      </label>
+
+      <label className="adminEventField">
+        <span>Порядок</span>
+        <input
+          name="sortOrder"
+          type="number"
+          min="0"
+          max="32767"
+          step="1"
+          value={form.sortOrder}
+          onChange={onChange}
+          required
+        />
+      </label>
+    </div>
+  )
+}
+
+function ConsentRequirementFields({ form, onChange }) {
+  return (
+    <div className="adminRequirementFormGrid">
+      <label className="adminEventField">
+        <span>Название</span>
+        <input
+          name="title"
+          type="text"
+          value={form.title}
+          onChange={onChange}
+          required
+        />
+      </label>
+
+      <label className="adminEventField">
+        <span>Тип согласия</span>
+        <input
+          name="consentType"
+          type="text"
+          value={form.consentType}
+          onChange={onChange}
+          required
+        />
+      </label>
+
+      <label className="adminEventField">
+        <span>Версия</span>
+        <input
+          name="consentVersion"
+          type="text"
+          value={form.consentVersion}
+          onChange={onChange}
+          required
+        />
+      </label>
+
+      <label className="adminEventField adminRequirementFieldWide">
+        <span>Ссылка на документ</span>
+        <input
+          name="documentUrl"
+          type="url"
+          value={form.documentUrl}
+          onChange={onChange}
+        />
+      </label>
+
+      <label className="adminEventField adminRequirementFieldWide">
+        <span>Текст согласия</span>
+        <textarea
+          name="bodyText"
+          rows="5"
+          value={form.bodyText}
+          onChange={onChange}
+          required
+        />
+      </label>
+
+      <label className="adminRequirementCheckbox">
+        <input
+          name="required"
+          type="checkbox"
+          checked={form.required}
+          onChange={onChange}
+        />
+        <span>Обязательное согласие</span>
+      </label>
+
+      <label className="adminEventField">
+        <span>Порядок</span>
+        <input
+          name="sortOrder"
+          type="number"
+          min="0"
+          max="32767"
+          step="1"
+          value={form.sortOrder}
+          onChange={onChange}
+          required
+        />
+      </label>
+    </div>
+  )
+}
+
+function RequirementSaveMessage({ state }) {
+  if (!state.message) {
+    return null
+  }
+
+  return (
+    <p
+      className={
+        state.status === 'success'
+          ? 'adminSaveSuccess'
+          : 'adminAuthMessage'
+      }
+      role={state.status === 'error' ? 'alert' : 'status'}
+    >
+      {state.message}
+    </p>
+  )
+}
+
 function AdminPage() {
   const [sessionStatus, setSessionStatus] = useState('checking')
   const [password, setPassword] = useState('')
@@ -674,6 +1021,24 @@ function AdminPage() {
     createNewDistanceForm([]),
   )
   const [newDistanceSaveState, setNewDistanceSaveState] = useState({
+    status: 'idle',
+    message: '',
+  })
+  const [documentForms, setDocumentForms] = useState({})
+  const [documentSaveStates, setDocumentSaveStates] = useState({})
+  const [newDocumentForm, setNewDocumentForm] = useState(() =>
+    createNewDocumentForm([]),
+  )
+  const [newDocumentSaveState, setNewDocumentSaveState] = useState({
+    status: 'idle',
+    message: '',
+  })
+  const [consentForms, setConsentForms] = useState({})
+  const [consentSaveStates, setConsentSaveStates] = useState({})
+  const [newConsentForm, setNewConsentForm] = useState(() =>
+    createNewConsentForm([]),
+  )
+  const [newConsentSaveState, setNewConsentSaveState] = useState({
     status: 'idle',
     message: '',
   })
@@ -825,6 +1190,14 @@ function AdminPage() {
       setDistanceSaveStates({})
       setNewDistanceForm(createNewDistanceForm([]))
       setNewDistanceSaveState({ status: 'idle', message: '' })
+      setDocumentForms({})
+      setDocumentSaveStates({})
+      setNewDocumentForm(createNewDocumentForm([]))
+      setNewDocumentSaveState({ status: 'idle', message: '' })
+      setConsentForms({})
+      setConsentSaveStates({})
+      setNewConsentForm(createNewConsentForm([]))
+      setNewConsentSaveState({ status: 'idle', message: '' })
       setNewEventForm(createNewEventForm())
       setNewEventSaveState({ status: 'idle', message: '' })
       setIsNewEventOpen(false)
@@ -874,6 +1247,14 @@ function AdminPage() {
     setDistanceSaveStates({})
     setNewDistanceForm(createNewDistanceForm([]))
     setNewDistanceSaveState({ status: 'idle', message: '' })
+    setDocumentForms({})
+    setDocumentSaveStates({})
+    setNewDocumentForm(createNewDocumentForm([]))
+    setNewDocumentSaveState({ status: 'idle', message: '' })
+    setConsentForms({})
+    setConsentSaveStates({})
+    setNewConsentForm(createNewConsentForm([]))
+    setNewConsentSaveState({ status: 'idle', message: '' })
 
     try {
       const result = await getAdminEvent(eventId)
@@ -895,6 +1276,10 @@ function AdminPage() {
       setNewDistanceForm(
         createNewDistanceForm(result.distances, result.groups),
       )
+      setDocumentForms(createDocumentForms(result.documents))
+      setNewDocumentForm(createNewDocumentForm(result.documents))
+      setConsentForms(createConsentForms(result.consents))
+      setNewConsentForm(createNewConsentForm(result.consents))
       setEventDetailStatus('ready')
     } catch (error) {
       if (
@@ -922,6 +1307,10 @@ function AdminPage() {
       setNewGroupForm(createNewGroupForm([], 'participant'))
       setDistanceForms({})
       setNewDistanceForm(createNewDistanceForm([]))
+      setDocumentForms({})
+      setNewDocumentForm(createNewDocumentForm([]))
+      setConsentForms({})
+      setNewConsentForm(createNewConsentForm([]))
       setEventDetailStatus('error')
       setEventDetailMessage('Не удалось загрузить мероприятие.')
     }
@@ -1534,6 +1923,389 @@ function AdminPage() {
     }
   }
 
+  const resetAfterRequirementUnauthorized = () => {
+    setEvents([])
+    setSelectedEventId(null)
+    setEventDetail(null)
+    setEventDetailStatus('idle')
+    setEventForm(null)
+    setDocumentForms({})
+    setDocumentSaveStates({})
+    setNewDocumentForm(createNewDocumentForm([]))
+    setNewDocumentSaveState({ status: 'idle', message: '' })
+    setConsentForms({})
+    setConsentSaveStates({})
+    setNewConsentForm(createNewConsentForm([]))
+    setNewConsentSaveState({ status: 'idle', message: '' })
+    setSessionStatus('unauthenticated')
+  }
+
+  const handleDocumentFormChange = (documentId, changeEvent) => {
+    const { name, value, checked, type } = changeEvent.target
+
+    setDocumentForms((currentForms) => ({
+      ...currentForms,
+      [documentId]: {
+        ...currentForms[documentId],
+        [name]: type === 'checkbox' ? checked : value,
+      },
+    }))
+    setDocumentSaveStates((currentStates) => ({
+      ...currentStates,
+      [documentId]: { status: 'idle', message: '' },
+    }))
+  }
+
+  const handleNewDocumentFormChange = (changeEvent) => {
+    const { name, value, checked, type } = changeEvent.target
+
+    setNewDocumentForm((currentForm) => ({
+      ...currentForm,
+      [name]: type === 'checkbox' ? checked : value,
+    }))
+    setNewDocumentSaveState({ status: 'idle', message: '' })
+  }
+
+  const handleSaveDocument = async (submitEvent, documentId) => {
+    submitEvent.preventDefault()
+
+    const eventId = eventDetail?.event?.id
+    const form = documentForms[documentId]
+
+    if (!eventId || !form) {
+      return
+    }
+
+    let changes
+
+    try {
+      changes = buildDocumentChanges(form)
+    } catch (error) {
+      setDocumentSaveStates((currentStates) => ({
+        ...currentStates,
+        [documentId]: {
+          status: 'error',
+          message:
+            error instanceof EventFormError
+              ? error.message
+              : 'Проверьте заполненные данные.',
+        },
+      }))
+      return
+    }
+
+    setDocumentSaveStates((currentStates) => ({
+      ...currentStates,
+      [documentId]: { status: 'saving', message: '' },
+    }))
+
+    try {
+      const result = await updateAdminDocumentRequirement(
+        eventId,
+        documentId,
+        changes,
+      )
+
+      if (!result.document || typeof result.document !== 'object') {
+        throw new AdminAuthError('invalid_server_response')
+      }
+
+      setEventDetail((currentDetail) => ({
+        ...currentDetail,
+        documents: (currentDetail?.documents ?? []).map((document) =>
+          document.id === result.document.id
+            ? result.document
+            : document,
+        ),
+      }))
+      setDocumentForms((currentForms) => ({
+        ...currentForms,
+        [documentId]: createDocumentForm(result.document),
+      }))
+      setDocumentSaveStates((currentStates) => ({
+        ...currentStates,
+        [documentId]: { status: 'success', message: 'Сохранено' },
+      }))
+    } catch (error) {
+      if (error instanceof AdminAuthError && error.status === 401) {
+        resetAfterRequirementUnauthorized()
+        return
+      }
+
+      setDocumentSaveStates((currentStates) => ({
+        ...currentStates,
+        [documentId]: {
+          status: 'error',
+          message: getRequirementErrorMessage(
+            error,
+            'document',
+            'update',
+          ),
+        },
+      }))
+    }
+  }
+
+  const handleCreateDocument = async (submitEvent) => {
+    submitEvent.preventDefault()
+
+    const eventId = eventDetail?.event?.id
+    const currentDocuments = eventDetail?.documents ?? []
+
+    if (!eventId) {
+      return
+    }
+
+    if (getNextRequirementSortOrder(currentDocuments) === null) {
+      setNewDocumentSaveState({
+        status: 'error',
+        message: 'Нельзя вычислить следующий порядок: достигнут лимит 32767.',
+      })
+      return
+    }
+
+    let changes
+
+    try {
+      changes = buildDocumentChanges(newDocumentForm)
+    } catch (error) {
+      setNewDocumentSaveState({
+        status: 'error',
+        message:
+          error instanceof EventFormError
+            ? error.message
+            : 'Проверьте заполненные данные.',
+      })
+      return
+    }
+
+    setNewDocumentSaveState({ status: 'saving', message: '' })
+
+    try {
+      const result = await createAdminDocumentRequirement(eventId, changes)
+
+      if (!result.document || typeof result.document !== 'object') {
+        throw new AdminAuthError('invalid_server_response')
+      }
+
+      const updatedDocuments = [...currentDocuments, result.document]
+
+      setEventDetail((currentDetail) => ({
+        ...currentDetail,
+        documents: [
+          ...(currentDetail?.documents ?? []),
+          result.document,
+        ],
+      }))
+      setDocumentForms((currentForms) => ({
+        ...currentForms,
+        [result.document.id]: createDocumentForm(result.document),
+      }))
+      setNewDocumentForm(createNewDocumentForm(updatedDocuments))
+      setNewDocumentSaveState({
+        status: 'success',
+        message: 'Документ добавлен',
+      })
+    } catch (error) {
+      if (error instanceof AdminAuthError && error.status === 401) {
+        resetAfterRequirementUnauthorized()
+        return
+      }
+
+      setNewDocumentSaveState({
+        status: 'error',
+        message: getRequirementErrorMessage(
+          error,
+          'document',
+          'create',
+        ),
+      })
+    }
+  }
+
+  const handleConsentFormChange = (consentId, changeEvent) => {
+    const { name, value, checked, type } = changeEvent.target
+
+    setConsentForms((currentForms) => ({
+      ...currentForms,
+      [consentId]: {
+        ...currentForms[consentId],
+        [name]: type === 'checkbox' ? checked : value,
+      },
+    }))
+    setConsentSaveStates((currentStates) => ({
+      ...currentStates,
+      [consentId]: { status: 'idle', message: '' },
+    }))
+  }
+
+  const handleNewConsentFormChange = (changeEvent) => {
+    const { name, value, checked, type } = changeEvent.target
+
+    setNewConsentForm((currentForm) => ({
+      ...currentForm,
+      [name]: type === 'checkbox' ? checked : value,
+    }))
+    setNewConsentSaveState({ status: 'idle', message: '' })
+  }
+
+  const handleSaveConsent = async (submitEvent, consentId) => {
+    submitEvent.preventDefault()
+
+    const eventId = eventDetail?.event?.id
+    const form = consentForms[consentId]
+
+    if (!eventId || !form) {
+      return
+    }
+
+    let changes
+
+    try {
+      changes = buildConsentChanges(form)
+    } catch (error) {
+      setConsentSaveStates((currentStates) => ({
+        ...currentStates,
+        [consentId]: {
+          status: 'error',
+          message:
+            error instanceof EventFormError
+              ? error.message
+              : 'Проверьте заполненные данные.',
+        },
+      }))
+      return
+    }
+
+    setConsentSaveStates((currentStates) => ({
+      ...currentStates,
+      [consentId]: { status: 'saving', message: '' },
+    }))
+
+    try {
+      const result = await updateAdminConsentRequirement(
+        eventId,
+        consentId,
+        changes,
+      )
+
+      if (!result.consent || typeof result.consent !== 'object') {
+        throw new AdminAuthError('invalid_server_response')
+      }
+
+      setEventDetail((currentDetail) => ({
+        ...currentDetail,
+        consents: (currentDetail?.consents ?? []).map((consent) =>
+          consent.id === result.consent.id
+            ? result.consent
+            : consent,
+        ),
+      }))
+      setConsentForms((currentForms) => ({
+        ...currentForms,
+        [consentId]: createConsentForm(result.consent),
+      }))
+      setConsentSaveStates((currentStates) => ({
+        ...currentStates,
+        [consentId]: { status: 'success', message: 'Сохранено' },
+      }))
+    } catch (error) {
+      if (error instanceof AdminAuthError && error.status === 401) {
+        resetAfterRequirementUnauthorized()
+        return
+      }
+
+      setConsentSaveStates((currentStates) => ({
+        ...currentStates,
+        [consentId]: {
+          status: 'error',
+          message: getRequirementErrorMessage(
+            error,
+            'consent',
+            'update',
+          ),
+        },
+      }))
+    }
+  }
+
+  const handleCreateConsent = async (submitEvent) => {
+    submitEvent.preventDefault()
+
+    const eventId = eventDetail?.event?.id
+    const currentConsents = eventDetail?.consents ?? []
+
+    if (!eventId) {
+      return
+    }
+
+    if (getNextRequirementSortOrder(currentConsents) === null) {
+      setNewConsentSaveState({
+        status: 'error',
+        message: 'Нельзя вычислить следующий порядок: достигнут лимит 32767.',
+      })
+      return
+    }
+
+    let changes
+
+    try {
+      changes = buildConsentChanges(newConsentForm)
+    } catch (error) {
+      setNewConsentSaveState({
+        status: 'error',
+        message:
+          error instanceof EventFormError
+            ? error.message
+            : 'Проверьте заполненные данные.',
+      })
+      return
+    }
+
+    setNewConsentSaveState({ status: 'saving', message: '' })
+
+    try {
+      const result = await createAdminConsentRequirement(eventId, changes)
+
+      if (!result.consent || typeof result.consent !== 'object') {
+        throw new AdminAuthError('invalid_server_response')
+      }
+
+      const updatedConsents = [...currentConsents, result.consent]
+
+      setEventDetail((currentDetail) => ({
+        ...currentDetail,
+        consents: [
+          ...(currentDetail?.consents ?? []),
+          result.consent,
+        ],
+      }))
+      setConsentForms((currentForms) => ({
+        ...currentForms,
+        [result.consent.id]: createConsentForm(result.consent),
+      }))
+      setNewConsentForm(createNewConsentForm(updatedConsents))
+      setNewConsentSaveState({
+        status: 'success',
+        message: 'Согласие добавлено',
+      })
+    } catch (error) {
+      if (error instanceof AdminAuthError && error.status === 401) {
+        resetAfterRequirementUnauthorized()
+        return
+      }
+
+      setNewConsentSaveState({
+        status: 'error',
+        message: getRequirementErrorMessage(
+          error,
+          'consent',
+          'create',
+        ),
+      })
+    }
+  }
+
   const handleLogin = async (event) => {
     event.preventDefault()
 
@@ -1597,6 +2369,14 @@ function AdminPage() {
       setDistanceSaveStates({})
       setNewDistanceForm(createNewDistanceForm([]))
       setNewDistanceSaveState({ status: 'idle', message: '' })
+      setDocumentForms({})
+      setDocumentSaveStates({})
+      setNewDocumentForm(createNewDocumentForm([]))
+      setNewDocumentSaveState({ status: 'idle', message: '' })
+      setConsentForms({})
+      setConsentSaveStates({})
+      setNewConsentForm(createNewConsentForm([]))
+      setNewConsentSaveState({ status: 'idle', message: '' })
       setSessionStatus('unauthenticated')
     } catch {
       setLogoutStatus('idle')
@@ -1614,12 +2394,29 @@ function AdminPage() {
     Object.values(groupSaveStates).some(
       ({ status }) => status === 'saving',
     )
+  const isDocumentSaving =
+    newDocumentSaveState.status === 'saving' ||
+    Object.values(documentSaveStates).some(
+      ({ status }) => status === 'saving',
+    )
+  const isConsentSaving =
+    newConsentSaveState.status === 'saving' ||
+    Object.values(consentSaveStates).some(
+      ({ status }) => status === 'saving',
+    )
+  const isRequirementSaving = isDocumentSaving || isConsentSaving
   const isNextGroupSortOrderUnavailable =
     eventDetail !== null &&
     getNextGroupSortOrder(eventDetail.groups) === null
   const isNextDistanceSortOrderUnavailable =
     eventDetail !== null &&
     getNextDistanceSortOrder(eventDetail.distances) === null
+  const isNextDocumentSortOrderUnavailable =
+    eventDetail !== null &&
+    getNextRequirementSortOrder(eventDetail.documents) === null
+  const isNextConsentSortOrderUnavailable =
+    eventDetail !== null &&
+    getNextRequirementSortOrder(eventDetail.consents) === null
 
   if (sessionStatus === 'checking') {
     return (
@@ -3044,6 +3841,255 @@ function AdminPage() {
                       })}
                     </div>
                   )}
+                </section>
+
+                <section className="adminDistancesSection adminRequirementsSection">
+                  <div className="adminDistancesHeader">
+                    <div>
+                      <p className="adminPageEyebrow">Регистрация</p>
+                      <h3>Документы и согласия</h3>
+                    </div>
+                  </div>
+                  <p className="adminSectionHint">
+                    Документы — файлы, которые участник должен
+                    предоставить. Согласия — тексты, которые участник
+                    подтверждает при регистрации.
+                  </p>
+
+                  <div className="adminRequirementBlock">
+                    <div className="adminDistanceCardHeader">
+                      <h4>Документы</h4>
+                      <span>{eventDetail.documents?.length ?? 0}</span>
+                    </div>
+
+                    <form
+                      className="adminDistanceCard adminDistanceCreateCard"
+                      onSubmit={handleCreateDocument}
+                      noValidate
+                    >
+                      <div className="adminDistanceCardHeader">
+                        <h4>Добавить документ</h4>
+                      </div>
+                      <DocumentRequirementFields
+                        form={newDocumentForm}
+                        onChange={handleNewDocumentFormChange}
+                      />
+                      <div className="adminEventFormActions">
+                        <button
+                          className="adminEventSaveButton"
+                          type="submit"
+                          disabled={
+                            eventSaveStatus === 'saving' ||
+                            isGroupSaving ||
+                            isDistanceSaving ||
+                            isRequirementSaving ||
+                            isNextDocumentSortOrderUnavailable
+                          }
+                        >
+                          {newDocumentSaveState.status === 'saving'
+                            ? 'Добавляем...'
+                            : 'Добавить документ'}
+                        </button>
+                        <RequirementSaveMessage
+                          state={newDocumentSaveState}
+                        />
+                      </div>
+
+                      {isNextDocumentSortOrderUnavailable && (
+                        <p className="adminAuthMessage" role="alert">
+                          Нельзя вычислить следующий порядок: достигнут
+                          лимит 32767.
+                        </p>
+                      )}
+                    </form>
+
+                    {(eventDetail.documents?.length ?? 0) === 0 && (
+                      <p>Для мероприятия документы не требуются.</p>
+                    )}
+
+                    {(eventDetail.documents?.length ?? 0) > 0 && (
+                      <div className="adminDistanceCards">
+                        {eventDetail.documents.map((document) => {
+                          const form = documentForms[document.id]
+                          const saveState =
+                            documentSaveStates[document.id] ?? {
+                              status: 'idle',
+                              message: '',
+                            }
+
+                          if (!form) {
+                            return null
+                          }
+
+                          return (
+                            <form
+                              className="adminDistanceCard"
+                              key={document.id}
+                              onSubmit={(submitEvent) =>
+                                handleSaveDocument(
+                                  submitEvent,
+                                  document.id,
+                                )
+                              }
+                              noValidate
+                            >
+                              <div className="adminDistanceCardHeader">
+                                <h4>{form.title || 'Без названия'}</h4>
+                                <span>
+                                  {form.documentType || 'Без типа'}
+                                </span>
+                              </div>
+                              <DocumentRequirementFields
+                                form={form}
+                                onChange={(changeEvent) =>
+                                  handleDocumentFormChange(
+                                    document.id,
+                                    changeEvent,
+                                  )
+                                }
+                              />
+                              <div className="adminEventFormActions">
+                                <button
+                                  className="adminEventSaveButton"
+                                  type="submit"
+                                  disabled={
+                                    eventSaveStatus === 'saving' ||
+                                    isGroupSaving ||
+                                    isDistanceSaving ||
+                                    isRequirementSaving
+                                  }
+                                >
+                                  {saveState.status === 'saving'
+                                    ? 'Сохраняем...'
+                                    : 'Сохранить документ'}
+                                </button>
+                                <RequirementSaveMessage state={saveState} />
+                              </div>
+                            </form>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="adminRequirementBlock">
+                    <div className="adminDistanceCardHeader">
+                      <h4>Согласия</h4>
+                      <span>{eventDetail.consents?.length ?? 0}</span>
+                    </div>
+
+                    <form
+                      className="adminDistanceCard adminDistanceCreateCard"
+                      onSubmit={handleCreateConsent}
+                      noValidate
+                    >
+                      <div className="adminDistanceCardHeader">
+                        <h4>Добавить согласие</h4>
+                      </div>
+                      <ConsentRequirementFields
+                        form={newConsentForm}
+                        onChange={handleNewConsentFormChange}
+                      />
+                      <div className="adminEventFormActions">
+                        <button
+                          className="adminEventSaveButton"
+                          type="submit"
+                          disabled={
+                            eventSaveStatus === 'saving' ||
+                            isGroupSaving ||
+                            isDistanceSaving ||
+                            isRequirementSaving ||
+                            isNextConsentSortOrderUnavailable
+                          }
+                        >
+                          {newConsentSaveState.status === 'saving'
+                            ? 'Добавляем...'
+                            : 'Добавить согласие'}
+                        </button>
+                        <RequirementSaveMessage
+                          state={newConsentSaveState}
+                        />
+                      </div>
+
+                      {isNextConsentSortOrderUnavailable && (
+                        <p className="adminAuthMessage" role="alert">
+                          Нельзя вычислить следующий порядок: достигнут
+                          лимит 32767.
+                        </p>
+                      )}
+                    </form>
+
+                    {(eventDetail.consents?.length ?? 0) === 0 && (
+                      <p>
+                        Для мероприятия дополнительные согласия не
+                        настроены.
+                      </p>
+                    )}
+
+                    {(eventDetail.consents?.length ?? 0) > 0 && (
+                      <div className="adminDistanceCards">
+                        {eventDetail.consents.map((consent) => {
+                          const form = consentForms[consent.id]
+                          const saveState =
+                            consentSaveStates[consent.id] ?? {
+                              status: 'idle',
+                              message: '',
+                            }
+
+                          if (!form) {
+                            return null
+                          }
+
+                          return (
+                            <form
+                              className="adminDistanceCard"
+                              key={consent.id}
+                              onSubmit={(submitEvent) =>
+                                handleSaveConsent(
+                                  submitEvent,
+                                  consent.id,
+                                )
+                              }
+                              noValidate
+                            >
+                              <div className="adminDistanceCardHeader">
+                                <h4>{form.title || 'Без названия'}</h4>
+                                <span>
+                                  {form.consentType || 'Без типа'}
+                                </span>
+                              </div>
+                              <ConsentRequirementFields
+                                form={form}
+                                onChange={(changeEvent) =>
+                                  handleConsentFormChange(
+                                    consent.id,
+                                    changeEvent,
+                                  )
+                                }
+                              />
+                              <div className="adminEventFormActions">
+                                <button
+                                  className="adminEventSaveButton"
+                                  type="submit"
+                                  disabled={
+                                    eventSaveStatus === 'saving' ||
+                                    isGroupSaving ||
+                                    isDistanceSaving ||
+                                    isRequirementSaving
+                                  }
+                                >
+                                  {saveState.status === 'saving'
+                                    ? 'Сохраняем...'
+                                    : 'Сохранить согласие'}
+                                </button>
+                                <RequirementSaveMessage state={saveState} />
+                              </div>
+                            </form>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
                 </section>
                 </>
               )}

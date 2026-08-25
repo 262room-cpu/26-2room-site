@@ -8,6 +8,7 @@ import {
 } from '../_supabase.js'
 
 const INTEGER_MAX = 2147483647
+const SMALLINT_MAX = 32767
 
 const EVENT_SELECT = [
   'id',
@@ -91,6 +92,51 @@ const CREATE_FIELDS = new Set([
   'city',
   'capacity',
 ])
+const DOCUMENT_SELECT = [
+  'id',
+  'event_id',
+  'document_type',
+  'title',
+  'description',
+  'template_url',
+  'required',
+  'sort_order',
+  'created_at',
+  'updated_at',
+].join(',')
+const CONSENT_SELECT = [
+  'id',
+  'event_id',
+  'consent_type',
+  'consent_version',
+  'title',
+  'body_text',
+  'document_url',
+  'required',
+  'sort_order',
+  'created_at',
+  'updated_at',
+].join(',')
+const DOCUMENT_FIELDS = {
+  documentType: { column: 'document_type', type: 'required_text' },
+  title: { column: 'title', type: 'required_text' },
+  description: { column: 'description', type: 'nullable_text' },
+  templateUrl: { column: 'template_url', type: 'nullable_text' },
+  required: { column: 'required', type: 'boolean' },
+  sortOrder: { column: 'sort_order', type: 'sort_order' },
+}
+const CONSENT_FIELDS = {
+  consentType: { column: 'consent_type', type: 'required_text' },
+  consentVersion: {
+    column: 'consent_version',
+    type: 'required_text',
+  },
+  title: { column: 'title', type: 'required_text' },
+  bodyText: { column: 'body_text', type: 'required_text' },
+  documentUrl: { column: 'document_url', type: 'nullable_text' },
+  required: { column: 'required', type: 'boolean' },
+  sortOrder: { column: 'sort_order', type: 'sort_order' },
+}
 const EDITABLE_FIELDS = {
   title: { column: 'title', type: 'required_text' },
   subtitle: { column: 'subtitle', type: 'nullable_text' },
@@ -153,6 +199,14 @@ class EventValidationError extends Error {
   }
 }
 
+class RequirementValidationError extends Error {
+  constructor(code) {
+    super(code)
+    this.name = 'RequirementValidationError'
+    this.code = code
+  }
+}
+
 function normalizeText(value, nullable) {
   if (value === null && nullable) {
     return null
@@ -173,6 +227,130 @@ function normalizeText(value, nullable) {
   }
 
   return normalized
+}
+
+function normalizeRequirementField(value, type, errorCode) {
+  switch (type) {
+    case 'required_text':
+      if (typeof value !== 'string' || !value.trim()) {
+        throw new RequirementValidationError(errorCode)
+      }
+      return value.trim()
+    case 'nullable_text':
+      if (value === null || value === undefined || value === '') {
+        return null
+      }
+      if (typeof value !== 'string') {
+        throw new RequirementValidationError(errorCode)
+      }
+      return value.trim() || null
+    case 'boolean':
+      if (typeof value !== 'boolean') {
+        throw new RequirementValidationError(errorCode)
+      }
+      return value
+    case 'sort_order':
+      if (
+        !Number.isSafeInteger(value) ||
+        value < 0 ||
+        value > SMALLINT_MAX
+      ) {
+        throw new RequirementValidationError(errorCode)
+      }
+      return value
+    default:
+      throw new RequirementValidationError('unsupported_field')
+  }
+}
+
+function normalizeRequirementBody(body, fields, errorCode) {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) {
+    throw new RequirementValidationError(errorCode)
+  }
+
+  const bodyFields = Object.keys(body)
+
+  if (bodyFields.length === 0) {
+    throw new RequirementValidationError('no_changes')
+  }
+
+  const values = {}
+  const update = {}
+
+  for (const field of bodyFields) {
+    const config = fields[field]
+
+    if (!config) {
+      throw new RequirementValidationError('unsupported_field')
+    }
+
+    const normalized = normalizeRequirementField(
+      body[field],
+      config.type,
+      errorCode,
+    )
+    values[field] = normalized
+    update[config.column] = normalized
+  }
+
+  return { values, update }
+}
+
+function buildRequirementInsert(body, resource, eventId) {
+  const isDocument = resource === 'document'
+  const fields = isDocument ? DOCUMENT_FIELDS : CONSENT_FIELDS
+  const errorCode = isDocument
+    ? 'invalid_document_data'
+    : 'invalid_consent_data'
+  const { values } = normalizeRequirementBody(body, fields, errorCode)
+  const requiredFields = isDocument
+    ? ['documentType', 'title', 'required', 'sortOrder']
+    : [
+        'consentType',
+        'consentVersion',
+        'title',
+        'bodyText',
+        'required',
+        'sortOrder',
+      ]
+
+  if (requiredFields.some((field) => !Object.hasOwn(values, field))) {
+    throw new RequirementValidationError('required_fields_missing')
+  }
+
+  if (isDocument) {
+    return {
+      event_id: eventId,
+      document_type: values.documentType,
+      title: values.title,
+      description: values.description ?? null,
+      template_url: values.templateUrl ?? null,
+      required: values.required,
+      sort_order: values.sortOrder,
+    }
+  }
+
+  return {
+    event_id: eventId,
+    consent_type: values.consentType,
+    consent_version: values.consentVersion,
+    title: values.title,
+    body_text: values.bodyText,
+    document_url: values.documentUrl ?? null,
+    required: values.required,
+    sort_order: values.sortOrder,
+  }
+}
+
+function buildRequirementUpdate(body, resource) {
+  const fields = resource === 'document'
+    ? DOCUMENT_FIELDS
+    : CONSENT_FIELDS
+  const errorCode = resource === 'document'
+    ? 'invalid_document_data'
+    : 'invalid_consent_data'
+
+  return normalizeRequirementBody(body, fields, errorCode).update
 }
 
 function normalizeDate(value) {
@@ -539,6 +717,179 @@ function mapGroup(group) {
   }
 }
 
+function mapDocumentRequirement(document) {
+  return {
+    id: document.id,
+    eventId: document.event_id,
+    documentType: document.document_type,
+    title: document.title,
+    description: document.description,
+    templateUrl: document.template_url,
+    required: document.required,
+    sortOrder: document.sort_order,
+    createdAt: document.created_at,
+    updatedAt: document.updated_at,
+  }
+}
+
+function mapConsentRequirement(consent) {
+  return {
+    id: consent.id,
+    eventId: consent.event_id,
+    consentType: consent.consent_type,
+    consentVersion: consent.consent_version,
+    title: consent.title,
+    bodyText: consent.body_text,
+    documentUrl: consent.document_url,
+    required: consent.required,
+    sortOrder: consent.sort_order,
+    createdAt: consent.created_at,
+    updatedAt: consent.updated_at,
+  }
+}
+
+function readQueryParameter(value) {
+  return Array.isArray(value) ? value[0] : value
+}
+
+function sendRequirementWriteError(response, error, resource) {
+  console.error(`Admin ${resource} requirement write failed`, {
+    code: error.code ?? 'unknown',
+  })
+
+  if (error.code === '23505') {
+    return response.status(409).json({
+      error: resource === 'document'
+        ? 'document_type_conflict'
+        : 'consent_type_conflict',
+    })
+  }
+
+  if (['22P02', '22003', '23502', '23514'].includes(error.code)) {
+    return response.status(400).json({
+      error: resource === 'document'
+        ? 'invalid_document_data'
+        : 'invalid_consent_data',
+    })
+  }
+
+  return response
+    .status(500)
+    .json({ error: 'internal_error' })
+}
+
+async function handleRequirementRequest({
+  request,
+  response,
+  supabase,
+  resource,
+  eventId,
+  requirementId,
+}) {
+  if (!['POST', 'PATCH'].includes(request.method)) {
+    response.setHeader('Allow', 'POST, PATCH')
+    return response
+      .status(405)
+      .json({ error: 'method_not_allowed' })
+  }
+
+  if (!eventId) {
+    return response
+      .status(400)
+      .json({ error: 'event_id_required' })
+  }
+
+  if (request.method === 'POST' && requirementId) {
+    return response
+      .status(400)
+      .json({ error: 'requirement_id_not_allowed' })
+  }
+
+  if (request.method === 'PATCH' && !requirementId) {
+    return response
+      .status(400)
+      .json({ error: 'requirement_id_required' })
+  }
+
+  const { data: event, error: eventError } = await supabase
+    .from('events')
+    .select('id')
+    .eq('id', eventId)
+    .maybeSingle()
+
+  if (eventError) {
+    console.error('Admin requirement event query failed', {
+      code: eventError.code ?? 'unknown',
+    })
+
+    return response
+      .status(500)
+      .json({ error: 'internal_error' })
+  }
+
+  if (!event) {
+    return response
+      .status(404)
+      .json({ error: 'event_not_found' })
+  }
+
+  const isDocument = resource === 'document'
+  const table = isDocument
+    ? 'event_document_requirements'
+    : 'event_consent_requirements'
+  const select = isDocument ? DOCUMENT_SELECT : CONSENT_SELECT
+  const responseKey = isDocument ? 'document' : 'consent'
+  const mapRequirement = isDocument
+    ? mapDocumentRequirement
+    : mapConsentRequirement
+
+  let values
+
+  try {
+    values = request.method === 'POST'
+      ? buildRequirementInsert(request.body, resource, eventId)
+      : buildRequirementUpdate(request.body, resource)
+  } catch (error) {
+    if (error instanceof RequirementValidationError) {
+      return response
+        .status(400)
+        .json({ error: error.code })
+    }
+
+    console.error('Admin requirement validation failed')
+
+    return response
+      .status(500)
+      .json({ error: 'internal_error' })
+  }
+
+  let query = request.method === 'POST'
+    ? supabase.from(table).insert(values)
+    : supabase
+        .from(table)
+        .update(values)
+        .eq('id', requirementId)
+        .eq('event_id', eventId)
+
+  query = query.select(select).maybeSingle()
+
+  const { data: requirement, error: writeError } = await query
+
+  if (writeError) {
+    return sendRequirementWriteError(response, writeError, resource)
+  }
+
+  if (!requirement) {
+    return response
+      .status(404)
+      .json({ error: 'requirement_not_found' })
+  }
+
+  return response
+    .status(request.method === 'POST' ? 201 : 200)
+    .json({ [responseKey]: mapRequirement(requirement) })
+}
+
 export default async function handler(request, response) {
   response.setHeader('Cache-Control', 'no-store')
   response.setHeader(
@@ -576,8 +927,13 @@ export default async function handler(request, response) {
   const eventId = Array.isArray(request.query.id)
     ? request.query.id[0]
     : request.query.id
+  const resource = readQueryParameter(request.query.resource)
+  const resourceEventId = readQueryParameter(request.query.eventId)
+  const requirementId = readQueryParameter(
+    request.query.requirementId,
+  )
 
-  if (request.method === 'POST' && eventId) {
+  if (request.method === 'POST' && eventId && !resource) {
     return response
       .status(400)
       .json({ error: 'event_id_not_allowed' })
@@ -599,6 +955,23 @@ export default async function handler(request, response) {
     return response
       .status(500)
       .json({ error: 'internal_error' })
+  }
+
+  if (resource) {
+    if (!['document', 'consent'].includes(resource)) {
+      return response
+        .status(400)
+        .json({ error: 'invalid_resource' })
+    }
+
+    return handleRequirementRequest({
+      request,
+      response,
+      supabase,
+      resource,
+      eventId: resourceEventId,
+      requirementId,
+    })
   }
 
   if (request.method === 'POST') {

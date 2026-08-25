@@ -119,6 +119,78 @@ export function updateAdminEvent(
   })
 }
 
+export function createAdminDocumentRequirement(
+  eventId,
+  changes,
+  { signal } = {},
+) {
+  const query = new URLSearchParams({
+    resource: 'document',
+    eventId,
+  })
+
+  return requestJson(`/api/admin/event?${query.toString()}`, {
+    method: 'POST',
+    body: changes,
+    signal,
+  })
+}
+
+export function updateAdminDocumentRequirement(
+  eventId,
+  requirementId,
+  changes,
+  { signal } = {},
+) {
+  const query = new URLSearchParams({
+    resource: 'document',
+    eventId,
+    requirementId,
+  })
+
+  return requestJson(`/api/admin/event?${query.toString()}`, {
+    method: 'PATCH',
+    body: changes,
+    signal,
+  })
+}
+
+export function createAdminConsentRequirement(
+  eventId,
+  changes,
+  { signal } = {},
+) {
+  const query = new URLSearchParams({
+    resource: 'consent',
+    eventId,
+  })
+
+  return requestJson(`/api/admin/event?${query.toString()}`, {
+    method: 'POST',
+    body: changes,
+    signal,
+  })
+}
+
+export function updateAdminConsentRequirement(
+  eventId,
+  requirementId,
+  changes,
+  { signal } = {},
+) {
+  const query = new URLSearchParams({
+    resource: 'consent',
+    eventId,
+    requirementId,
+  })
+
+  return requestJson(`/api/admin/event?${query.toString()}`, {
+    method: 'PATCH',
+    body: changes,
+    signal,
+  })
+}
+
 export function updateAdminDistance(
   eventId,
   distanceId,
