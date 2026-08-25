@@ -35,7 +35,7 @@ function getTypeEvent(event, registrationFormType) {
   }
 }
 
-function MixedRegistrationForm({ event }) {
+function MixedRegistrationForm({ event, previewMode = false }) {
   const [selectedType, setSelectedType] = useState(null)
 
   if (selectedType) {
@@ -59,11 +59,16 @@ function MixedRegistrationForm({ event }) {
             </p>
           </section>
         ) : selectedType === 'kids' ? (
-          <KidsRegistrationForm key="kids" event={selectedEvent} />
+          <KidsRegistrationForm
+            key="kids"
+            event={selectedEvent}
+            previewMode={previewMode}
+          />
         ) : (
           <AdultRegistrationForm
             key="participant"
             event={selectedEvent}
+            previewMode={previewMode}
           />
         )}
       </div>

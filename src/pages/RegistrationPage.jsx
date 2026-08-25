@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router'
+import { Link, useParams, useSearchParams } from 'react-router'
 import { EVENT_FETCH_STATUSES, fetchEventBySlug } from '../api/events'
 import AdultRegistrationForm from '../components/AdultRegistrationForm'
 import KidsRegistrationForm from '../components/KidsRegistrationForm'
@@ -75,7 +75,7 @@ function adaptRegistrationEvent(event) {
   }
 }
 
-function RegistrationHeader({ event }) {
+function RegistrationHeader({ event, previewMode = false }) {
   return (
     <header className="registrationPageHeader">
       <Link className="registrationPageBrand" to="/">
@@ -83,7 +83,10 @@ function RegistrationHeader({ event }) {
         <span>26.2 ROOM</span>
       </Link>
 
-      <Link className="registrationPageBackLink" to={event ? `/events/${event.slug}` : '/'}>
+      <Link
+        className="registrationPageBackLink"
+        to={event ? `/events/${event.slug}${previewMode ? '?preview=1' : ''}` : '/'}
+      >
         {event ? 'Вернуться к мероприятию' : 'На главную'}
       </Link>
     </header>
@@ -116,8 +119,11 @@ function RegistrationPageMessage({ title, description, loading = false }) {
 
 function RegistrationPage() {
   const { slug } = useParams()
+  const [searchParams] = useSearchParams()
+  const previewMode = searchParams.get('preview') === '1'
   const [eventRequest, setEventRequest] = useState({
     slug: null,
+    preview: false,
     status: null,
     event: null,
   })
@@ -126,7 +132,10 @@ function RegistrationPage() {
     const controller = new AbortController()
     let isActive = true
 
-    fetchEventBySlug(slug, { signal: controller.signal })
+    fetchEventBySlug(slug, {
+      signal: controller.signal,
+      preview: previewMode,
+    })
       .then((result) => {
         if (!isActive) {
           return
@@ -134,6 +143,7 @@ function RegistrationPage() {
 
         setEventRequest({
           slug,
+          preview: previewMode,
           status: result.status,
           event:
             result.status === EVENT_FETCH_STATUSES.SUCCESS
@@ -146,17 +156,22 @@ function RegistrationPage() {
           return
         }
 
-        setEventRequest({ slug, status: EVENT_FETCH_STATUSES.ERROR, event: null })
+        setEventRequest({
+          slug,
+          preview: previewMode,
+          status: EVENT_FETCH_STATUSES.ERROR,
+          event: null,
+        })
       })
 
     return () => {
       isActive = false
       controller.abort()
     }
-  }, [slug])
+  }, [previewMode, slug])
 
   const currentRequest =
-    eventRequest.slug === slug
+    eventRequest.slug === slug && eventRequest.preview === previewMode
       ? eventRequest
       : { status: null, event: null }
 
@@ -193,13 +208,20 @@ function RegistrationPage() {
   const eventDate = formatEventDate(event.startsAt)
   const eventPrice = formatPrice(event.price, event.currency)
   const gateContent = STATUS_GATE_CONTENT[event.status]
-  const registrationIsOpen = event.status === EVENT_STATUSES.OPEN
+  const registrationIsOpen =
+    event.status === EVENT_STATUSES.OPEN || previewMode
 
   return (
     <div className="registrationPage">
-      <RegistrationHeader event={event} />
+      <RegistrationHeader event={event} previewMode={previewMode} />
 
       <main className="registrationPageMain">
+        {previewMode && (
+          <div className="registrationPagePreviewBanner" role="status">
+            Режим предпросмотра — регистрация не будет создана.
+          </div>
+        )}
+
         <section className="registrationPageIntro">
           <div className="registrationPageIntroCopy">
             <p className="registrationPageEyebrow">REGISTRATION · 26.2 ROOM</p>
@@ -243,11 +265,11 @@ function RegistrationPage() {
 
         {registrationIsOpen ? (
           event.registrationFormType === 'kids' ? (
-            <KidsRegistrationForm event={event} />
+            <KidsRegistrationForm event={event} previewMode={previewMode} />
           ) : event.registrationFormType === 'participant' ? (
-            <AdultRegistrationForm event={event} />
+            <AdultRegistrationForm event={event} previewMode={previewMode} />
           ) : event.registrationFormType === 'mixed' ? (
-            <MixedRegistrationForm event={event} />
+            <MixedRegistrationForm event={event} previewMode={previewMode} />
           ) : (
             <section className="registrationPageGate" aria-live="polite">
               <p className="registrationPageEyebrow">Регистрация</p>

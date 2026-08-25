@@ -184,7 +184,7 @@ function getSubmissionErrorMessage(code) {
   return messages[code] ?? 'Не удалось завершить регистрацию. Попробуйте ещё раз.'
 }
 
-function KidsRegistrationForm({ event }) {
+function KidsRegistrationForm({ event, previewMode = false }) {
   const [formValues, setFormValues] = useState(INITIAL_FORM_VALUES)
   const [documentFiles, setDocumentFiles] = useState({})
   const [consentValues, setConsentValues] = useState({})
@@ -265,6 +265,10 @@ function KidsRegistrationForm({ event }) {
 
   const handleSubmit = async (submitEvent) => {
     submitEvent.preventDefault()
+
+    if (previewMode) {
+      return
+    }
 
     if (isSubmitting || submissionComplete) {
       return
@@ -792,9 +796,11 @@ function KidsRegistrationForm({ event }) {
       <button
         className="kidsRegistrationSubmit"
         type="submit"
-        disabled={isSubmitting || submissionComplete}
+        disabled={previewMode || isSubmitting || submissionComplete}
       >
-        {submissionComplete
+        {previewMode
+          ? 'Предпросмотр — отправка отключена'
+          : submissionComplete
           ? 'Данные сохранены'
           : isSubmitting
             ? 'Сохраняем регистрацию…'

@@ -77,6 +77,19 @@
   padding: 48px 0 96px;
 }
 
+.registrationPagePreviewBanner {
+  margin-bottom: 28px;
+  border: 1px solid rgba(255, 214, 0, 0.42);
+  border-radius: 16px;
+  padding: 14px 18px;
+  background: rgba(255, 214, 0, 0.1);
+  color: #fff4a3;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.5;
+  text-align: center;
+}
+
 .registrationPageIntro {
   display: grid;
   grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);

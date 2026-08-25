@@ -6,6 +6,7 @@ import {
   getSupabaseAdmin,
   SupabaseConfigurationError,
 } from '../_supabase.js'
+import { mapEvent as mapPublicEvent } from '../events.js'
 
 const INTEGER_MAX = 2147483647
 const SMALLINT_MAX = 32767
@@ -30,6 +31,8 @@ const EVENT_SELECT = [
   'event_type',
   'registration_form_type',
   'status',
+  'is_published',
+  'published_at',
   'short_description',
   'description',
   'city',
@@ -62,6 +65,8 @@ const LIST_EVENT_SELECT = [
   'event_type',
   'registration_form_type',
   'status',
+  'is_published',
+  'published_at',
   'city',
   'venue',
   'starts_at',
@@ -786,6 +791,7 @@ function buildEventCreate(body) {
     event_type: normalizeText(body.eventType, false),
     registration_form_type: registrationFormType,
     status: 'draft',
+    is_published: false,
     short_description: normalizeText(
       body.shortDescription,
       false,
@@ -822,6 +828,8 @@ function mapEvent(event) {
     eventType: event.event_type,
     registrationFormType: event.registration_form_type,
     status: event.status,
+    isPublished: event.is_published,
+    publishedAt: event.published_at,
     shortDescription: event.short_description,
     description: event.description,
     city: event.city,
@@ -860,6 +868,8 @@ function mapListEvent(event) {
     eventType: event.event_type,
     registrationFormType: event.registration_form_type,
     status: event.status,
+    isPublished: event.is_published,
+    publishedAt: normalizeNullable(event.published_at),
     city: event.city,
     venue: event.venue,
     startsAt: normalizeNullable(event.starts_at),
@@ -2157,6 +2167,167 @@ async function handleRegistrationDetailRequest({
   })
 }
 
+async function handlePublicationRequest({
+  request,
+  response,
+  supabase,
+  eventId,
+}) {
+  if (request.method !== 'PATCH') {
+    response.setHeader('Allow', 'PATCH')
+    return response.status(405).json({ error: 'method_not_allowed' })
+  }
+
+  if (!eventId || !UUID_PATTERN.test(eventId)) {
+    return response.status(400).json({ error: 'invalid_event_id' })
+  }
+
+  const body = request.body
+  const action = body?.action
+
+  if (
+    !body ||
+    typeof body !== 'object' ||
+    Array.isArray(body) ||
+    Object.keys(body).length !== 1 ||
+    !['publish', 'unpublish'].includes(action)
+  ) {
+    return response.status(400).json({ error: 'invalid_publication_action' })
+  }
+
+  const publicationUpdate = action === 'publish'
+    ? {
+        is_published: true,
+        published_at: new Date().toISOString(),
+      }
+    : { is_published: false }
+
+  const { data: event, error } = await supabase
+    .from('events')
+    .update(publicationUpdate)
+    .eq('id', eventId)
+    .select(EVENT_SELECT)
+    .maybeSingle()
+
+  if (error) {
+    console.error('Admin event publication update failed', {
+      code: error.code ?? 'unknown',
+    })
+    return response.status(500).json({ error: 'internal_error' })
+  }
+
+  if (!event) {
+    return response.status(404).json({ error: 'event_not_found' })
+  }
+
+  return response.status(200).json({ event: mapEvent(event) })
+}
+
+async function handlePreviewRequest({
+  request,
+  response,
+  supabase,
+  slug,
+}) {
+  if (request.method !== 'GET') {
+    response.setHeader('Allow', 'GET')
+    return response.status(405).json({ error: 'method_not_allowed' })
+  }
+
+  if (
+    typeof slug !== 'string' ||
+    slug.length > 120 ||
+    !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)
+  ) {
+    return response.status(400).json({ error: 'invalid_event_slug' })
+  }
+
+  const { data: event, error: eventError } = await supabase
+    .from('events')
+    .select(EVENT_SELECT)
+    .eq('slug', slug)
+    .maybeSingle()
+
+  if (eventError) {
+    console.error('Admin event preview query failed', {
+      code: eventError.code ?? 'unknown',
+    })
+    return response.status(500).json({ error: 'internal_error' })
+  }
+
+  if (!event) {
+    return response.status(404).json({ error: 'event_not_found' })
+  }
+
+  const [
+    groupsResult,
+    distancesResult,
+    kitResult,
+    partnersResult,
+    documentsResult,
+    consentsResult,
+  ] = await Promise.all([
+    supabase
+      .from('event_registration_groups')
+      .select('id,code,title,registration_form_type,capacity,sort_order')
+      .eq('event_id', event.id)
+      .order('sort_order', { ascending: true }),
+    supabase
+      .from('event_distances')
+      .select('group_id,code,title,distance_meters,min_age,max_age,capacity,price_minor,sort_order')
+      .eq('event_id', event.id)
+      .order('sort_order', { ascending: true }),
+    supabase
+      .from('event_kit_items')
+      .select('code,name,description,image_path,sort_order')
+      .eq('event_id', event.id)
+      .order('sort_order', { ascending: true }),
+    supabase
+      .from('event_partners')
+      .select('name,logo_path,website_url,category,sort_order')
+      .eq('event_id', event.id)
+      .order('sort_order', { ascending: true }),
+    supabase
+      .from('event_document_requirements')
+      .select('document_type,title,description,template_url,required,sort_order')
+      .eq('event_id', event.id)
+      .order('sort_order', { ascending: true }),
+    supabase
+      .from('event_consent_requirements')
+      .select('consent_type,consent_version,title,body_text,document_url,required,sort_order')
+      .eq('event_id', event.id)
+      .order('sort_order', { ascending: true }),
+  ])
+
+  const failedQuery = [
+    groupsResult,
+    distancesResult,
+    kitResult,
+    partnersResult,
+    documentsResult,
+    consentsResult,
+  ].find((result) => result.error)
+
+  if (failedQuery) {
+    console.error('Admin event preview related data query failed', {
+      code: failedQuery.error.code ?? 'unknown',
+    })
+    return response.status(500).json({ error: 'internal_error' })
+  }
+
+  return response.status(200).json({
+    event: mapPublicEvent(
+      event,
+      groupsResult.data ?? [],
+      distancesResult.data ?? [],
+      kitResult.data ?? [],
+      partnersResult.data ?? [],
+      documentsResult.data ?? [],
+      consentsResult.data ?? [],
+    ),
+  })
+}
+
 export default async function handler(request, response) {
   response.setHeader('Cache-Control', 'no-store')
   response.setHeader(
@@ -2203,6 +2374,7 @@ export default async function handler(request, response) {
   const registrationId = readQueryParameter(
     request.query.registrationId,
   )
+  const previewSlug = readQueryParameter(request.query.slug)
 
   if (request.method === 'POST' && eventId && !resource) {
     return response
@@ -2229,6 +2401,24 @@ export default async function handler(request, response) {
   }
 
   if (resource) {
+    if (resource === 'preview') {
+      return handlePreviewRequest({
+        request,
+        response,
+        supabase,
+        slug: previewSlug,
+      })
+    }
+
+    if (resource === 'publication') {
+      return handlePublicationRequest({
+        request,
+        response,
+        supabase,
+        eventId: resourceEventId,
+      })
+    }
+
     if (['document', 'consent'].includes(resource)) {
       return handleRequirementRequest({
         request,

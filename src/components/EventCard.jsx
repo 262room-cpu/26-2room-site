@@ -2,6 +2,7 @@ import { Link } from 'react-router'
 import { EVENT_DATE_STATUSES, EVENT_STATUSES } from '../data/events'
 
 const EVENT_STATUS_LABELS = {
+  [EVENT_STATUSES.DRAFT]: 'Регистрация готовится',
   [EVENT_STATUSES.COMING_SOON]: 'Регистрация скоро',
   [EVENT_STATUSES.OPEN]: 'Регистрация открыта',
   [EVENT_STATUSES.SOLD_OUT]: 'Все места заняты',

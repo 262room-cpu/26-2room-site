@@ -15,6 +15,7 @@ import {
   updateAdminConsentRequirement,
   updateAdminDocumentRequirement,
   updateAdminEvent,
+  updateAdminEventPublication,
   updateAdminGroup,
 } from '../api/admin'
 import AdminEventManagement from '../components/AdminEventManagement'
@@ -829,6 +830,8 @@ function updateEventListItem(event, updatedEvent) {
     eventType: updatedEvent.eventType,
     registrationFormType: updatedEvent.registrationFormType,
     status: updatedEvent.status,
+    isPublished: updatedEvent.isPublished,
+    publishedAt: updatedEvent.publishedAt,
     city: updatedEvent.city,
     venue: updatedEvent.venue,
     startsAt: updatedEvent.startsAt,
@@ -1390,10 +1393,10 @@ function AdminPage() {
   }
 
   const handleSaveEvent = async (submitEvent) => {
-    submitEvent.preventDefault()
+    submitEvent?.preventDefault()
 
     if (!eventDetail?.event || !eventForm) {
-      return
+      return null
     }
 
     let changes
@@ -1407,7 +1410,7 @@ function AdminPage() {
           ? error.message
           : 'Проверьте заполненные данные.',
       )
-      return
+      return null
     }
 
     setEventSaveStatus('saving')
@@ -1443,7 +1446,12 @@ function AdminPage() {
         ),
       )
       setEventSaveStatus('success')
-      setEventSaveMessage('Сохранено')
+      setEventSaveMessage(
+        result.event.isPublished
+          ? 'Изменения сохранены'
+          : 'Черновик сохранён',
+      )
+      return result.event
     } catch (error) {
       if (error instanceof AdminAuthError && error.status === 401) {
         setEvents([])
@@ -1461,7 +1469,7 @@ function AdminPage() {
         setNewDistanceForm(createNewDistanceForm([]))
         setNewDistanceSaveState({ status: 'idle', message: '' })
         setSessionStatus('unauthenticated')
-        return
+        return null
       }
 
       setEventSaveStatus('error')
@@ -1472,6 +1480,74 @@ function AdminPage() {
           : error instanceof AdminAuthError && error.status === 404
             ? 'Мероприятие не найдено.'
             : 'Не удалось сохранить. Проверьте данные и попробуйте ещё раз.',
+      )
+      return null
+    }
+  }
+
+  const handlePublicationChange = async (action) => {
+    if (!eventDetail?.event || eventSaveStatus === 'saving') {
+      return
+    }
+
+    if (action === 'publish') {
+      const savedEvent = await handleSaveEvent()
+
+      if (!savedEvent) {
+        return
+      }
+    }
+
+    setEventSaveStatus('saving')
+    setEventSaveMessage('')
+
+    try {
+      const result = await updateAdminEventPublication(
+        eventDetail.event.id,
+        action,
+      )
+
+      if (!result.event || typeof result.event !== 'object') {
+        throw new AdminAuthError('invalid_server_response')
+      }
+
+      setEventDetail((currentDetail) => ({
+        ...currentDetail,
+        event: result.event,
+      }))
+      if (action === 'publish') {
+        setEventForm(createEventForm(result.event))
+      }
+      setEvents((currentEvents) =>
+        currentEvents.map((event) =>
+          event.id === result.event.id
+            ? updateEventListItem(event, result.event)
+            : event,
+        ),
+      )
+      setEventSaveStatus('success')
+      setEventSaveMessage(
+        action === 'publish'
+          ? 'Мероприятие размещено на сайте'
+          : 'Мероприятие снято с публикации',
+      )
+    } catch (error) {
+      if (error instanceof AdminAuthError && error.status === 401) {
+        setEvents([])
+        setSelectedEventId(null)
+        setEventDetail(null)
+        setEventDetailStatus('idle')
+        setEventForm(null)
+        setEventSaveStatus('idle')
+        setSessionStatus('unauthenticated')
+        return
+      }
+
+      setEventSaveStatus('error')
+      setEventSaveMessage(
+        error instanceof AdminAuthError && error.status === 404
+          ? 'Мероприятие не найдено.'
+          : 'Не удалось изменить публикацию. Попробуйте ещё раз.',
       )
     }
   }
@@ -2608,6 +2684,8 @@ function AdminPage() {
                     <strong>{event.title}</strong>
                     <span>{event.city}</span>
                     <span>
+                      {event.isPublished ? 'Опубликовано' : 'Черновик'}
+                      {' · '}
                       {EVENT_STATUS_LABELS[event.status] ?? event.status}
                     </span>
                   </button>
@@ -2772,13 +2850,73 @@ function AdminPage() {
                   <h2>{eventDetail?.event?.title ?? 'Рабочая область'}</h2>
                   {eventDetail?.event && (
                     <p>
+                      Публикация:{' '}
+                      <strong>
+                        {eventDetail.event.isPublished
+                          ? 'Опубликовано'
+                          : 'Черновик'}
+                      </strong>
+                      {' · Регистрация: '}
                       {EVENT_STATUS_LABELS[eventDetail.event.status] ??
-                        eventDetail.event.status}{' '}
-                      · {eventDetail.event.city}
+                        eventDetail.event.status}
+                      {' · '}
+                      {eventDetail.event.city}
                     </p>
                   )}
                 </div>
                 <div className="adminWorkspaceHeaderActions">
+                  {eventDetail?.event && (
+                    <>
+                      <a
+                        className="adminInlineButton adminPreviewLink"
+                        href={`/events/${eventDetail.event.slug}?preview=1`}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Предпросмотр
+                      </a>
+                      <button
+                        className="adminInlineButton"
+                        type="button"
+                        onClick={handleSaveEvent}
+                        disabled={
+                          eventSaveStatus === 'saving' ||
+                          isGroupSaving ||
+                          isDistanceSaving ||
+                          isRequirementSaving
+                        }
+                      >
+                        {eventDetail.event.isPublished
+                          ? 'Сохранить изменения'
+                          : 'Сохранить черновик'}
+                      </button>
+                      <button
+                        className={
+                          eventDetail.event.isPublished
+                            ? 'adminEventCancelButton'
+                            : 'adminEventSaveButton'
+                        }
+                        type="button"
+                        onClick={() =>
+                          handlePublicationChange(
+                            eventDetail.event.isPublished
+                              ? 'unpublish'
+                              : 'publish',
+                          )
+                        }
+                        disabled={
+                          eventSaveStatus === 'saving' ||
+                          isGroupSaving ||
+                          isDistanceSaving ||
+                          isRequirementSaving
+                        }
+                      >
+                        {eventDetail.event.isPublished
+                          ? 'Снять с публикации'
+                          : 'Разместить на сайте'}
+                      </button>
+                    </>
+                  )}
                   {workspaceModule && (
                     <button
                       className="adminInlineButton"
@@ -3235,7 +3373,9 @@ function AdminPage() {
                     >
                       {eventSaveStatus === 'saving'
                         ? 'Сохраняем...'
-                        : 'Сохранить'}
+                        : eventDetail.event.isPublished
+                          ? 'Сохранить изменения'
+                          : 'Сохранить черновик'}
                     </button>
 
                     {eventSaveMessage && (

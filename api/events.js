@@ -2,7 +2,6 @@ import { getSupabaseAdmin, SupabaseConfigurationError } from './_supabase.js'
 
 const MAX_SLUG_LENGTH = 120
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
-const PUBLIC_EVENT_STATUSES = ['coming_soon', 'open', 'sold_out', 'closed', 'finished']
 
 const EVENT_LIST_SELECT = [
   'slug',
@@ -296,7 +295,7 @@ export default async function handler(request, response) {
     const { data: events, error: eventsError } = await supabase
       .from('events')
       .select(EVENT_LIST_SELECT)
-      .in('status', PUBLIC_EVENT_STATUSES)
+      .eq('is_published', true)
       .order('starts_at', { ascending: true, nullsFirst: false })
       .order('tentative_date', { ascending: true, nullsFirst: false })
       .order('slug', { ascending: true })
@@ -313,7 +312,7 @@ export default async function handler(request, response) {
     .from('events')
     .select(EVENT_SELECT)
     .eq('slug', slug)
-    .in('status', PUBLIC_EVENT_STATUSES)
+    .eq('is_published', true)
     .maybeSingle()
 
   if (eventError) {

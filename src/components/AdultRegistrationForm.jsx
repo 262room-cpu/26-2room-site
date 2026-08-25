@@ -275,7 +275,7 @@ function getSubmissionErrorMessage(code) {
   )
 }
 
-function AdultRegistrationForm({ event }) {
+function AdultRegistrationForm({ event, previewMode = false }) {
   const [formValues, setFormValues] =
     useState(INITIAL_FORM_VALUES)
   const [documentFiles, setDocumentFiles] = useState({})
@@ -373,6 +373,10 @@ function AdultRegistrationForm({ event }) {
 
   const handleSubmit = async (submitEvent) => {
     submitEvent.preventDefault()
+
+    if (previewMode) {
+      return
+    }
 
     if (isSubmitting || submissionComplete) {
       return
@@ -1088,11 +1092,14 @@ function AdultRegistrationForm({ event }) {
         className="kidsRegistrationSubmit"
         type="submit"
         disabled={
+          previewMode ||
           isSubmitting ||
           submissionComplete
         }
       >
-        {submissionComplete
+        {previewMode
+          ? 'Предпросмотр — отправка отключена'
+          : submissionComplete
           ? 'Данные сохранены'
           : isSubmitting
             ? 'Сохраняем…'

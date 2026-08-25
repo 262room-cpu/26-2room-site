@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router'
+import { Link, useParams, useSearchParams } from 'react-router'
 import { EVENT_FETCH_STATUSES, fetchEventBySlug } from '../api/events'
 import './EventPage.css'
 
@@ -113,8 +113,11 @@ function EventPageMessage({ title, description, loading = false }) {
 
 function EventPage() {
   const { slug } = useParams()
+  const [searchParams] = useSearchParams()
+  const previewMode = searchParams.get('preview') === '1'
   const [eventRequest, setEventRequest] = useState({
     slug: null,
+    preview: false,
     status: null,
     event: null,
   })
@@ -123,7 +126,10 @@ function EventPage() {
     const controller = new AbortController()
     let isActive = true
 
-    fetchEventBySlug(slug, { signal: controller.signal })
+    fetchEventBySlug(slug, {
+      signal: controller.signal,
+      preview: previewMode,
+    })
       .then((result) => {
         if (!isActive) {
           return
@@ -131,6 +137,7 @@ function EventPage() {
 
         setEventRequest({
           slug,
+          preview: previewMode,
           status: result.status,
           event: result.status === EVENT_FETCH_STATUSES.SUCCESS ? result.event : null,
         })
@@ -140,17 +147,22 @@ function EventPage() {
           return
         }
 
-        setEventRequest({ slug, status: EVENT_FETCH_STATUSES.ERROR, event: null })
+        setEventRequest({
+          slug,
+          preview: previewMode,
+          status: EVENT_FETCH_STATUSES.ERROR,
+          event: null,
+        })
       })
 
     return () => {
       isActive = false
       controller.abort()
     }
-  }, [slug])
+  }, [previewMode, slug])
 
   const currentRequest =
-    eventRequest.slug === slug
+    eventRequest.slug === slug && eventRequest.preview === previewMode
       ? eventRequest
       : { status: null, event: null }
 
@@ -217,6 +229,12 @@ function EventPage() {
       <EventPageHeader />
 
       <main className="eventPageMain">
+        {previewMode && (
+          <div className="eventPagePreviewBanner" role="status">
+            Режим предпросмотра — регистрация не будет создана.
+          </div>
+        )}
+
         <section className="eventPageHero">
           <div className="eventPageHeroCopy">
             <div className="eventPageStatus">{statusLabel}</div>
@@ -356,9 +374,12 @@ function EventPage() {
             <p>{registrationCopy}</p>
           </div>
 
-          {event.status === EVENT_STATUSES.OPEN && (
-            <Link className="eventPagePrimaryLink" to={`/events/${event.slug}/register`}>
-              Зарегистрироваться
+          {(event.status === EVENT_STATUSES.OPEN || previewMode) && (
+            <Link
+              className="eventPagePrimaryLink"
+              to={`/events/${event.slug}/register${previewMode ? '?preview=1' : ''}`}
+            >
+              {previewMode ? 'Предпросмотр формы' : 'Зарегистрироваться'}
             </Link>
           )}
         </section>

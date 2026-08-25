@@ -119,6 +119,23 @@ export function updateAdminEvent(
   })
 }
 
+export function updateAdminEventPublication(
+  eventId,
+  action,
+  { signal } = {},
+) {
+  const query = new URLSearchParams({
+    resource: 'publication',
+    eventId,
+  })
+
+  return requestJson(`/api/admin/event?${query.toString()}`, {
+    method: 'PATCH',
+    body: { action },
+    signal,
+  })
+}
+
 export function createAdminDocumentRequirement(
   eventId,
   changes,

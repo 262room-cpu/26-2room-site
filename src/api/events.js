@@ -65,14 +65,18 @@ export async function fetchEvents({ signal } = {}) {
   }
 }
 
-export async function fetchEventBySlug(slug, { signal } = {}) {
+export async function fetchEventBySlug(slug, { signal, preview = false } = {}) {
   if (typeof slug !== 'string' || slug.length === 0) {
     return { status: EVENT_FETCH_STATUSES.ERROR }
   }
 
   try {
-    const response = await fetch(`/api/events?slug=${encodeURIComponent(slug)}`, {
+    const url = preview
+      ? `/api/admin/event?resource=preview&slug=${encodeURIComponent(slug)}`
+      : `/api/events?slug=${encodeURIComponent(slug)}`
+    const response = await fetch(url, {
       headers: { Accept: 'application/json' },
+      credentials: 'same-origin',
       signal,
     })
 
@@ -84,7 +88,8 @@ export async function fetchEventBySlug(slug, { signal } = {}) {
       return { status: EVENT_FETCH_STATUSES.ERROR }
     }
 
-    const event = await response.json()
+    const data = await response.json()
+    const event = preview ? data?.event : data
 
     if (!event || typeof event !== 'object' || Array.isArray(event)) {
       return { status: EVENT_FETCH_STATUSES.ERROR }
