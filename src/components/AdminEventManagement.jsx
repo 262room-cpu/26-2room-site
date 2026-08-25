@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react'
 import {
   AdminAuthError,
-  createAdminKitItem,
   createAdminPartner,
   getAdminRegistration,
   getAdminRegistrations,
-  updateAdminKitItem,
   updateAdminPartner,
 } from '../api/admin'
 
@@ -52,18 +50,6 @@ function parseSortOrder(value) {
   return parsed
 }
 
-function kitForm(item = {}, items = []) {
-  const order = nextSortOrder(items)
-
-  return {
-    code: item.code ?? '',
-    name: item.name ?? '',
-    description: item.description ?? '',
-    imagePath: item.imagePath ?? '',
-    sortOrder: String(item.sortOrder ?? order ?? ''),
-  }
-}
-
 function partnerForm(partner = {}, partners = []) {
   const order = nextSortOrder(partners)
 
@@ -73,23 +59,6 @@ function partnerForm(partner = {}, partners = []) {
     websiteUrl: partner.websiteUrl ?? '',
     category: partner.category ?? '',
     sortOrder: String(partner.sortOrder ?? order ?? ''),
-  }
-}
-
-function buildKitChanges(form) {
-  const code = form.code.trim()
-  const name = form.name.trim()
-
-  if (!code || !name) {
-    throw new ManagementFormError('Код и название обязательны.')
-  }
-
-  return {
-    code,
-    name,
-    description: form.description.trim() || null,
-    imagePath: form.imagePath.trim() || null,
-    sortOrder: parseSortOrder(form.sortOrder),
   }
 }
 
@@ -158,46 +127,6 @@ function SaveMessage({ state }) {
     >
       {state.message}
     </p>
-  )
-}
-
-function KitFields({ form, onChange }) {
-  return (
-    <div className="adminRequirementFormGrid">
-      <label className="adminEventField">
-        <span>Название</span>
-        <input name="name" value={form.name} onChange={onChange} required />
-      </label>
-      <label className="adminEventField">
-        <span>Код</span>
-        <input name="code" value={form.code} onChange={onChange} required />
-      </label>
-      <label className="adminEventField adminRequirementFieldWide">
-        <span>Описание</span>
-        <textarea
-          name="description"
-          rows="3"
-          value={form.description}
-          onChange={onChange}
-        />
-      </label>
-      <label className="adminEventField adminRequirementFieldWide">
-        <span>Путь к изображению</span>
-        <input name="imagePath" value={form.imagePath} onChange={onChange} />
-      </label>
-      <label className="adminEventField">
-        <span>Порядок</span>
-        <input
-          name="sortOrder"
-          type="number"
-          min="0"
-          max="32767"
-          value={form.sortOrder}
-          onChange={onChange}
-          required
-        />
-      </label>
-    </div>
   )
 }
 
@@ -397,19 +326,14 @@ function RegistrationDetail({ detail, onClose }) {
 }
 
 function AdminEventManagement({
+  module,
   eventId,
-  kitItems,
   partners,
   distances,
-  onKitItemsChange,
   onPartnersChange,
   onUnauthorized,
   disabled,
 }) {
-  const [kitForms, setKitForms] = useState(() => makeForms(kitItems, kitForm))
-  const [newKitForm, setNewKitForm] = useState(() => kitForm({}, kitItems))
-  const [kitStates, setKitStates] = useState({})
-  const [newKitState, setNewKitState] = useState({ status: 'idle', message: '' })
   const [partnerForms, setPartnerForms] = useState(() =>
     makeForms(partners, partnerForm),
   )
@@ -450,6 +374,10 @@ function AdminEventManagement({
   })
 
   useEffect(() => {
+    if (module !== 'participants') {
+      return undefined
+    }
+
     const controller = new AbortController()
     let active = true
 
@@ -490,7 +418,7 @@ function AdminEventManagement({
       active = false
       controller.abort()
     }
-  }, [eventId, onUnauthorized, registrationFilters, registrationRefresh])
+  }, [eventId, module, onUnauthorized, registrationFilters, registrationRefresh])
 
   const handleRequestError = (error, fallback, conflictMessage) => {
     if (error instanceof AdminAuthError && error.status === 401) {
@@ -519,81 +447,6 @@ function AdminEventManagement({
       ...current,
       [id]: { status: 'idle', message: '' },
     }))
-  }
-
-  const saveKit = async (event, itemId) => {
-    event.preventDefault()
-    let changes
-    try {
-      changes = buildKitChanges(kitForms[itemId])
-    } catch (error) {
-      setKitStates((current) => ({
-        ...current,
-        [itemId]: { status: 'error', message: error.message },
-      }))
-      return
-    }
-    setKitStates((current) => ({
-      ...current,
-      [itemId]: { status: 'saving', message: '' },
-    }))
-    try {
-      const result = await updateAdminKitItem(eventId, itemId, changes)
-      const next = kitItems.map((item) =>
-        item.id === result.item.id ? result.item : item,
-      )
-      onKitItemsChange(next)
-      setKitForms((current) => ({
-        ...current,
-        [itemId]: kitForm(result.item),
-      }))
-      setKitStates((current) => ({
-        ...current,
-        [itemId]: { status: 'success', message: 'Сохранено' },
-      }))
-    } catch (error) {
-      const message = handleRequestError(
-        error,
-        'Не удалось сохранить элемент.',
-        'Элемент с таким кодом уже существует.',
-      )
-      if (message) {
-        setKitStates((current) => ({
-          ...current,
-          [itemId]: { status: 'error', message },
-        }))
-      }
-    }
-  }
-
-  const createKit = async (event) => {
-    event.preventDefault()
-    let changes
-    try {
-      changes = buildKitChanges(newKitForm)
-    } catch (error) {
-      setNewKitState({ status: 'error', message: error.message })
-      return
-    }
-    setNewKitState({ status: 'saving', message: '' })
-    try {
-      const result = await createAdminKitItem(eventId, changes)
-      const next = [...kitItems, result.item]
-      onKitItemsChange(next)
-      setKitForms((current) => ({
-        ...current,
-        [result.item.id]: kitForm(result.item),
-      }))
-      setNewKitForm(kitForm({}, next))
-      setNewKitState({ status: 'success', message: 'Элемент добавлен' })
-    } catch (error) {
-      const message = handleRequestError(
-        error,
-        'Не удалось добавить элемент.',
-        'Элемент с таким кодом уже существует.',
-      )
-      if (message) setNewKitState({ status: 'error', message })
-    }
   }
 
   const savePartner = async (event, partnerId) => {
@@ -689,13 +542,10 @@ function AdminEventManagement({
     }
   }
 
-  const isKitSaving =
-    newKitState.status === 'saving' ||
-    Object.values(kitStates).some(({ status }) => status === 'saving')
   const isPartnerSaving =
     newPartnerState.status === 'saving' ||
     Object.values(partnerStates).some(({ status }) => status === 'saving')
-  const writesDisabled = disabled || isKitSaving || isPartnerSaving
+  const writesDisabled = disabled || isPartnerSaving
   const pageCount = Math.max(
     1,
     Math.ceil(registrationsState.total / registrationFilters.pageSize),
@@ -703,51 +553,7 @@ function AdminEventManagement({
 
   return (
     <>
-      <section className="adminDistancesSection">
-        <div className="adminDistancesHeader">
-          <div>
-            <p className="adminPageEyebrow">Материалы</p>
-            <h3>Стартовый набор</h3>
-          </div>
-          <span>{kitItems.length}</span>
-        </div>
-        <form className="adminDistanceCard adminDistanceCreateCard" onSubmit={createKit} noValidate>
-          <div className="adminDistanceCardHeader"><h4>Добавить элемент</h4></div>
-          <KitFields
-            form={newKitForm}
-            onChange={(event) => {
-              setNewKitForm((current) => ({ ...current, [event.target.name]: event.target.value }))
-              setNewKitState({ status: 'idle', message: '' })
-            }}
-          />
-          <div className="adminEventFormActions">
-            <button className="adminEventSaveButton" type="submit" disabled={writesDisabled || nextSortOrder(kitItems) === null}>
-              {newKitState.status === 'saving' ? 'Добавляем...' : 'Добавить элемент'}
-            </button>
-            <SaveMessage state={newKitState} />
-          </div>
-        </form>
-        {kitItems.length === 0 ? <p>Стартовый набор пока не настроен.</p> : (
-          <div className="adminDistanceCards">
-            {kitItems.map((item) => {
-              const form = kitForms[item.id]
-              const state = kitStates[item.id] ?? { status: 'idle', message: '' }
-              if (!form) return null
-              return (
-                <form className="adminDistanceCard" key={item.id} onSubmit={(event) => saveKit(event, item.id)} noValidate>
-                  <div className="adminDistanceCardHeader"><h4>{form.name || 'Без названия'}</h4><span>{form.code || 'Без кода'}</span></div>
-                  <KitFields form={form} onChange={(event) => updateForm(setKitForms, setKitStates, item.id, event)} />
-                  <div className="adminEventFormActions">
-                    <button className="adminEventSaveButton" type="submit" disabled={writesDisabled}>{state.status === 'saving' ? 'Сохраняем...' : 'Сохранить элемент'}</button>
-                    <SaveMessage state={state} />
-                  </div>
-                </form>
-              )
-            })}
-          </div>
-        )}
-      </section>
-
+      {module === 'partners' && (
       <section className="adminDistancesSection">
         <div className="adminDistancesHeader">
           <div><p className="adminPageEyebrow">Экосистема</p><h3>Партнёры</h3></div>
@@ -787,7 +593,9 @@ function AdminEventManagement({
           </div>
         )}
       </section>
+      )}
 
+      {module === 'participants' && (
       <section className="adminDistancesSection adminRegistrationsSection">
         <div className="adminDistancesHeader">
           <div><p className="adminPageEyebrow">Участники</p><h3>Регистрации</h3></div>
@@ -844,6 +652,7 @@ function AdminEventManagement({
         {registrationDetailState.status === 'error' && <p className="adminAuthMessage" role="alert">{registrationDetailState.message}</p>}
         {registrationDetailState.status === 'ready' && registrationDetailState.data && <RegistrationDetail detail={registrationDetailState.data} onClose={() => setRegistrationDetailState({ status: 'idle', message: '', data: null })} />}
       </section>
+      )}
     </>
   )
 }

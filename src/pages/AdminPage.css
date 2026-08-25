@@ -809,6 +809,224 @@
   font-weight: 700;
 }
 
+.adminWorkspaceHeader {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.adminWorkspaceHeader h2,
+.adminWorkspaceModuleHeading h3 {
+  margin: 4px 0 8px;
+}
+
+.adminWorkspaceHeader p:last-child {
+  margin: 0;
+  color: #9299a3;
+}
+
+.adminWorkspaceHeaderActions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.adminWorkspaceGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.adminWorkspaceCard {
+  display: grid;
+  min-width: 0;
+  min-height: 190px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 8px;
+  background: #111214;
+  color: #eef0f2;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.adminWorkspaceCard:hover {
+  border-color: rgba(255, 214, 0, 0.42);
+  background: #151608;
+  transform: translateY(-2px);
+}
+
+.adminWorkspaceCardIndex {
+  color: #ffd600;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.adminWorkspaceCard strong {
+  align-self: end;
+  margin-top: 32px;
+  font-size: 21px;
+}
+
+.adminWorkspaceCard small {
+  margin-top: 8px;
+  color: #9ba2ac;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.adminWorkspaceCard em {
+  align-self: end;
+  margin-top: 16px;
+  color: #ffd600;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.adminWorkspaceModuleHeading {
+  margin-bottom: 18px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.adminWorkspaceTabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 22px;
+  overflow-x: auto;
+}
+
+.adminWorkspaceTabs button {
+  min-height: 40px;
+  padding: 9px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  background: #111214;
+  color: #aeb4bd;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.adminWorkspaceTabs button.isActive {
+  border-color: #ffd600;
+  background: #ffd600;
+  color: #080808;
+}
+
+.adminStarterKitModule {
+  display: grid;
+  gap: 22px;
+}
+
+.adminKitSelectedList,
+.adminKitLibraryList {
+  display: grid;
+  gap: 10px;
+}
+
+.adminKitSelectedRow,
+.adminKitLibraryItem {
+  display: grid;
+  min-width: 0;
+  gap: 14px;
+  align-items: center;
+  padding: 14px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.adminKitSelectedRow {
+  grid-template-columns: minmax(0, 1fr) 120px auto;
+}
+
+.adminKitSelectedRow strong,
+.adminKitSelectedRow small,
+.adminKitLibrarySelect strong,
+.adminKitLibrarySelect small {
+  display: block;
+}
+
+.adminKitSelectedRow small,
+.adminKitLibrarySelect small {
+  margin-top: 4px;
+  color: #858c96;
+}
+
+.adminKitOrderField {
+  display: grid;
+  gap: 5px;
+  color: #858c96;
+  font-size: 11px;
+}
+
+.adminKitOrderField input {
+  width: 100%;
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 8px;
+  background: #08090a;
+  color: #f3f4f5;
+}
+
+.adminKitLibraryItem {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.adminKitLibraryItem.isInactive {
+  opacity: 0.62;
+}
+
+.adminKitLibrarySelect {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: auto 48px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  cursor: pointer;
+}
+
+.adminKitLibrarySelect input {
+  width: 18px;
+  height: 18px;
+  accent-color: #ffd600;
+}
+
+.adminKitImagePlaceholder {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  border: 1px solid rgba(255, 214, 0, 0.22);
+  border-radius: 8px;
+  background: rgba(255, 214, 0, 0.07);
+  color: #ffd600;
+  place-items: center;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.adminKitLibraryActions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  color: #d3ad00;
+  font-size: 11px;
+}
+
+.adminKitEditor {
+  margin-top: 18px;
+  border-color: rgba(255, 214, 0, 0.24);
+}
+
 @media (max-width: 920px) {
   .adminDistanceFormGrid,
   .adminGroupFormGrid {
@@ -823,6 +1041,10 @@
   .adminRegistrationDetailGrid,
   .adminRegistrationRelatedGrid {
     grid-template-columns: 1fr;
+  }
+
+  .adminWorkspaceGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -870,6 +1092,32 @@
   }
 
   .adminRegistrationPagination {
+    justify-content: space-between;
+  }
+
+  .adminWorkspaceHeader {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .adminWorkspaceHeaderActions {
+    justify-content: flex-start;
+  }
+
+  .adminWorkspaceGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .adminWorkspaceCard {
+    min-height: 158px;
+  }
+
+  .adminKitSelectedRow,
+  .adminKitLibraryItem {
+    grid-template-columns: 1fr;
+  }
+
+  .adminKitLibraryActions {
     justify-content: space-between;
   }
 

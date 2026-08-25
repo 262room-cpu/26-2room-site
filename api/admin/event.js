@@ -131,11 +131,22 @@ const CONSENT_SELECT = [
 const KIT_SELECT = [
   'id',
   'event_id',
+  'catalog_item_id',
   'code',
   'name',
   'description',
   'image_path',
   'sort_order',
+  'created_at',
+  'updated_at',
+].join(',')
+const KIT_CATALOG_SELECT = [
+  'id',
+  'code',
+  'name',
+  'description',
+  'image_path',
+  'active',
   'created_at',
   'updated_at',
 ].join(',')
@@ -198,12 +209,12 @@ const CONSENT_FIELDS = {
   required: { column: 'required', type: 'boolean' },
   sortOrder: { column: 'sort_order', type: 'sort_order' },
 }
-const KIT_FIELDS = {
+const KIT_CATALOG_FIELDS = {
   code: { column: 'code', type: 'required_text' },
   name: { column: 'name', type: 'required_text' },
   description: { column: 'description', type: 'nullable_text' },
   imagePath: { column: 'image_path', type: 'nullable_text' },
-  sortOrder: { column: 'sort_order', type: 'sort_order' },
+  active: { column: 'active', type: 'boolean' },
 }
 const PARTNER_FIELDS = {
   name: { column: 'name', type: 'required_text' },
@@ -428,28 +439,15 @@ function buildRequirementUpdate(body, resource) {
   return normalizeRequirementBody(body, fields, errorCode).update
 }
 
-function buildEventItemInsert(body, resource, eventId) {
-  const isKit = resource === 'kit'
-  const fields = isKit ? KIT_FIELDS : PARTNER_FIELDS
-  const errorCode = isKit
-    ? 'invalid_kit_data'
-    : 'invalid_partner_data'
-  const { values } = normalizeRequirementBody(body, fields, errorCode)
-  const requiredFields = isKit ? ['code', 'name'] : ['name']
+function buildPartnerInsert(body, eventId) {
+  const { values } = normalizeRequirementBody(
+    body,
+    PARTNER_FIELDS,
+    'invalid_partner_data',
+  )
 
-  if (requiredFields.some((field) => !Object.hasOwn(values, field))) {
+  if (!Object.hasOwn(values, 'name')) {
     throw new RequirementValidationError('required_fields_missing')
-  }
-
-  if (isKit) {
-    return {
-      event_id: eventId,
-      code: values.code,
-      name: values.name,
-      description: values.description ?? null,
-      image_path: values.imagePath ?? null,
-      sort_order: values.sortOrder ?? 0,
-    }
   }
 
   return {
@@ -462,13 +460,73 @@ function buildEventItemInsert(body, resource, eventId) {
   }
 }
 
-function buildEventItemUpdate(body, resource) {
-  const fields = resource === 'kit' ? KIT_FIELDS : PARTNER_FIELDS
-  const errorCode = resource === 'kit'
-    ? 'invalid_kit_data'
-    : 'invalid_partner_data'
+function buildPartnerUpdate(body) {
+  return normalizeRequirementBody(
+    body,
+    PARTNER_FIELDS,
+    'invalid_partner_data',
+  ).update
+}
 
-  return normalizeRequirementBody(body, fields, errorCode).update
+function buildKitCatalogInsert(body) {
+  const { values } = normalizeRequirementBody(
+    body,
+    KIT_CATALOG_FIELDS,
+    'invalid_kit_data',
+  )
+
+  if (
+    !Object.hasOwn(values, 'code') ||
+    !Object.hasOwn(values, 'name')
+  ) {
+    throw new RequirementValidationError('required_fields_missing')
+  }
+
+  return {
+    code: values.code,
+    name: values.name,
+    description: values.description ?? null,
+    image_path: values.imagePath ?? null,
+    active: values.active ?? true,
+  }
+}
+
+function buildKitCatalogUpdate(body) {
+  return normalizeRequirementBody(
+    body,
+    KIT_CATALOG_FIELDS,
+    'invalid_kit_data',
+  ).update
+}
+
+function buildKitMembershipChange(body) {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) {
+    throw new RequirementValidationError('invalid_kit_membership')
+  }
+
+  const fields = Object.keys(body)
+
+  if (
+    fields.length === 0 ||
+    fields.some((field) => !['selected', 'sortOrder'].includes(field)) ||
+    typeof body.selected !== 'boolean'
+  ) {
+    throw new RequirementValidationError('invalid_kit_membership')
+  }
+
+  if (!body.selected && Object.hasOwn(body, 'sortOrder')) {
+    throw new RequirementValidationError('invalid_kit_membership')
+  }
+
+  const sortOrder = Object.hasOwn(body, 'sortOrder')
+    ? normalizeRequirementField(
+        body.sortOrder,
+        'sort_order',
+        'invalid_kit_membership',
+      )
+    : 0
+
+  return { selected: body.selected, sortOrder }
 }
 
 function normalizeDate(value) {
@@ -870,11 +928,25 @@ function mapKitItem(item) {
   return {
     id: item.id,
     eventId: item.event_id,
+    catalogItemId: item.catalog_item_id,
     code: item.code,
     name: item.name,
     description: item.description,
     imagePath: item.image_path,
     sortOrder: item.sort_order,
+    createdAt: item.created_at,
+    updatedAt: item.updated_at,
+  }
+}
+
+function mapKitCatalogItem(item) {
+  return {
+    id: item.id,
+    code: item.code,
+    name: item.name,
+    description: item.description,
+    imagePath: item.image_path,
+    active: item.active,
     createdAt: item.created_at,
     updatedAt: item.updated_at,
   }
@@ -1040,7 +1112,6 @@ async function handleEventItemRequest({
   request,
   response,
   supabase,
-  resource,
   eventId,
   itemId,
 }) {
@@ -1091,18 +1162,12 @@ async function handleEventItemRequest({
       .json({ error: 'event_not_found' })
   }
 
-  const isKit = resource === 'kit'
-  const table = isKit ? 'event_kit_items' : 'event_partners'
-  const select = isKit ? KIT_SELECT : PARTNER_SELECT
-  const responseKey = isKit ? 'item' : 'partner'
-  const mapItem = isKit ? mapKitItem : mapPartner
-
   let values
 
   try {
     values = request.method === 'POST'
-      ? buildEventItemInsert(request.body, resource, eventId)
-      : buildEventItemUpdate(request.body, resource)
+      ? buildPartnerInsert(request.body, eventId)
+      : buildPartnerUpdate(request.body)
   } catch (error) {
     if (error instanceof RequirementValidationError) {
       return response
@@ -1118,32 +1183,24 @@ async function handleEventItemRequest({
   }
 
   let query = request.method === 'POST'
-    ? supabase.from(table).insert(values)
+    ? supabase.from('event_partners').insert(values)
     : supabase
-        .from(table)
+        .from('event_partners')
         .update(values)
         .eq('id', itemId)
         .eq('event_id', eventId)
 
-  query = query.select(select).maybeSingle()
+  query = query.select(PARTNER_SELECT).maybeSingle()
 
   const { data: item, error: writeError } = await query
 
   if (writeError) {
-    console.error(`Admin ${resource} item write failed`, {
+    console.error('Admin partner item write failed', {
       code: writeError.code ?? 'unknown',
     })
 
-    if (isKit && writeError.code === '23505') {
-      return response
-        .status(409)
-        .json({ error: 'kit_code_conflict' })
-    }
-
     if (['22P02', '22003', '23502', '23514'].includes(writeError.code)) {
-      return response.status(400).json({
-        error: isKit ? 'invalid_kit_data' : 'invalid_partner_data',
-      })
+      return response.status(400).json({ error: 'invalid_partner_data' })
     }
 
     return response
@@ -1159,7 +1216,293 @@ async function handleEventItemRequest({
 
   return response
     .status(request.method === 'POST' ? 201 : 200)
-    .json({ [responseKey]: mapItem(item) })
+    .json({ partner: mapPartner(item) })
+}
+
+async function loadAdminEventOwner(supabase, eventId) {
+  if (!eventId || !UUID_PATTERN.test(eventId)) {
+    return { event: null, error: 'invalid_event_id' }
+  }
+
+  const { data, error } = await supabase
+    .from('events')
+    .select('id')
+    .eq('id', eventId)
+    .maybeSingle()
+
+  if (error) {
+    console.error('Admin kit event owner query failed', {
+      code: error.code ?? 'unknown',
+    })
+    return { event: null, error: 'internal_error' }
+  }
+
+  return data
+    ? { event: data, error: null }
+    : { event: null, error: 'event_not_found' }
+}
+
+function sendKitWriteError(response, error) {
+  console.error('Admin kit catalog write failed', {
+    code: error.code ?? 'unknown',
+  })
+
+  if (error.code === '23505') {
+    return response.status(409).json({ error: 'kit_code_conflict' })
+  }
+
+  if (['22P02', '22003', '23502', '23514'].includes(error.code)) {
+    return response.status(400).json({ error: 'invalid_kit_data' })
+  }
+
+  return response.status(500).json({ error: 'internal_error' })
+}
+
+async function handleKitCatalogRequest({
+  request,
+  response,
+  supabase,
+  eventId,
+  itemId,
+}) {
+  if (!['GET', 'POST', 'PATCH'].includes(request.method)) {
+    response.setHeader('Allow', 'GET, POST, PATCH')
+    return response.status(405).json({ error: 'method_not_allowed' })
+  }
+
+  if (request.method === 'POST' && itemId) {
+    return response.status(400).json({ error: 'item_id_not_allowed' })
+  }
+
+  if (request.method === 'PATCH' && !itemId) {
+    return response.status(400).json({ error: 'item_id_required' })
+  }
+
+  if (itemId && !UUID_PATTERN.test(itemId)) {
+    return response.status(400).json({ error: 'invalid_kit_data' })
+  }
+
+  const owner = await loadAdminEventOwner(supabase, eventId)
+
+  if (owner.error) {
+    return response
+      .status(owner.error === 'event_not_found' ? 404 : owner.error === 'invalid_event_id' ? 400 : 500)
+      .json({ error: owner.error })
+  }
+
+  if (request.method === 'GET') {
+    const [catalogResult, selectedResult] = await Promise.all([
+      supabase
+        .from('event_kit_catalog_items')
+        .select(KIT_CATALOG_SELECT)
+        .order('active', { ascending: false })
+        .order('name', { ascending: true }),
+      supabase
+        .from('event_kit_items')
+        .select(KIT_SELECT)
+        .eq('event_id', eventId)
+        .order('sort_order', { ascending: true }),
+    ])
+
+    if (catalogResult.error || selectedResult.error) {
+      console.error('Admin kit library query failed')
+      return response.status(500).json({ error: 'internal_error' })
+    }
+
+    return response.status(200).json({
+      catalogItems: (catalogResult.data ?? []).map(mapKitCatalogItem),
+      kitItems: (selectedResult.data ?? []).map(mapKitItem),
+    })
+  }
+
+  let values
+
+  try {
+    values = request.method === 'POST'
+      ? buildKitCatalogInsert(request.body)
+      : buildKitCatalogUpdate(request.body)
+  } catch (error) {
+    if (error instanceof RequirementValidationError) {
+      return response.status(400).json({ error: error.code })
+    }
+
+    console.error('Admin kit catalog validation failed')
+    return response.status(500).json({ error: 'internal_error' })
+  }
+
+  if (request.method === 'PATCH') {
+    const { data, error } = await supabase
+      .from('event_kit_catalog_items')
+      .update(values)
+      .eq('id', itemId)
+      .select(KIT_CATALOG_SELECT)
+      .maybeSingle()
+
+    if (error) {
+      return sendKitWriteError(response, error)
+    }
+
+    if (!data) {
+      return response.status(404).json({ error: 'kit_item_not_found' })
+    }
+
+    return response.status(200).json({ catalogItem: mapKitCatalogItem(data) })
+  }
+
+  const { data: catalogItem, error: createError } = await supabase
+    .from('event_kit_catalog_items')
+    .insert(values)
+    .select(KIT_CATALOG_SELECT)
+    .maybeSingle()
+
+  if (createError) {
+    return sendKitWriteError(response, createError)
+  }
+
+  if (!catalogItem) {
+    return response.status(500).json({ error: 'internal_error' })
+  }
+
+  const { data: lastItem, error: orderError } = await supabase
+    .from('event_kit_items')
+    .select('sort_order')
+    .eq('event_id', eventId)
+    .order('sort_order', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (orderError) {
+    console.error('Admin kit next sort order query failed', {
+      code: orderError.code ?? 'unknown',
+    })
+    return response.status(201).json({
+      catalogItem: mapKitCatalogItem(catalogItem),
+      kitItem: null,
+    })
+  }
+
+  const sortOrder = Math.min((lastItem?.sort_order ?? -1) + 1, SMALLINT_MAX)
+  const { data: kitItem, error: membershipError } = await supabase
+    .from('event_kit_items')
+    .insert({
+      event_id: eventId,
+      catalog_item_id: catalogItem.id,
+      sort_order: sortOrder,
+    })
+    .select(KIT_SELECT)
+    .maybeSingle()
+
+  if (membershipError) {
+    console.error('Admin kit automatic membership failed', {
+      code: membershipError.code ?? 'unknown',
+    })
+  }
+
+  return response.status(201).json({
+    catalogItem: mapKitCatalogItem(catalogItem),
+    kitItem: kitItem ? mapKitItem(kitItem) : null,
+  })
+}
+
+async function handleKitMembershipRequest({
+  request,
+  response,
+  supabase,
+  eventId,
+  itemId,
+}) {
+  if (request.method !== 'PATCH') {
+    response.setHeader('Allow', 'PATCH')
+    return response.status(405).json({ error: 'method_not_allowed' })
+  }
+
+  if (!itemId || !UUID_PATTERN.test(itemId)) {
+    return response.status(400).json({ error: 'invalid_kit_membership' })
+  }
+
+  const owner = await loadAdminEventOwner(supabase, eventId)
+
+  if (owner.error) {
+    return response
+      .status(owner.error === 'event_not_found' ? 404 : owner.error === 'invalid_event_id' ? 400 : 500)
+      .json({ error: owner.error })
+  }
+
+  let change
+
+  try {
+    change = buildKitMembershipChange(request.body)
+  } catch (error) {
+    if (error instanceof RequirementValidationError) {
+      return response.status(400).json({ error: error.code })
+    }
+
+    console.error('Admin kit membership validation failed')
+    return response.status(500).json({ error: 'internal_error' })
+  }
+
+  if (!change.selected) {
+    const { error } = await supabase
+      .from('event_kit_items')
+      .delete()
+      .eq('event_id', eventId)
+      .eq('catalog_item_id', itemId)
+
+    if (error) {
+      console.error('Admin kit membership removal failed', {
+        code: error.code ?? 'unknown',
+      })
+      return response.status(500).json({ error: 'internal_error' })
+    }
+
+    return response.status(200).json({ selected: false, kitItem: null })
+  }
+
+  const { data: catalogItem, error: catalogError } = await supabase
+    .from('event_kit_catalog_items')
+    .select('id')
+    .eq('id', itemId)
+    .maybeSingle()
+
+  if (catalogError) {
+    console.error('Admin kit membership catalog query failed', {
+      code: catalogError.code ?? 'unknown',
+    })
+    return response.status(500).json({ error: 'internal_error' })
+  }
+
+  if (!catalogItem) {
+    return response.status(404).json({ error: 'kit_item_not_found' })
+  }
+
+  const { data: kitItem, error } = await supabase
+    .from('event_kit_items')
+    .upsert(
+      {
+        event_id: eventId,
+        catalog_item_id: itemId,
+        sort_order: change.sortOrder,
+      },
+      { onConflict: 'event_id,catalog_item_id' },
+    )
+    .select(KIT_SELECT)
+    .maybeSingle()
+
+  if (error) {
+    console.error('Admin kit membership save failed', {
+      code: error.code ?? 'unknown',
+    })
+    return response.status(500).json({ error: 'internal_error' })
+  }
+
+  if (!kitItem) {
+    return response.status(500).json({ error: 'internal_error' })
+  }
+
+  return response.status(200).json({
+    selected: true,
+    kitItem: mapKitItem(kitItem),
+  })
 }
 
 function parsePositiveInteger(value, fallback, max = INTEGER_MAX) {
@@ -1897,7 +2240,27 @@ export default async function handler(request, response) {
       })
     }
 
-    if (['kit', 'partner'].includes(resource)) {
+    if (resource === 'kit') {
+      return handleKitCatalogRequest({
+        request,
+        response,
+        supabase,
+        eventId: resourceEventId,
+        itemId,
+      })
+    }
+
+    if (resource === 'kit-membership') {
+      return handleKitMembershipRequest({
+        request,
+        response,
+        supabase,
+        eventId: resourceEventId,
+        itemId,
+      })
+    }
+
+    if (resource === 'partner') {
       return handleEventItemRequest({
         request,
         response,

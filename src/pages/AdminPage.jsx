@@ -18,7 +18,41 @@ import {
   updateAdminGroup,
 } from '../api/admin'
 import AdminEventManagement from '../components/AdminEventManagement'
+import AdminStarterKit from '../components/AdminStarterKit'
 import './AdminPage.css'
+
+const WORKSPACE_MODULES = [
+  {
+    id: 'main',
+    title: 'Основное',
+    description: 'Карточка, статус, описание, место и дата.',
+  },
+  {
+    id: 'registration',
+    title: 'Регистрация',
+    description: 'Настройки, документы и обязательные согласия.',
+  },
+  {
+    id: 'distances',
+    title: 'Дистанции',
+    description: 'Группы регистрации, дистанции, лимиты и цены.',
+  },
+  {
+    id: 'kit',
+    title: 'Стартовый набор',
+    description: 'Выбор предметов из общей библиотеки.',
+  },
+  {
+    id: 'partners',
+    title: 'Партнёры',
+    description: 'Партнёры, категории, сайты и логотипы события.',
+  },
+  {
+    id: 'participants',
+    title: 'Участники',
+    description: 'Регистрации, контакты, документы и платежи.',
+  },
+]
 
 const EVENT_STATUS_OPTIONS = [
   ['draft', 'Черновик'],
@@ -1004,6 +1038,8 @@ function AdminPage() {
   const [eventDetailStatus, setEventDetailStatus] = useState('idle')
   const [eventDetail, setEventDetail] = useState(null)
   const [eventDetailMessage, setEventDetailMessage] = useState('')
+  const [workspaceModule, setWorkspaceModule] = useState(null)
+  const [registrationTab, setRegistrationTab] = useState('settings')
   const [eventForm, setEventForm] = useState(null)
   const [eventSaveStatus, setEventSaveStatus] = useState('idle')
   const [eventSaveMessage, setEventSaveMessage] = useState('')
@@ -1177,6 +1213,8 @@ function AdminPage() {
       setEventsStatus('ready')
       setEventsMessage('')
       setSelectedEventId(result.event.id)
+      setWorkspaceModule(null)
+      setRegistrationTab('settings')
       setEventDetail(createdDetail)
       setEventDetailStatus('ready')
       setEventDetailMessage('Мероприятие создано как черновик.')
@@ -1236,6 +1274,8 @@ function AdminPage() {
 
   const handleSelectEvent = async (eventId) => {
     setSelectedEventId(eventId)
+    setWorkspaceModule(null)
+    setRegistrationTab('settings')
     setEventDetailStatus('loading')
     setEventDetail(null)
     setEventDetailMessage('')
@@ -2360,6 +2400,7 @@ function AdminPage() {
       setLogoutStatus('idle')
       setEvents([])
       setSelectedEventId(null)
+      setWorkspaceModule(null)
       setEventDetail(null)
       setEventDetailStatus('idle')
       setEventForm(null)
@@ -2725,7 +2766,42 @@ function AdminPage() {
 
           {selectedEventId && (
             <section className="adminPageSection adminEventDetailSection">
-              <h2>Карточка мероприятия</h2>
+              <div className="adminWorkspaceHeader">
+                <div>
+                  <p className="adminPageEyebrow">Мероприятие</p>
+                  <h2>{eventDetail?.event?.title ?? 'Рабочая область'}</h2>
+                  {eventDetail?.event && (
+                    <p>
+                      {EVENT_STATUS_LABELS[eventDetail.event.status] ??
+                        eventDetail.event.status}{' '}
+                      · {eventDetail.event.city}
+                    </p>
+                  )}
+                </div>
+                <div className="adminWorkspaceHeaderActions">
+                  {workspaceModule && (
+                    <button
+                      className="adminInlineButton"
+                      type="button"
+                      onClick={() => setWorkspaceModule(null)}
+                    >
+                      К рабочей области
+                    </button>
+                  )}
+                  <button
+                    className="adminEventCancelButton"
+                    type="button"
+                    onClick={() => {
+                      setSelectedEventId(null)
+                      setWorkspaceModule(null)
+                      setEventDetail(null)
+                      setEventDetailStatus('idle')
+                    }}
+                  >
+                    К мероприятиям
+                  </button>
+                </div>
+              </div>
 
               {eventDetailStatus === 'ready' && eventDetailMessage && (
                 <p className="adminSaveSuccess" role="status">
@@ -2747,6 +2823,77 @@ function AdminPage() {
                 eventDetail &&
                 eventForm && (
                 <>
+                {!workspaceModule && (
+                  <div className="adminWorkspaceGrid">
+                    {WORKSPACE_MODULES.map((item, index) => {
+                      const counters = {
+                        registration: `${eventDetail.documents?.length ?? 0} док. · ${eventDetail.consents?.length ?? 0} согл.`,
+                        distances: `${eventDetail.groups?.length ?? 0} групп · ${eventDetail.distances?.length ?? 0} дистанций`,
+                        kit: `${eventDetail.kitItems?.length ?? 0} предметов`,
+                        partners: `${eventDetail.partners?.length ?? 0} партнёров`,
+                      }
+
+                      return (
+                        <button
+                          className="adminWorkspaceCard"
+                          type="button"
+                          key={item.id}
+                          onClick={() => {
+                            setWorkspaceModule(item.id)
+                            if (item.id === 'registration') {
+                              setRegistrationTab('settings')
+                            }
+                          }}
+                        >
+                          <span className="adminWorkspaceCardIndex">
+                            {String(index + 1).padStart(2, '0')}
+                          </span>
+                          <strong>{item.title}</strong>
+                          <small>{item.description}</small>
+                          {counters[item.id] && <em>{counters[item.id]}</em>}
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+
+                {workspaceModule && (
+                  <div className="adminWorkspaceModuleHeading">
+                    <p className="adminPageEyebrow">Раздел</p>
+                    <h3>
+                      {WORKSPACE_MODULES.find(
+                        (item) => item.id === workspaceModule,
+                      )?.title}
+                    </h3>
+                  </div>
+                )}
+
+                {workspaceModule === 'registration' && (
+                  <div className="adminWorkspaceTabs" role="tablist">
+                    {[
+                      ['settings', 'Настройки'],
+                      ['documents', 'Документы'],
+                      ['consents', 'Согласия'],
+                    ].map(([value, label]) => (
+                      <button
+                        className={
+                          registrationTab === value ? 'isActive' : ''
+                        }
+                        type="button"
+                        role="tab"
+                        aria-selected={registrationTab === value}
+                        key={value}
+                        onClick={() => setRegistrationTab(value)}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {(workspaceModule === 'main' ||
+                  (workspaceModule === 'registration' &&
+                    registrationTab === 'settings')) && (
                 <form
                   className="adminEventForm"
                   onSubmit={handleSaveEvent}
@@ -2766,6 +2913,8 @@ function AdminPage() {
                     </span>
                   </div>
 
+                  {workspaceModule === 'main' && (
+                    <>
                   <fieldset className="adminEventFormGroup">
                     <legend>Основные данные</legend>
                     <div className="adminEventFormGrid">
@@ -2791,16 +2940,6 @@ function AdminPage() {
                       </label>
 
                       <label className="adminEventField">
-                        <span>Префикс регистрации</span>
-                        <input
-                          name="registrationCodePrefix"
-                          type="text"
-                          value={eventForm.registrationCodePrefix}
-                          onChange={handleEventFormChange}
-                        />
-                      </label>
-
-                      <label className="adminEventField">
                         <span>Тип мероприятия</span>
                         <input
                           name="eventType"
@@ -2809,30 +2948,6 @@ function AdminPage() {
                           onChange={handleEventFormChange}
                           required
                         />
-                      </label>
-
-                      <label className="adminEventField">
-                        <span>Форма регистрации</span>
-                        <select
-                          name="registrationFormType"
-                          value={eventForm.registrationFormType}
-                          onChange={handleEventFormChange}
-                        >
-                          {REGISTRATION_FORM_OPTIONS.map(
-                            ([value, label]) => (
-                              <option value={value} key={value}>
-                                {label}
-                              </option>
-                            ),
-                          )}
-                        </select>
-                        {eventForm.registrationFormType === 'mixed' && (
-                          <small>
-                            В одном мероприятии могут одновременно
-                            регистрироваться дети и взрослые через разные
-                            группы дистанций.
-                          </small>
-                        )}
                       </label>
 
                       <label className="adminEventField">
@@ -2989,9 +3104,46 @@ function AdminPage() {
                     </div>
                   </fieldset>
 
+                    </>
+                  )}
+
+                  {workspaceModule === 'registration' && (
                   <fieldset className="adminEventFormGroup">
                     <legend>Регистрация и стоимость</legend>
                     <div className="adminEventFormGrid">
+                      <label className="adminEventField">
+                        <span>Префикс регистрации</span>
+                        <input
+                          name="registrationCodePrefix"
+                          type="text"
+                          value={eventForm.registrationCodePrefix}
+                          onChange={handleEventFormChange}
+                        />
+                      </label>
+
+                      <label className="adminEventField">
+                        <span>Форма регистрации</span>
+                        <select
+                          name="registrationFormType"
+                          value={eventForm.registrationFormType}
+                          onChange={handleEventFormChange}
+                        >
+                          {REGISTRATION_FORM_OPTIONS.map(
+                            ([value, label]) => (
+                              <option value={value} key={value}>
+                                {label}
+                              </option>
+                            ),
+                          )}
+                        </select>
+                        {eventForm.registrationFormType === 'mixed' && (
+                          <small>
+                            Дети и взрослые регистрируются через разные
+                            группы дистанций.
+                          </small>
+                        )}
+                      </label>
+
                       <label className="adminEventField">
                         <span>Открытие регистрации</span>
                         <input
@@ -3069,6 +3221,7 @@ function AdminPage() {
                       </label>
                     </div>
                   </fieldset>
+                  )}
 
                   <div className="adminEventFormActions">
                     <button
@@ -3103,7 +3256,10 @@ function AdminPage() {
                     )}
                   </div>
                 </form>
+                )}
 
+                {workspaceModule === 'distances' && (
+                  <>
                 <section
                   className="adminDistancesSection adminGroupsSection"
                   aria-labelledby="admin-groups-title"
@@ -3850,11 +4006,20 @@ function AdminPage() {
                   )}
                 </section>
 
+                  </>
+                )}
+
+                {workspaceModule === 'registration' &&
+                  registrationTab !== 'settings' && (
                 <section className="adminDistancesSection adminRequirementsSection">
                   <div className="adminDistancesHeader">
                     <div>
                       <p className="adminPageEyebrow">Регистрация</p>
-                      <h3>Документы и согласия</h3>
+                      <h3>
+                        {registrationTab === 'documents'
+                          ? 'Документы'
+                          : 'Согласия'}
+                      </h3>
                     </div>
                   </div>
                   <p className="adminSectionHint">
@@ -3863,6 +4028,7 @@ function AdminPage() {
                     подтверждает при регистрации.
                   </p>
 
+                  {registrationTab === 'documents' && (
                   <div className="adminRequirementBlock">
                     <div className="adminDistanceCardHeader">
                       <h4>Документы</h4>
@@ -3978,7 +4144,9 @@ function AdminPage() {
                       </div>
                     )}
                   </div>
+                  )}
 
+                  {registrationTab === 'consents' && (
                   <div className="adminRequirementBlock">
                     <div className="adminDistanceCardHeader">
                       <h4>Согласия</h4>
@@ -4097,46 +4265,51 @@ function AdminPage() {
                       </div>
                     )}
                   </div>
+                  )}
                 </section>
+                )}
 
-                <AdminEventManagement
-                  key={eventDetail.event.id}
-                  eventId={eventDetail.event.id}
-                  kitItems={eventDetail.kitItems ?? []}
-                  partners={eventDetail.partners ?? []}
-                  distances={eventDetail.distances ?? []}
-                  onKitItemsChange={(kitItems) =>
-                    setEventDetail((currentDetail) => ({
-                      ...currentDetail,
-                      kitItems,
-                    }))
-                  }
-                  onPartnersChange={(partners) =>
-                    setEventDetail((currentDetail) => ({
-                      ...currentDetail,
-                      partners,
-                    }))
-                  }
-                  onUnauthorized={handleAdminUnauthorized}
-                  disabled={
-                    eventSaveStatus === 'saving' ||
-                    isGroupSaving ||
-                    isDistanceSaving ||
-                    isRequirementSaving
-                  }
-                />
+                {workspaceModule === 'kit' && (
+                  <AdminStarterKit
+                    key={`kit-${eventDetail.event.id}`}
+                    eventId={eventDetail.event.id}
+                    onKitItemsChange={(kitItems) =>
+                      setEventDetail((currentDetail) => ({
+                        ...currentDetail,
+                        kitItems,
+                      }))
+                    }
+                    onUnauthorized={handleAdminUnauthorized}
+                  />
+                )}
+
+                {['partners', 'participants'].includes(workspaceModule) && (
+                  <AdminEventManagement
+                    key={`${workspaceModule}-${eventDetail.event.id}`}
+                    module={workspaceModule}
+                    eventId={eventDetail.event.id}
+                    partners={eventDetail.partners ?? []}
+                    distances={eventDetail.distances ?? []}
+                    onPartnersChange={(partners) =>
+                      setEventDetail((currentDetail) => ({
+                        ...currentDetail,
+                        partners,
+                      }))
+                    }
+                    onUnauthorized={handleAdminUnauthorized}
+                    disabled={
+                      eventSaveStatus === 'saving' ||
+                      isGroupSaving ||
+                      isDistanceSaving ||
+                      isRequirementSaving
+                    }
+                  />
+                )}
                 </>
               )}
             </section>
           )}
 
-          <section className="adminPageSection">
-            <h2>Настройки регистрации</h2>
-            <p>
-              Детская или взрослая форма, возрастные ограничения,
-              документы и обязательные согласия.
-            </p>
-          </section>
         </div>
       </main>
     </div>

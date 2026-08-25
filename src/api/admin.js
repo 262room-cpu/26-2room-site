@@ -191,7 +191,15 @@ export function updateAdminConsentRequirement(
   })
 }
 
-export function createAdminKitItem(eventId, changes, { signal } = {}) {
+export function getAdminKitLibrary(eventId, { signal } = {}) {
+  const query = new URLSearchParams({ resource: 'kit', eventId })
+
+  return requestJson(`/api/admin/event?${query.toString()}`, {
+    signal,
+  })
+}
+
+export function createAdminKitCatalogItem(eventId, changes, { signal } = {}) {
   const query = new URLSearchParams({ resource: 'kit', eventId })
 
   return requestJson(`/api/admin/event?${query.toString()}`, {
@@ -201,7 +209,7 @@ export function createAdminKitItem(eventId, changes, { signal } = {}) {
   })
 }
 
-export function updateAdminKitItem(
+export function updateAdminKitCatalogItem(
   eventId,
   itemId,
   changes,
@@ -211,6 +219,25 @@ export function updateAdminKitItem(
     resource: 'kit',
     eventId,
     itemId,
+  })
+
+  return requestJson(`/api/admin/event?${query.toString()}`, {
+    method: 'PATCH',
+    body: changes,
+    signal,
+  })
+}
+
+export function updateAdminKitMembership(
+  eventId,
+  catalogItemId,
+  changes,
+  { signal } = {},
+) {
+  const query = new URLSearchParams({
+    resource: 'kit-membership',
+    eventId,
+    itemId: catalogItemId,
   })
 
   return requestJson(`/api/admin/event?${query.toString()}`, {
