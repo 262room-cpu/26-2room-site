@@ -7,12 +7,16 @@ import {
   SupabaseConfigurationError,
 } from '../_supabase.js'
 import { mapEvent as mapPublicEvent } from '../events.js'
+import { getEventReadiness } from '../../shared/event-readiness.js'
+import { buildCsv } from '../../shared/csv.js'
 
 const INTEGER_MAX = 2147483647
 const SMALLINT_MAX = 32767
 const DEFAULT_REGISTRATION_PAGE_SIZE = 50
 const MAX_REGISTRATION_PAGE_SIZE = 100
 const REGISTRATION_SEARCH_LIMIT = 2500
+const REGISTRATION_EXPORT_LIMIT = 10000
+const REGISTRATION_EXPORT_BATCH_SIZE = 1000
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 const REGISTRATION_STATUSES = new Set([
@@ -714,16 +718,6 @@ function buildEventUpdate(body, currentEvent) {
     throw new EventValidationError()
   }
 
-  if (
-    candidate.status === 'open' &&
-    (
-      candidate.dateStatus !== 'confirmed' ||
-      !candidate.startsAt
-    )
-  ) {
-    throw new EventValidationError()
-  }
-
   const hasEventWindowStart = candidate.eventWindowStart !== null
   const hasEventWindowEnd = candidate.eventWindowEnd !== null
 
@@ -741,6 +735,10 @@ function buildEventUpdate(body, currentEvent) {
   }
 
   return update
+}
+
+function nextColumnValue(update, column, currentValue) {
+  return Object.hasOwn(update, column) ? update[column] : currentValue
 }
 
 function buildEventCreate(body) {
@@ -1765,6 +1763,18 @@ async function handleRegistrationListRequest({
       .json({ error: 'invalid_registration_filters' })
   }
 
+  const format = readQueryParameter(request.query.format)
+
+  if (format === 'csv') {
+    return handleRegistrationCsvExport({ response, supabase, eventId })
+  }
+
+  if (format) {
+    return response
+      .status(400)
+      .json({ error: 'invalid_registration_filters' })
+  }
+
   const page = parsePositiveInteger(
     readQueryParameter(request.query.page),
     1,
@@ -1912,6 +1922,211 @@ async function handleRegistrationListRequest({
     pageSize,
     summary: summaryResult.summary,
   })
+}
+
+async function loadRegistrationExportRows(supabase, eventId) {
+  const rows = []
+
+  while (rows.length <= REGISTRATION_EXPORT_LIMIT) {
+    const offset = rows.length
+    const upperBound = Math.min(
+      offset + REGISTRATION_EXPORT_BATCH_SIZE - 1,
+      REGISTRATION_EXPORT_LIMIT,
+    )
+    const { data, error } = await supabase
+      .from('registrations')
+      .select(REGISTRATION_LIST_SELECT)
+      .eq('event_id', eventId)
+      .order('created_at', { ascending: true })
+      .order('id', { ascending: true })
+      .range(offset, upperBound)
+
+    if (error) {
+      return { rows: null, error }
+    }
+
+    const batch = data ?? []
+    rows.push(...batch)
+
+    if (batch.length < upperBound - offset + 1) {
+      break
+    }
+  }
+
+  if (rows.length > REGISTRATION_EXPORT_LIMIT) {
+    return { rows: null, error: new Error('export_limit_exceeded') }
+  }
+
+  return { rows, error: null }
+}
+
+function latestPaymentMap(payments) {
+  const result = new Map()
+
+  for (const payment of payments) {
+    const current = result.get(payment.registration_id)
+
+    if (!current || payment.created_at > current.created_at) {
+      result.set(payment.registration_id, payment)
+    }
+  }
+
+  return result
+}
+
+function formatExportAmount(amountMinor) {
+  return Number.isSafeInteger(amountMinor)
+    ? (amountMinor / 100).toFixed(2)
+    : ''
+}
+
+async function handleRegistrationCsvExport({ response, supabase, eventId }) {
+  const { data: event, error: eventError } = await supabase
+    .from('events')
+    .select('id,slug')
+    .eq('id', eventId)
+    .maybeSingle()
+
+  if (eventError) {
+    console.error('Admin registration export event query failed', {
+      code: eventError.code ?? 'unknown',
+    })
+    return response.status(500).json({ error: 'internal_error' })
+  }
+
+  if (!event) {
+    return response.status(404).json({ error: 'event_not_found' })
+  }
+
+  const registrationsResult = await loadRegistrationExportRows(
+    supabase,
+    eventId,
+  )
+
+  if (registrationsResult.error) {
+    const isLimitError =
+      registrationsResult.error.message === 'export_limit_exceeded'
+    console.error('Admin registration export query failed', {
+      code: isLimitError
+        ? 'export_limit_exceeded'
+        : registrationsResult.error.code ?? 'unknown',
+    })
+    return response.status(isLimitError ? 413 : 500).json({
+      error: isLimitError ? 'registration_export_too_large' : 'internal_error',
+    })
+  }
+
+  const registrations = registrationsResult.rows
+  const registrationIds = registrations.map(({ id }) => id)
+  const [participantsResult, childrenResult, parentsResult, paymentsResult] =
+    await Promise.all([
+      fetchRowsByRegistrationIds(
+        supabase,
+        'participants',
+        'registration_id,last_name,first_name,middle_name,birth_date,gender,phone_display,email_display',
+        registrationIds,
+      ),
+      fetchRowsByRegistrationIds(
+        supabase,
+        'children',
+        'registration_id,last_name,first_name,middle_name,birth_date,gender',
+        registrationIds,
+      ),
+      fetchRowsByRegistrationIds(
+        supabase,
+        'parents',
+        'registration_id,full_name,phone_display,email_display',
+        registrationIds,
+      ),
+      fetchRowsByRegistrationIds(
+        supabase,
+        'payments',
+        'registration_id,status,created_at',
+        registrationIds,
+      ),
+    ])
+
+  const { data: distances, error: distancesError } = await supabase
+    .from('event_distances')
+    .select('id,title')
+    .eq('event_id', eventId)
+
+  if (
+    participantsResult.error ||
+    childrenResult.error ||
+    parentsResult.error ||
+    paymentsResult.error ||
+    distancesError
+  ) {
+    console.error('Admin registration export related query failed')
+    return response.status(500).json({ error: 'internal_error' })
+  }
+
+  const participants = new Map(
+    participantsResult.data.map((row) => [row.registration_id, row]),
+  )
+  const children = new Map(
+    childrenResult.data.map((row) => [row.registration_id, row]),
+  )
+  const parents = new Map(
+    parentsResult.data.map((row) => [row.registration_id, row]),
+  )
+  const payments = latestPaymentMap(paymentsResult.data)
+  const distanceMap = new Map(
+    (distances ?? []).map((distance) => [distance.id, distance.title]),
+  )
+  const rows = registrations.map((registration) => {
+    const adult = participants.get(registration.id)
+    const child = children.get(registration.id)
+    const parent = parents.get(registration.id)
+    const payment = payments.get(registration.id)
+
+    return {
+      registrationId: registration.id,
+      publicId: registration.public_id,
+      status: registration.status,
+      createdAt: registration.created_at,
+      participantType: adult ? 'adult' : child ? 'child' : '',
+      surname: adult?.last_name ?? child?.last_name ?? '',
+      firstName: adult?.first_name ?? child?.first_name ?? '',
+      patronymic: adult?.middle_name ?? child?.middle_name ?? '',
+      birthDate: adult?.birth_date ?? child?.birth_date ?? '',
+      gender: adult?.gender ?? child?.gender ?? '',
+      phone: adult?.phone_display ?? parent?.phone_display ?? '',
+      email: adult?.email_display ?? parent?.email_display ?? '',
+      parentName: parent?.full_name ?? '',
+      distance: distanceMap.get(registration.distance_id) ?? '',
+      amount: formatExportAmount(registration.amount_minor),
+      currency: registration.currency,
+      paymentStatus: payment?.status ?? '',
+    }
+  })
+  const headers = [
+    { key: 'registrationId', label: 'ID регистрации' },
+    { key: 'publicId', label: 'Номер регистрации' },
+    { key: 'status', label: 'Статус регистрации' },
+    { key: 'createdAt', label: 'Дата создания' },
+    { key: 'participantType', label: 'Тип участника' },
+    { key: 'surname', label: 'Фамилия' },
+    { key: 'firstName', label: 'Имя' },
+    { key: 'patronymic', label: 'Отчество' },
+    { key: 'birthDate', label: 'Дата рождения' },
+    { key: 'gender', label: 'Пол' },
+    { key: 'phone', label: 'Телефон' },
+    { key: 'email', label: 'Email' },
+    { key: 'parentName', label: 'Родитель / представитель' },
+    { key: 'distance', label: 'Дистанция' },
+    { key: 'amount', label: 'Сумма' },
+    { key: 'currency', label: 'Валюта' },
+    { key: 'paymentStatus', label: 'Статус оплаты' },
+  ]
+
+  response.setHeader('Content-Type', 'text/csv; charset=utf-8')
+  response.setHeader(
+    'Content-Disposition',
+    `attachment; filename="registrations-${event.slug}.csv"`,
+  )
+  return response.status(200).send(buildCsv(headers, rows))
 }
 
 async function addDocumentSignedUrls(supabase, documents) {
@@ -2745,6 +2960,69 @@ export default async function handler(request, response) {
         return response
           .status(400)
           .json({ error: 'incompatible_registration_groups' })
+      }
+    }
+
+    if ((update.status ?? event.status) === 'open') {
+      const [groupsResult, distancesResult] = await Promise.all([
+        supabase
+          .from('event_registration_groups')
+          .select('id,registration_form_type,capacity')
+          .eq('event_id', eventId),
+        supabase
+          .from('event_distances')
+          .select('group_id,code,title,distance_meters,capacity,price_minor')
+          .eq('event_id', eventId),
+      ])
+
+      if (groupsResult.error || distancesResult.error) {
+        console.error('Admin event readiness query failed')
+        return response.status(500).json({ error: 'internal_error' })
+      }
+
+      const readiness = getEventReadiness({
+        event: {
+          registrationFormType:
+            nextColumnValue(
+              update,
+              'registration_form_type',
+              event.registration_form_type,
+            ),
+          dateStatus: nextColumnValue(
+            update,
+            'date_status',
+            event.date_status,
+          ),
+          startsAt: nextColumnValue(update, 'starts_at', event.starts_at),
+          priceMinor: nextColumnValue(
+            update,
+            'price_minor',
+            event.price_minor,
+          ),
+          currency: nextColumnValue(update, 'currency', event.currency),
+          capacity: nextColumnValue(update, 'capacity', event.capacity),
+        },
+        groups: (groupsResult.data ?? []).map((group) => ({
+          id: group.id,
+          registrationFormType: group.registration_form_type,
+          capacity: group.capacity,
+        })),
+        distances: (distancesResult.data ?? []).map((distance) => ({
+          groupId: distance.group_id,
+          code: distance.code,
+          title: distance.title,
+          distanceMeters: distance.distance_meters,
+          capacity: distance.capacity,
+          priceMinor: distance.price_minor,
+        })),
+      })
+
+      if (!readiness.registration.ready) {
+        return response.status(409).json({
+          error: 'registration_not_ready',
+          reason: readiness.registration.reasons[0],
+          details: { reasons: readiness.registration.reasons },
+        })
       }
     }
 

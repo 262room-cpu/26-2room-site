@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import {
   AdminAuthError,
   createAdminPartner,
+  downloadAdminRegistrationsCsv,
   getAdminRegistration,
   getAdminRegistrations,
   updateAdminPartner,
@@ -372,6 +373,10 @@ function AdminEventManagement({
     message: '',
     data: null,
   })
+  const [exportState, setExportState] = useState({
+    status: 'idle',
+    message: '',
+  })
 
   useEffect(() => {
     if (module !== 'participants') {
@@ -542,6 +547,37 @@ function AdminEventManagement({
     }
   }
 
+  const exportRegistrations = async () => {
+    setExportState({ status: 'loading', message: '' })
+
+    try {
+      const blob = await downloadAdminRegistrationsCsv(eventId)
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `registrations-${eventId}.csv`
+      document.body.append(link)
+      link.click()
+      link.remove()
+      URL.revokeObjectURL(url)
+      setExportState({ status: 'success', message: 'CSV подготовлен.' })
+    } catch (error) {
+      if (error instanceof AdminAuthError && error.status === 401) {
+        onUnauthorized()
+        return
+      }
+
+      setExportState({
+        status: 'error',
+        message:
+          error instanceof AdminAuthError &&
+          error.code === 'registration_export_too_large'
+            ? 'Слишком много регистраций для одного CSV.'
+            : 'Не удалось подготовить CSV.',
+      })
+    }
+  }
+
   const isPartnerSaving =
     newPartnerState.status === 'saving' ||
     Object.values(partnerStates).some(({ status }) => status === 'saving')
@@ -599,8 +635,13 @@ function AdminEventManagement({
       <section className="adminDistancesSection adminRegistrationsSection">
         <div className="adminDistancesHeader">
           <div><p className="adminPageEyebrow">Участники</p><h3>Регистрации</h3></div>
-          <button className="adminInlineButton" type="button" onClick={() => setRegistrationRefresh((value) => value + 1)} disabled={registrationsState.status === 'loading'}>Обновить</button>
+          <div className="adminManagementHeaderActions">
+            <button className="adminInlineButton" type="button" onClick={exportRegistrations} disabled={exportState.status === 'loading'}>{exportState.status === 'loading' ? 'Экспортируем...' : 'Экспорт CSV'}</button>
+            <button className="adminInlineButton" type="button" onClick={() => setRegistrationRefresh((value) => value + 1)} disabled={registrationsState.status === 'loading'}>Обновить</button>
+          </div>
         </div>
+
+        <SaveMessage state={exportState} />
 
         <div className="adminRegistrationSummary">
           <span><strong>{registrationsState.summary.total ?? 0}</strong>Всего</span>

@@ -173,11 +173,11 @@ function getSubmissionErrorMessage(code) {
     registration_expired: 'Время бронирования истекло. Нажмите кнопку ещё раз, чтобы создать новую бронь.',
     registration_not_pending: 'Эта регистрация уже не ожидает оплату.',
     payment_already_started: 'Оплата для этой регистрации уже была начата.',
-    unsupported_file_type: 'Неподдерживаемый формат файла расписки.',
+    unsupported_file_type: 'Неподдерживаемый формат документа.',
     invalid_uploaded_file: 'Загруженный файл не прошёл проверку.',
     uploaded_file_not_found: 'Не удалось найти загруженный файл. Попробуйте отправить форму ещё раз.',
-    document_upload_failed: 'Не удалось загрузить расписку. Попробуйте ещё раз.',
-    document_upload_network_error: 'Соединение прервалось при загрузке расписки. Попробуйте ещё раз.',
+    document_upload_failed: 'Не удалось загрузить документ. Попробуйте ещё раз.',
+    document_upload_network_error: 'Соединение прервалось при загрузке документа. Попробуйте ещё раз.',
     network_error: 'Не удалось связаться с сервером. Проверьте интернет и попробуйте ещё раз.',
   }
 
@@ -385,7 +385,11 @@ function KidsRegistrationForm({ event, previewMode = false }) {
       }
 
       setSubmissionComplete(true)
-      setSubmitMessage('Данные и документы сохранены. Следующий шаг — оплата.')
+      setSubmitMessage(
+        (event.documentRequirements ?? []).length > 0
+          ? 'Данные и документы сохранены. Следующий шаг — оплата.'
+          : 'Данные сохранены. Следующий шаг — оплата.',
+      )
     } catch (error) {
       if (error?.code === 'registration_expired') {
         idempotencyKeyRef.current = null

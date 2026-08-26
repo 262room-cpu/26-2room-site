@@ -398,6 +398,10 @@ function AdminStarterKit({ eventId, onKitItemsChange, onUnauthorized }) {
           </form>
         )}
 
+        {state.catalogItems.length === 0 && (
+          <p>Библиотека пока пуста. Добавьте первый предмет.</p>
+        )}
+
         <div className="adminKitLibraryList">
           {state.catalogItems.map((catalogItem) => {
             const kitItem = selectedByCatalogId.get(catalogItem.id)

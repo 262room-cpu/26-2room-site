@@ -5,6 +5,7 @@ import AdultRegistrationForm from '../components/AdultRegistrationForm'
 import KidsRegistrationForm from '../components/KidsRegistrationForm'
 import MixedRegistrationForm from '../components/MixedRegistrationForm'
 import { EVENT_STATUSES } from '../data/events'
+import { getEventReadiness } from '../../shared/event-readiness'
 import './RegistrationPage.css'
 
 const STATUS_GATE_CONTENT = {
@@ -28,6 +29,19 @@ const STATUS_GATE_CONTENT = {
     title: 'Мероприятие завершено',
     description: 'Регистрация на прошедшее мероприятие недоступна.',
   },
+}
+
+const READINESS_REASON_LABELS = {
+  invalid_registration_form_type: 'не выбран тип формы',
+  date_not_confirmed: 'не подтверждены дата и время',
+  no_registration_groups: 'нет групп регистрации',
+  registration_form_mismatch: 'тип группы не соответствует форме',
+  no_distances: 'нет дистанций',
+  invalid_distance_group: 'дистанция не привязана к группе',
+  invalid_distance: 'не заполнены параметры дистанции',
+  invalid_price: 'не настроена цена',
+  invalid_capacity: 'некорректно указан лимит',
+  invalid_currency: 'не настроена валюта',
 }
 
 function formatEventDate(value) {
@@ -208,8 +222,16 @@ function RegistrationPage() {
   const eventDate = formatEventDate(event.startsAt)
   const eventPrice = formatPrice(event.price, event.currency)
   const gateContent = STATUS_GATE_CONTENT[event.status]
+  const registrationReadiness = getEventReadiness({
+    event,
+    groups: event.registrationGroups ?? [],
+    distances: event.distances ?? [],
+    documents: event.documentRequirements ?? [],
+    consents: event.consentRequirements ?? [],
+  })
   const registrationIsOpen =
-    event.status === EVENT_STATUSES.OPEN || previewMode
+    (event.status === EVENT_STATUSES.OPEN || previewMode) &&
+    registrationReadiness.registration.ready
 
   return (
     <div className="registrationPage">
@@ -263,7 +285,23 @@ function RegistrationPage() {
           </dl>
         </section>
 
-        {registrationIsOpen ? (
+        {(event.status === EVENT_STATUSES.OPEN || previewMode) &&
+        !registrationReadiness.registration.ready ? (
+          <section className="registrationPageGate" aria-live="polite">
+            <p className="registrationPageEyebrow">Регистрация</p>
+            <h2>Регистрация настраивается</h2>
+            <p>
+              {previewMode
+                ? `Проверьте конфигурацию: ${registrationReadiness.registration.reasons
+                    .map((reason) => READINESS_REASON_LABELS[reason] ?? reason)
+                    .join(', ')}.`
+                : 'Организатор завершает настройку формы. Попробуйте открыть страницу позднее.'}
+            </p>
+            <Link className="registrationPagePrimaryLink" to={`/events/${event.slug}${previewMode ? '?preview=1' : ''}`}>
+              Вернуться к мероприятию
+            </Link>
+          </section>
+        ) : registrationIsOpen ? (
           event.registrationFormType === 'kids' ? (
             <KidsRegistrationForm event={event} previewMode={previewMode} />
           ) : event.registrationFormType === 'participant' ? (

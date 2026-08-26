@@ -1,9 +1,10 @@
 export class AdminAuthError extends Error {
-  constructor(code, status = null) {
+  constructor(code, status = null, details = null) {
     super(code)
     this.name = 'AdminAuthError'
     this.code = code
     this.status = status
+    this.details = details
   }
 }
 
@@ -45,6 +46,7 @@ async function requestJson(
     throw new AdminAuthError(
       data?.error ?? 'request_failed',
       response.status,
+      data?.details ?? (data?.reason ? { reasons: [data.reason] } : null),
     )
   }
 
@@ -331,6 +333,37 @@ export function getAdminRegistrations(
   return requestJson(`/api/admin/event?${query.toString()}`, {
     signal,
   })
+}
+
+export async function downloadAdminRegistrationsCsv(
+  eventId,
+  { signal } = {},
+) {
+  const query = new URLSearchParams({
+    resource: 'registrations',
+    eventId,
+    format: 'csv',
+  })
+  let response
+
+  try {
+    response = await fetch(`/api/admin/event?${query.toString()}`, {
+      credentials: 'same-origin',
+      signal,
+    })
+  } catch {
+    throw new AdminAuthError('network_error')
+  }
+
+  if (!response.ok) {
+    const data = await readJsonResponse(response)
+    throw new AdminAuthError(
+      data?.error ?? 'request_failed',
+      response.status,
+    )
+  }
+
+  return response.blob()
 }
 
 export function getAdminRegistration(

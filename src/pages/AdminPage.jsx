@@ -21,6 +21,7 @@ import {
 } from '../api/admin'
 import AdminEventManagement from '../components/AdminEventManagement'
 import AdminStarterKit from '../components/AdminStarterKit'
+import { getEventReadiness } from '../../shared/event-readiness'
 import './AdminPage.css'
 
 const WORKSPACE_MODULES = [
@@ -59,15 +60,28 @@ const WORKSPACE_MODULES = [
 const EVENT_STATUS_OPTIONS = [
   ['draft', 'Черновик'],
   ['coming_soon', 'Скоро'],
-  ['open', 'Регистрация открыта'],
+  ['open', 'Открыта'],
   ['sold_out', 'Мест нет'],
-  ['closed', 'Регистрация закрыта'],
+  ['closed', 'Закрыта'],
   ['finished', 'Завершено'],
 ]
 
 const EVENT_STATUS_LABELS = Object.fromEntries(
   EVENT_STATUS_OPTIONS,
 )
+const READINESS_REASON_LABELS = {
+  incomplete_public_details: 'Заполните основные данные мероприятия.',
+  invalid_registration_form_type: 'Выберите тип формы регистрации.',
+  date_not_confirmed: 'Подтвердите дату и время мероприятия.',
+  no_registration_groups: 'Добавьте хотя бы одну группу регистрации.',
+  registration_form_mismatch: 'Проверьте тип группы регистрации.',
+  no_distances: 'Добавьте хотя бы одну дистанцию.',
+  invalid_distance_group: 'Привяжите каждую дистанцию к подходящей группе.',
+  invalid_distance: 'Проверьте параметры дистанций.',
+  invalid_price: 'Укажите корректную цену события или дистанции.',
+  invalid_capacity: 'Проверьте лимиты участников.',
+  invalid_currency: 'Укажите корректную валюту.',
+}
 
 const REGISTRATION_FORM_OPTIONS = [
   ['kids', 'Детская регистрация'],
@@ -1498,9 +1512,13 @@ function AdminPage() {
         error instanceof AdminAuthError &&
           error.code === 'incompatible_registration_groups'
           ? 'Сначала измените тип несовместимых групп регистрации.'
-          : error instanceof AdminAuthError && error.status === 404
-            ? 'Мероприятие не найдено.'
-            : 'Не удалось сохранить. Проверьте данные и попробуйте ещё раз.',
+          : error instanceof AdminAuthError &&
+              error.code === 'registration_not_ready'
+            ? READINESS_REASON_LABELS[error.details?.reasons?.[0]] ??
+              'Регистрация ещё не настроена.'
+            : error instanceof AdminAuthError && error.status === 404
+              ? 'Мероприятие не найдено.'
+              : 'Не удалось сохранить. Проверьте данные и попробуйте ещё раз.',
       )
       return null
     }
@@ -2650,6 +2668,15 @@ function AdminPage() {
   const isNextConsentSortOrderUnavailable =
     eventDetail !== null &&
     getNextRequirementSortOrder(eventDetail.consents) === null
+  const eventReadiness = eventDetail?.event
+    ? getEventReadiness({
+        event: eventDetail.event,
+        groups: eventDetail.groups ?? [],
+        distances: eventDetail.distances ?? [],
+        documents: eventDetail.documents ?? [],
+        consents: eventDetail.consents ?? [],
+      })
+    : null
 
   if (sessionStatus === 'checking') {
     return (
@@ -3217,6 +3244,54 @@ function AdminPage() {
                   className="adminEventForm"
                   onSubmit={handleSaveEvent}
                 >
+                  <section className="adminReadinessPanel" aria-label="Готовность мероприятия">
+                    <div className="adminReadinessHeader">
+                      <div>
+                        <p className="adminPageEyebrow">Готовность</p>
+                        <h3>Публикация и регистрация</h3>
+                      </div>
+                      <label className="adminEventField adminStatusControl">
+                        <span>Статус регистрации</span>
+                        <select
+                          name="status"
+                          value={eventForm.status}
+                          onChange={handleEventFormChange}
+                        >
+                          {EVENT_STATUS_OPTIONS.map(([value, label]) => (
+                            <option value={value} key={value}>
+                              {label}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    </div>
+                    <div className="adminReadinessChecklist">
+                      <span className={eventReadiness?.publicPage.ready ? 'isReady' : 'isMissing'}>
+                        {eventReadiness?.publicPage.ready ? '✓' : '○'} Публичная страница
+                      </span>
+                      <span className={(eventReadiness?.summary.groupCount ?? 0) > 0 ? 'isReady' : 'isMissing'}>
+                        {(eventReadiness?.summary.groupCount ?? 0) > 0 ? '✓' : '○'} Группы: {eventReadiness?.summary.groupCount ?? 0}
+                      </span>
+                      <span className={(eventReadiness?.summary.distanceCount ?? 0) > 0 ? 'isReady' : 'isMissing'}>
+                        {(eventReadiness?.summary.distanceCount ?? 0) > 0 ? '✓' : '○'} Дистанции: {eventReadiness?.summary.distanceCount ?? 0}
+                      </span>
+                      <span className="isReady">
+                        {eventReadiness?.summary.documentCount ? '✓' : '○'} Документы:{' '}
+                        {eventReadiness?.summary.documentCount || 'не требуются'}
+                      </span>
+                      <span className="isReady">
+                        {eventReadiness?.summary.consentCount ? '✓' : '○'} Согласия:{' '}
+                        {eventReadiness?.summary.consentCount || 'не требуются'}
+                      </span>
+                    </div>
+                    <p className={eventReadiness?.registration.ready ? 'adminReadinessSuccess' : 'adminReadinessWarning'}>
+                      {eventReadiness?.registration.ready
+                        ? 'Регистрация технически настроена.'
+                        : READINESS_REASON_LABELS[eventReadiness?.registration.reasons[0]] ??
+                          'Регистрация ещё не настроена.'}
+                    </p>
+                  </section>
+
                   <div className="adminEventCounts">
                     <span>
                       Групп: {eventDetail.groups?.length ?? 0}
@@ -3269,20 +3344,6 @@ function AdminPage() {
                         />
                       </label>
 
-                      <label className="adminEventField">
-                        <span>Статус</span>
-                        <select
-                          name="status"
-                          value={eventForm.status}
-                          onChange={handleEventFormChange}
-                        >
-                          {EVENT_STATUS_OPTIONS.map(([value, label]) => (
-                            <option value={value} key={value}>
-                              {label}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
                     </div>
                   </fieldset>
 
@@ -3720,7 +3781,7 @@ function AdminPage() {
                   </form>
 
                   {(eventDetail.groups?.length ?? 0) === 0 && (
-                    <p>У мероприятия пока нет групп регистрации.</p>
+                    <p>Добавьте первую группу, чтобы настроить регистрацию.</p>
                   )}
 
                   {(eventDetail.groups?.length ?? 0) > 0 && (
@@ -4078,7 +4139,7 @@ function AdminPage() {
                   </form>
 
                   {(eventDetail.distances?.length ?? 0) === 0 && (
-                    <p>У мероприятия пока нет дистанций.</p>
+                    <p>Добавьте первую дистанцию для доступной группы.</p>
                   )}
 
                   {(eventDetail.distances?.length ?? 0) > 0 && (
