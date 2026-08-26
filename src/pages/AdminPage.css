@@ -853,6 +853,50 @@
   text-decoration: none;
 }
 
+.adminDeleteButton,
+.adminDeleteConfirmButton {
+  min-height: 38px;
+  border: 1px solid rgba(248, 113, 113, 0.7);
+  border-radius: 8px;
+  padding: 8px 14px;
+  background: rgba(127, 29, 29, 0.22);
+  color: #fecaca;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.adminDeleteButton:disabled,
+.adminDeleteConfirmButton:disabled {
+  cursor: wait;
+  opacity: 0.58;
+}
+
+.adminDeleteConfirmation {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 24px;
+  border: 1px solid rgba(248, 113, 113, 0.45);
+  border-radius: 8px;
+  padding: 18px;
+  background: rgba(69, 10, 10, 0.26);
+}
+
+.adminDeleteConfirmation strong {
+  color: #fff;
+}
+
+.adminDeleteConfirmation p {
+  margin: 6px 0 0;
+}
+
+.adminDeleteConfirmationActions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 .adminWorkspaceGrid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

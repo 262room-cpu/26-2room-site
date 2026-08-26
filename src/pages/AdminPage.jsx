@@ -6,6 +6,7 @@ import {
   createAdminDocumentRequirement,
   createAdminEvent,
   createAdminGroup,
+  deleteAdminEvent,
   getAdminEvent,
   getAdminEvents,
   getAdminSession,
@@ -1046,6 +1047,11 @@ function AdminPage() {
   const [eventForm, setEventForm] = useState(null)
   const [eventSaveStatus, setEventSaveStatus] = useState('idle')
   const [eventSaveMessage, setEventSaveMessage] = useState('')
+  const [eventDeleteState, setEventDeleteState] = useState({
+    confirming: false,
+    status: 'idle',
+    message: '',
+  })
   const [groupForms, setGroupForms] = useState({})
   const [groupSaveStates, setGroupSaveStates] = useState({})
   const [newGroupForm, setNewGroupForm] = useState(() =>
@@ -1160,6 +1166,11 @@ function AdminPage() {
     setIsNewEventOpen(false)
     setNewEventForm(createNewEventForm())
     setNewEventSaveState({ status: 'idle', message: '' })
+    setEventDeleteState({
+      confirming: false,
+      status: 'idle',
+      message: '',
+    })
   }, [sessionStatus])
 
   const handleNewEventFormChange = (changeEvent) => {
@@ -1224,6 +1235,11 @@ function AdminPage() {
       setEventForm(createEventForm(result.event))
       setEventSaveStatus('idle')
       setEventSaveMessage('')
+      setEventDeleteState({
+        confirming: false,
+        status: 'idle',
+        message: '',
+      })
       setGroupForms({})
       setGroupSaveStates({})
       setNewGroupForm(
@@ -1285,6 +1301,11 @@ function AdminPage() {
     setEventForm(null)
     setEventSaveStatus('idle')
     setEventSaveMessage('')
+    setEventDeleteState({
+      confirming: false,
+      status: 'idle',
+      message: '',
+    })
     setGroupForms({})
     setGroupSaveStates({})
     setNewGroupForm(createNewGroupForm([], 'participant'))
@@ -1531,6 +1552,11 @@ function AdminPage() {
           ? 'Мероприятие размещено на сайте'
           : 'Мероприятие снято с публикации',
       )
+      setEventDeleteState({
+        confirming: false,
+        status: 'idle',
+        message: '',
+      })
     } catch (error) {
       if (error instanceof AdminAuthError && error.status === 401) {
         setEvents([])
@@ -1549,6 +1575,89 @@ function AdminPage() {
           ? 'Мероприятие не найдено.'
           : 'Не удалось изменить публикацию. Попробуйте ещё раз.',
       )
+    }
+  }
+
+  const handleDeleteEvent = async () => {
+    if (
+      !eventDetail?.event ||
+      eventDetail.event.isPublished ||
+      eventDeleteState.status === 'deleting'
+    ) {
+      return
+    }
+
+    setEventDeleteState({
+      confirming: true,
+      status: 'deleting',
+      message: '',
+    })
+
+    try {
+      const result = await deleteAdminEvent(eventDetail.event.id)
+
+      if (result.deleted !== true) {
+        throw new AdminAuthError('invalid_server_response')
+      }
+
+      const refreshed = await getAdminEvents()
+
+      if (!Array.isArray(refreshed.events)) {
+        throw new AdminAuthError('invalid_server_response')
+      }
+
+      setEvents(refreshed.events)
+      setEventsStatus('ready')
+      setEventsMessage('')
+      setSelectedEventId(null)
+      setWorkspaceModule(null)
+      setEventDetail(null)
+      setEventDetailStatus('idle')
+      setEventDetailMessage('')
+      setEventForm(null)
+      setEventSaveStatus('idle')
+      setEventSaveMessage('')
+      setEventDeleteState({
+        confirming: false,
+        status: 'idle',
+        message: '',
+      })
+    } catch (error) {
+      if (error instanceof AdminAuthError && error.status === 401) {
+        setEvents([])
+        setEventsStatus('idle')
+        setSelectedEventId(null)
+        setEventDetail(null)
+        setEventDetailStatus('idle')
+        setEventForm(null)
+        setSessionStatus('unauthenticated')
+        return
+      }
+
+      let message = 'Не удалось удалить мероприятие. Попробуйте ещё раз.'
+
+      if (
+        error instanceof AdminAuthError &&
+        error.code === 'event_has_registrations'
+      ) {
+        message = 'Удалить мероприятие нельзя: у него уже есть регистрации.'
+      } else if (
+        error instanceof AdminAuthError &&
+        error.code === 'event_is_published'
+      ) {
+        message = 'Сначала снимите мероприятие с публикации.'
+      } else if (
+        error instanceof AdminAuthError &&
+        error.status === 404
+      ) {
+        message = 'Мероприятие не найдено.'
+      }
+
+      setEventDeleteState({
+        confirming: true,
+        status: 'error',
+        message,
+      })
     }
   }
 
@@ -2915,6 +3024,28 @@ function AdminPage() {
                           ? 'Снять с публикации'
                           : 'Разместить на сайте'}
                       </button>
+                      {!eventDetail.event.isPublished && (
+                        <button
+                          className="adminDeleteButton"
+                          type="button"
+                          onClick={() =>
+                            setEventDeleteState({
+                              confirming: true,
+                              status: 'idle',
+                              message: '',
+                            })
+                          }
+                          disabled={
+                            eventSaveStatus === 'saving' ||
+                            eventDeleteState.status === 'deleting' ||
+                            isGroupSaving ||
+                            isDistanceSaving ||
+                            isRequirementSaving
+                          }
+                        >
+                          Удалить мероприятие
+                        </button>
+                      )}
                     </>
                   )}
                   {workspaceModule && (
@@ -2940,6 +3071,56 @@ function AdminPage() {
                   </button>
                 </div>
               </div>
+
+              {!eventDetail?.event?.isPublished &&
+                eventDeleteState.confirming && (
+                  <div
+                    className="adminDeleteConfirmation"
+                    role="alertdialog"
+                    aria-labelledby="admin-delete-event-title"
+                    aria-describedby="admin-delete-event-description"
+                  >
+                    <div>
+                      <strong id="admin-delete-event-title">
+                        {eventDetail.event.title}
+                      </strong>
+                      <p id="admin-delete-event-description">
+                        Мероприятие будет удалено без возможности восстановления.
+                      </p>
+                    </div>
+                    <div className="adminDeleteConfirmationActions">
+                      <button
+                        className="adminDeleteConfirmButton"
+                        type="button"
+                        onClick={handleDeleteEvent}
+                        disabled={eventDeleteState.status === 'deleting'}
+                      >
+                        {eventDeleteState.status === 'deleting'
+                          ? 'Удаляем...'
+                          : 'Удалить безвозвратно'}
+                      </button>
+                      <button
+                        className="adminEventCancelButton"
+                        type="button"
+                        onClick={() =>
+                          setEventDeleteState({
+                            confirming: false,
+                            status: 'idle',
+                            message: '',
+                          })
+                        }
+                        disabled={eventDeleteState.status === 'deleting'}
+                      >
+                        Отмена
+                      </button>
+                    </div>
+                    {eventDeleteState.message && (
+                      <p className="adminAuthMessage" role="alert">
+                        {eventDeleteState.message}
+                      </p>
+                    )}
+                  </div>
+                )}
 
               {eventDetailStatus === 'ready' && eventDetailMessage && (
                 <p className="adminSaveSuccess" role="status">

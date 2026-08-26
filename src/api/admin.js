@@ -103,6 +103,17 @@ export function createAdminEvent(changes, { signal } = {}) {
   })
 }
 
+export function deleteAdminEvent(eventId, { signal } = {}) {
+  const query = new URLSearchParams({
+    id: eventId,
+  })
+
+  return requestJson(`/api/admin/event?${query.toString()}`, {
+    method: 'DELETE',
+    signal,
+  })
+}
+
 export function updateAdminEvent(
   eventId,
   changes,

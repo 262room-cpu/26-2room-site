@@ -2335,8 +2335,8 @@ export default async function handler(request, response) {
     'application/json; charset=utf-8',
   )
 
-  if (!['GET', 'POST', 'PATCH'].includes(request.method)) {
-    response.setHeader('Allow', 'GET, POST, PATCH')
+  if (!['GET', 'POST', 'PATCH', 'DELETE'].includes(request.method)) {
+    response.setHeader('Allow', 'GET, POST, PATCH, DELETE')
     return response
       .status(405)
       .json({ error: 'method_not_allowed' })
@@ -2572,6 +2572,12 @@ export default async function handler(request, response) {
       .json({ error: 'event_id_required' })
   }
 
+  if (request.method === 'DELETE' && !UUID_PATTERN.test(eventId)) {
+    return response
+      .status(400)
+      .json({ error: 'invalid_event_id' })
+  }
+
   const { data: event, error: eventError } = await supabase
     .from('events')
     .select(EVENT_SELECT)
@@ -2592,6 +2598,103 @@ export default async function handler(request, response) {
     return response
       .status(404)
       .json({ error: 'event_not_found' })
+  }
+
+  if (request.method === 'DELETE') {
+    if (event.is_published) {
+      return response
+        .status(409)
+        .json({ error: 'event_is_published' })
+    }
+
+    const { count: registrationCount, error: countError } =
+      await supabase
+        .from('registrations')
+        .select('id', { count: 'exact', head: true })
+        .eq('event_id', eventId)
+
+    if (countError) {
+      console.error('Admin event registration count failed', {
+        code: countError.code ?? 'unknown',
+      })
+
+      return response
+        .status(500)
+        .json({ error: 'internal_error' })
+    }
+
+    if (
+      !Number.isSafeInteger(registrationCount) ||
+      registrationCount < 0
+    ) {
+      console.error('Admin event registration count was unavailable')
+
+      return response
+        .status(500)
+        .json({ error: 'internal_error' })
+    }
+
+    if (registrationCount > 0) {
+      return response
+        .status(409)
+        .json({ error: 'event_has_registrations' })
+    }
+
+    const { data: deletedEvent, error: deleteError } =
+      await supabase
+        .from('events')
+        .delete()
+        .eq('id', eventId)
+        .eq('is_published', false)
+        .select('id')
+        .maybeSingle()
+
+    if (deleteError) {
+      console.error('Admin event deletion failed', {
+        code: deleteError.code ?? 'unknown',
+      })
+
+      if (deleteError.code === '23503') {
+        return response
+          .status(409)
+          .json({ error: 'event_has_registrations' })
+      }
+
+      return response
+        .status(500)
+        .json({ error: 'internal_error' })
+    }
+
+    if (!deletedEvent) {
+      const { data: currentEvent, error: currentEventError } =
+        await supabase
+          .from('events')
+          .select('is_published')
+          .eq('id', eventId)
+          .maybeSingle()
+
+      if (currentEventError) {
+        console.error('Admin event deletion recheck failed', {
+          code: currentEventError.code ?? 'unknown',
+        })
+
+        return response
+          .status(500)
+          .json({ error: 'internal_error' })
+      }
+
+      if (currentEvent?.is_published) {
+        return response
+          .status(409)
+          .json({ error: 'event_is_published' })
+      }
+
+      return response
+        .status(404)
+        .json({ error: 'event_not_found' })
+    }
+
+    return response.status(200).json({ deleted: true })
   }
 
   if (request.method === 'PATCH') {
