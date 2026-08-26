@@ -968,7 +968,9 @@ a {
 
 .appStatusMedia img {
   display: block;
-  width: min(100%, 320px);
+  width: auto;
+  max-width: min(100%, 320px);
+  height: auto;
   max-height: 620px;
   border: 8px solid #171717;
   border-radius: 30px;
