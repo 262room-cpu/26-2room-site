@@ -936,13 +936,47 @@ a {
     #09090b;
 }
 
-.appStatus p {
+.appStatus.hasScreenshot {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 360px);
+  align-items: center;
+  gap: 56px;
+  text-align: left;
+}
+
+.appStatusCopy {
   max-width: 760px;
   margin: 0 auto;
 }
 
+.appStatus.hasScreenshot .appStatusCopy {
+  margin: 0;
+}
+
+.appStatus p {
+  margin: 0;
+}
+
 .appStatus .primaryBtn {
   margin-top: 24px;
+}
+
+.appStatusMedia {
+  display: flex;
+  justify-content: center;
+}
+
+.appStatusMedia img {
+  display: block;
+  width: min(100%, 320px);
+  max-height: 620px;
+  border: 8px solid #171717;
+  border-radius: 30px;
+  object-fit: contain;
+  box-shadow:
+    0 0 0 1px rgba(255, 214, 0, 0.18),
+    0 28px 80px rgba(0, 0, 0, 0.5),
+    0 0 42px rgba(255, 214, 0, 0.1);
 }
 
 .statusBadge {
@@ -1023,6 +1057,14 @@ a {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 22px;
+}
+
+.contactHubActions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 24px;
+  flex-wrap: wrap;
 }
 
 .contactCard {
@@ -1402,6 +1444,11 @@ a {
     flex-direction: column;
   }
 
+  .appStatus.hasScreenshot {
+    grid-template-columns: 1fr;
+    gap: 34px;
+  }
+
   .footer {
     flex-direction: column;
   }
@@ -1554,6 +1601,11 @@ a {
   .contactHubTitle p,
   .contactCard p {
     font-size: 17px;
+  }
+
+  .contactHubActions {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .contactCard {

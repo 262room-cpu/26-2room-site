@@ -4,15 +4,13 @@ import ActiveEvents from '../components/ActiveEvents'
 import {
   audiences,
   contactCards,
-  ecosystem,
   organizerItems,
-  platformCards,
   races,
-  reasons,
   sponsorItems,
 } from '../data/homeContent'
 
 const CONTACT_EMAIL = '26.2room@internet.ru'
+const APP_SCREENSHOT_PATH = '/app-screenshot.png'
 
 const START_SUBJECT = 'Добавить старт в 26.2 ROOM'
 const PARTNERSHIP_SUBJECT = 'Партнёрство с 26.2 ROOM'
@@ -58,6 +56,7 @@ const fieldPlaceholders = {
 }
 
 function HomePage() {
+  const [appScreenshotAvailable, setAppScreenshotAvailable] = useState(false)
   const [eventsRequest, setEventsRequest] = useState({
     status: null,
     events: [],
@@ -66,6 +65,17 @@ function HomePage() {
   const [submissionStatus, setSubmissionStatus] = useState('idle')
   const [formAttempted, setFormAttempted] = useState(false)
   const [formValues, setFormValues] = useState({})
+
+  useEffect(() => {
+    const screenshot = new Image()
+
+    screenshot.onload = () => setAppScreenshotAvailable(true)
+    screenshot.src = APP_SCREENSHOT_PATH
+
+    return () => {
+      screenshot.onload = null
+    }
+  }, [])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -201,10 +211,10 @@ function HomePage() {
 
         <nav className="nav">
           <a href="#audiences">Для кого</a>
-          <a href="#ecosystem">Экосистема</a>
-          <a href="#runners">Бегунам</a>
+          <a href="#app">Приложение</a>
           <a href="#organizers">Организаторам</a>
           <a href="#partners">Брендам</a>
+          <a href="#instagram">Instagram</a>
           <a href="#contacts">Контакты</a>
         </nav>
       </header>
@@ -292,11 +302,10 @@ function HomePage() {
         <section className="section audienceSection" id="audiences">
           <div className="sectionTitle">
             <small>ЧТО ТАКОЕ 26.2 ROOM?</small>
-            <h2>Единое пространство для беговой культуры.</h2>
+            <h2>Всё нужное для движения вперёд.</h2>
             <p>
-              Это единое пространство для беговой культуры: мы собираем
-              старты, рассказываем о событиях, создаём медиа-контент и строим
-              цифровую платформу для бегунов и организаторов.
+              Календарь событий, живое медиа и рабочая точка связи для
+              сообщества и индустрии.
             </p>
           </div>
 
@@ -310,124 +319,44 @@ function HomePage() {
           </div>
         </section>
 
-        <section className="whySection">
-          <div className="whyIntro">
-            <small>ПОЧЕМУ 26.2 ROOM?</small>
-            <h2>Почему 26.2 ROOM?</h2>
-            <p className="whyLead">
-              Беговая аудитория уже есть — ей нужно удобное место, где видны
-              старты, клубы, организаторы и бренды.
-            </p>
+        <section
+          className={`appStatus${appScreenshotAvailable ? ' hasScreenshot' : ''}`}
+          id="app"
+        >
+          <div className="appStatusCopy">
+            <div className="statusBadge">App Store · Google Play</div>
+            <h2>Приложение 26.2 ROOM уже доступно</h2>
             <p>
-              Мы соединяем календарь стартов, Instagram-медиа, беговое
-              комьюнити, app-платформу и партнёрские интеграции в одну
-              экосистему.
+              Находите спортивные старты, сохраняйте интересные события и
+              планируйте следующий старт в одном приложении.
             </p>
+            <a
+              className="primaryBtn"
+              href="https://onelink.to/ggt8eg"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Скачать приложение
+            </a>
           </div>
 
-          <div className="whyGrid">
-            {reasons.map((reason) => (
-              <article className="whyCard" key={reason.title}>
-                <span>{reason.number}</span>
-                <h3>{reason.title}</h3>
-                <p>{reason.text}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className="platformSection">
-          <div className="platformIntro">
-            <small>САЙТ И ПРИЛОЖЕНИЕ</small>
-            <h2>Сайт показывает главное. Приложение помогает планировать.</h2>
-            <p>
-              На сайте мы рассказываем о проекте, показываем избранные старты и
-              собираем заявки от организаторов и партнёров. Полный календарь,
-              фильтры, карта, избранное и уведомления доступны в приложении
-              26.2 ROOM.
-            </p>
-          </div>
-
-          <div className="platformCards">
-            {platformCards.map((card) => (
-              <article className={`platformCard ${card.highlight ? 'platformCardHot' : ''}`} key={card.title}>
-                <div className="platformCardTop">
-                  <h3>{card.title}</h3>
-                  {card.badge && <span>{card.badge}</span>}
-                </div>
-
-                <ul>
-                  {card.items.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className="section" id="ecosystem">
-          <div className="sectionTitle">
-            <small>ЭКОСИСТЕМА</small>
-            <h2>App, сайт и Instagram работают вместе.</h2>
-            <p>
-              Мы собираем старты, людей, организаторов и бренды в понятную
-              цифровую систему: от медиа-анонса до перехода на регистрацию.
-            </p>
-          </div>
-
-          <div className="featuresGrid ecosystemGrid">
-            {ecosystem.map((item) => (
-              <div className="featureCard" key={item.title}>
-                <div className="featureIcon">{item.icon}</div>
-                <h3>{item.title}</h3>
-                <p>{item.text}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="section startsSection" id="runners">
-          <div>
-            <small>ДЛЯ БЕГУНОВ</small>
-            <h2>Находить старты проще. Планировать сезон спокойнее.</h2>
-            <p>
-              Бегуны могут находить старты, следить за календарём, сохранять
-              идеи для сезона и подписываться на Instagram, чтобы не пропускать
-              афиши, подборки и живой беговой контент.
-            </p>
-
-            <div className="tags">
-              <span>5K</span>
-              <span>10K</span>
-              <span>21.1K</span>
-              <span>42.2K</span>
-              <span>Trail</span>
-              <span>Club Run</span>
+          {appScreenshotAvailable && (
+            <div className="appStatusMedia">
+              <img
+                src={APP_SCREENSHOT_PATH}
+                alt="Приложение 26.2 ROOM"
+              />
             </div>
-          </div>
-
-          <div className="bigRaceList">
-            {races.map((race) => (
-              <div className="bigRaceCard" key={race.name}>
-                <div>
-                  <small>{race.city}</small>
-                  <h3>{race.name}</h3>
-                </div>
-                <strong>{race.date}</strong>
-              </div>
-            ))}
-          </div>
+          )}
         </section>
 
         <section className="businessSection" id="organizers">
           <div className="businessText">
             <small>ДЛЯ ОРГАНИЗАТОРОВ</small>
-            <h2>Расскажите о старте тем, кто уже ищет, куда бежать.</h2>
+            <h2>Ваше событие увидит нужная аудитория.</h2>
             <p>
-              Организуете марафон, трейл, забег, клубную пробежку или
-              спортивное событие? 26.2 ROOM поможет рассказать о вашем старте
-              беговой аудитории.
+              Добавьте марафон, трейл, городскую или клубную пробежку: разместим
+              информацию и направим участников на официальную регистрацию.
             </p>
             <button className="primaryBtn" type="button" onClick={() => openForm('start')}>
               Добавить свой старт
@@ -447,11 +376,10 @@ function HomePage() {
         <section className="businessSection reverse" id="partners">
           <div className="businessText">
             <small>ДЛЯ СПОНСОРОВ И БРЕНДОВ</small>
-            <h2>Точка входа в беговое комьюнити Казахстана.</h2>
+            <h2>Свяжите бренд с активной аудиторией.</h2>
             <p>
-              26.2 ROOM — точка входа в беговое комьюнити Казахстана. Мы
-              создаём медиа, календарь стартов и цифровую платформу, вокруг
-              которой собирается активная спортивная аудитория.
+              Партнёрские форматы, спецпроекты и интеграции вокруг календаря и
+              спортивных событий Казахстана.
             </p>
             <button className="primaryBtn" type="button" onClick={() => openForm('partnership')}>
               Обсудить партнёрство
@@ -471,10 +399,9 @@ function HomePage() {
         <section className="mediaSection" id="instagram">
           <div>
             <small>INSTAGRAM-МЕДИА</small>
-            <h2>@26.2_room — живая часть экосистемы.</h2>
+            <h2>@26.2_room — медиа в ритме бега.</h2>
             <p>
-              В Instagram мы публикуем календарь стартов, беговые мемы, афиши,
-              подборки, рилсы и живой контент для бегунов.
+              Афиши, подборки, рилсы, календарь и живой контент сообщества.
             </p>
           </div>
 
@@ -483,46 +410,7 @@ function HomePage() {
           </a>
         </section>
 
-        <section className="appStatus">
-          <div className="statusBadge">App Store · Google Play</div>
-          <h2>Приложение 26.2 ROOM уже доступно</h2>
-          <p>
-            Находите спортивные старты, сохраняйте интересные события и
-            планируйте следующий старт в одном приложении.
-          </p>
-          <a
-            className="primaryBtn"
-            href="https://onelink.to/ggt8eg"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Скачать приложение
-          </a>
-        </section>
-
-        <section className="finalCta" id="contacts">
-          <div className="arrow">→</div>
-          <h2>Хотите добавить старт, предложить партнёрство или обсудить интеграцию?</h2>
-
-          <div className="buttons center">
-            <button className="primaryBtn" type="button" onClick={() => openForm('start')}>
-              Добавить старт
-            </button>
-            <button className="secondaryBtn" type="button" onClick={() => openForm('partnership')}>
-              Стать партнёром
-            </button>
-            <a className="secondaryBtn" href="https://www.instagram.com/26.2_room/" target="_blank" rel="noreferrer">
-              Instagram
-            </a>
-            <button className="secondaryBtn" type="button" onClick={() => openForm('partnership')}>
-              Email
-            </button>
-          </div>
-
-          <div className="email">26.2room@internet.ru</div>
-        </section>
-
-        <section className="contactHub">
+        <section className="contactHub" id="contacts">
           <div className="contactHubTitle">
             <small>КОНТАКТЫ ДЛЯ ОРГАНИЗАТОРОВ И БРЕНДОВ</small>
             <h2>Хотите попасть в 26.2 ROOM?</h2>
@@ -552,15 +440,25 @@ function HomePage() {
               </article>
             ))}
           </div>
+
+          <div className="contactHubActions">
+            <a className="secondaryBtn" href="https://www.instagram.com/26.2_room/" target="_blank" rel="noreferrer">
+              Instagram
+            </a>
+            <a className="secondaryBtn" href={`mailto:${CONTACT_EMAIL}`}>
+              {CONTACT_EMAIL}
+            </a>
+          </div>
         </section>
       </main>
 
       <footer className="footer">
         <div>© 2026 26.2 ROOM. Running ecosystem.</div>
         <div className="footerLinks">
-          <a href="#ecosystem">Экосистема</a>
+          <a href="#audiences">О проекте</a>
+          <a href="#app">Приложение</a>
           <a href="#organizers">Организаторам</a>
-          <button type="button" onClick={() => openForm('partnership')}>Contact</button>
+          <a href="#contacts">Контакты</a>
         </div>
       </footer>
 
