@@ -484,11 +484,11 @@ function HomePage() {
         </section>
 
         <section className="appStatus">
-          <div className="statusBadge">App Store и Google Play</div>
-          <h2>26.2 ROOM уже доступно пользователям.</h2>
+          <div className="statusBadge">App Store · Google Play</div>
+          <h2>Приложение 26.2 ROOM уже доступно</h2>
           <p>
-            Ищите старты по дате, городу и дистанции, сохраняйте события и
-            планируйте свой беговой сезон в приложении.
+            Находите спортивные старты, сохраняйте интересные события и
+            планируйте следующий старт в одном приложении.
           </p>
           <a
             className="primaryBtn"
