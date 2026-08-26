@@ -1023,7 +1023,9 @@ function AdultRegistrationForm({ event, previewMode = false }) {
       {(event.consentRequirements ?? []).length > 0 && (
         <section className="kidsRegistrationSection" aria-labelledby="consents-title">
           <div className="kidsRegistrationSectionHeading">
-            <span>05</span>
+            <span>
+              {(event.documentRequirements ?? []).length > 0 ? '05' : '04'}
+            </span>
             <div>
               <h3 id="consents-title">Подтверждения</h3>
               <p>Обязательные согласия нужно подтвердить для продолжения.</p>
