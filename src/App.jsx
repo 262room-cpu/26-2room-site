@@ -3,6 +3,7 @@ import './App.css'
 import AdminPage from './pages/AdminPage'
 import EventPage from './pages/EventPage'
 import HomePage from './pages/HomePage'
+import NotFoundPage from './pages/NotFoundPage'
 import RegistrationPage from './pages/RegistrationPage'
 
 function App() {
@@ -12,6 +13,7 @@ function App() {
       <Route path="/admin" element={<AdminPage />} />
       <Route path="/events/:slug" element={<EventPage />} />
       <Route path="/events/:slug/register" element={<RegistrationPage />} />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   )
 }

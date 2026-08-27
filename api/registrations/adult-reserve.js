@@ -393,6 +393,7 @@ export default async function handler(request, response) {
     .from('events')
     .select('id')
     .eq('slug', payload.eventSlug)
+    .eq('is_published', true)
     .maybeSingle()
 
   if (eventError) {

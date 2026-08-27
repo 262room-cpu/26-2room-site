@@ -139,8 +139,6 @@ function HomePage() {
     const type = activeForm === 'start' ? 'race' : 'partner'
 
     try {
-      console.log('Sending request to /api/send-request', { type, fields })
-
       const response = await fetch('/api/send-request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -150,8 +148,6 @@ function HomePage() {
         }),
       })
       const result = await response.json().catch(() => null)
-
-      console.log('API response:', result)
 
       if (!response.ok || result?.ok !== true) {
         console.error('API error:', result)
@@ -202,7 +198,7 @@ function HomePage() {
     <div className="page">
       <header className="header">
         <div className="logoBox">
-          <img className="logoImage" src="/logo-26-2room.jpg.jpg" alt="26.2 ROOM" />
+          <img className="logoImage" src="/logo-26-2room.jpg" alt="26.2 ROOM" />
           <div className="brandCopy">
             <div className="logoText" data-text="26.2 ROOM">26.2 ROOM</div>
             <div className="tagline">YOUR FINISH LINE</div>
@@ -263,7 +259,7 @@ function HomePage() {
 
           <div className="phoneWrap">
             <div className="phone">
-              <img className="phoneLogoWatermark" src="/logo-26-2room.jpg.jpg" alt="" aria-hidden="true" />
+              <img className="phoneLogoWatermark" src="/logo-26-2room.jpg" alt="" aria-hidden="true" />
               <div className="phoneTop">
                 <div>
                   <small>26.2 ROOM</small>

@@ -76,7 +76,7 @@ function EventPageHeader() {
   return (
     <header className="eventPageHeader">
       <Link className="eventPageBrand" to="/">
-        <img src="/logo-26-2room.jpg.jpg" alt="26.2 ROOM" />
+        <img src="/logo-26-2room.jpg" alt="26.2 ROOM" />
         <span>26.2 ROOM</span>
       </Link>
 
@@ -121,6 +121,7 @@ function EventPage() {
     status: null,
     event: null,
   })
+  const [failedVisualUrls, setFailedVisualUrls] = useState([])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -223,6 +224,9 @@ function EventPage() {
   const hasDistances = event.distances.length > 0
   const hasStarterKit = event.starterKit.length > 0
   const hasPartners = event.partners.length > 0
+  const eventVisualUrl = [event.posterUrl, event.coverImage].find(
+    (url) => url && !failedVisualUrls.includes(url),
+  )
 
   return (
     <div className="eventPage">
@@ -292,10 +296,16 @@ function EventPage() {
           </div>
 
           <div className="eventPageVisual" aria-label={event.title}>
-            {event.posterUrl || event.coverImage ? (
+            {eventVisualUrl ? (
               <img
-                src={event.posterUrl ?? event.coverImage}
+                src={eventVisualUrl}
                 alt={`Постер ${event.title}`}
+                onError={() =>
+                  setFailedVisualUrls((currentUrls) => [
+                    ...currentUrls,
+                    eventVisualUrl,
+                  ])
+                }
               />
             ) : (
               <div className="eventPageVisualFallback">

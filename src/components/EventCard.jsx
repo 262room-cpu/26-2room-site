@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link } from 'react-router'
 import { EVENT_DATE_STATUSES, EVENT_STATUSES } from '../data/events'
 
@@ -41,6 +42,8 @@ function formatPrice(price, currency) {
 }
 
 function EventCard({ event }) {
+  const [failedPosterUrl, setFailedPosterUrl] = useState(null)
+
   const confirmedEventDate = formatEventDate(event.startsAt)
   const tentativeEventDate =
     event.dateStatus === EVENT_DATE_STATUSES.TENTATIVE
@@ -53,9 +56,13 @@ function EventCard({ event }) {
 
   return (
     <article className="activeEventCard">
-      {event.posterUrl && (
+      {event.posterUrl && event.posterUrl !== failedPosterUrl && (
         <div className="activeEventCardPoster">
-          <img src={event.posterUrl} alt={`Постер ${event.title}`} />
+          <img
+            src={event.posterUrl}
+            alt={`Постер ${event.title}`}
+            onError={() => setFailedPosterUrl(event.posterUrl)}
+          />
         </div>
       )}
 

@@ -2,10 +2,6 @@ import EventCard from './EventCard'
 import './ActiveEvents.css'
 
 function ActiveEvents({ events, loading = false, error = false }) {
-  if (!loading && !error && events.length === 0) {
-    return null
-  }
-
   return (
     <section className="activeEvents">
       <div className="activeEventsHeader">
@@ -32,7 +28,14 @@ function ActiveEvents({ events, loading = false, error = false }) {
         </div>
       )}
 
-      {!loading && !error && (
+      {!loading && !error && events.length === 0 && (
+        <div className="activeEventsState" aria-live="polite" role="status">
+          <strong>Новые события скоро появятся</strong>
+          <p>Следите за обновлениями календаря 26.2 ROOM.</p>
+        </div>
+      )}
+
+      {!loading && !error && events.length > 0 && (
         <div className="activeEventsGrid">
           {events.map((event) => (
             <EventCard event={event} key={event.slug} />

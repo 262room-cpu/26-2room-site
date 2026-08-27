@@ -93,7 +93,7 @@ function RegistrationHeader({ event, previewMode = false }) {
   return (
     <header className="registrationPageHeader">
       <Link className="registrationPageBrand" to="/">
-        <img src="/logo-26-2room.jpg.jpg" alt="26.2 ROOM" />
+        <img src="/logo-26-2room.jpg" alt="26.2 ROOM" />
         <span>26.2 ROOM</span>
       </Link>
 
