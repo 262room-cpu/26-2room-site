@@ -2,11 +2,15 @@ import {
   AdminAuthConfigurationError,
   isAdminRequest,
 } from '../_admin-auth.js'
+import { randomUUID } from 'node:crypto'
 import {
   getSupabaseAdmin,
   SupabaseConfigurationError,
 } from '../_supabase.js'
-import { mapEvent as mapPublicEvent } from '../events.js'
+import {
+  getEventPosterUrl,
+  mapEvent as mapPublicEvent,
+} from '../events.js'
 import { getEventReadiness } from '../../shared/event-readiness.js'
 import { buildCsv } from '../../shared/csv.js'
 
@@ -17,6 +21,15 @@ const MAX_REGISTRATION_PAGE_SIZE = 100
 const REGISTRATION_SEARCH_LIMIT = 2500
 const REGISTRATION_EXPORT_LIMIT = 10000
 const REGISTRATION_EXPORT_BATCH_SIZE = 1000
+const EVENT_POSTERS_BUCKET = 'event-posters'
+const EVENT_POSTER_MAX_SIZE_BYTES = 5 * 1024 * 1024
+const EVENT_POSTER_TYPES = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+}
+const EVENT_POSTER_FILENAME_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.(jpg|png|webp)$/i
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 const REGISTRATION_STATUSES = new Set([
@@ -55,6 +68,7 @@ const EVENT_SELECT = [
   'price_minor',
   'currency',
   'cover_image_path',
+  'poster_path',
   'participant_note',
   'distance_selection_note',
   'created_at',
@@ -81,6 +95,7 @@ const LIST_EVENT_SELECT = [
   'capacity',
   'price_minor',
   'currency',
+  'poster_path',
   'created_at',
   'updated_at',
 ].join(',')
@@ -811,12 +826,13 @@ function buildEventCreate(body) {
     price_minor: null,
     currency: 'KZT',
     cover_image_path: null,
+    poster_path: null,
     participant_note: null,
     distance_selection_note: null,
   }
 }
 
-function mapEvent(event) {
+function mapEvent(event, supabase = null) {
   return {
     id: event.id,
     slug: event.slug,
@@ -846,6 +862,10 @@ function mapEvent(event) {
     priceMinor: event.price_minor,
     currency: event.currency,
     coverImagePath: event.cover_image_path,
+    posterPath: event.poster_path,
+    posterUrl: supabase
+      ? getEventPosterUrl(supabase, event.poster_path)
+      : null,
     participantNote: event.participant_note,
     distanceSelectionNote: event.distance_selection_note,
     createdAt: event.created_at,
@@ -857,7 +877,7 @@ function normalizeNullable(value) {
   return value === null || value === 'null' ? null : value
 }
 
-function mapListEvent(event) {
+function mapListEvent(event, supabase) {
   return {
     id: event.id,
     slug: event.slug,
@@ -882,6 +902,8 @@ function mapListEvent(event) {
     capacity: normalizeNullable(event.capacity),
     priceMinor: normalizeNullable(event.price_minor),
     currency: normalizeNullable(event.currency),
+    posterPath: normalizeNullable(event.poster_path),
+    posterUrl: getEventPosterUrl(supabase, event.poster_path),
     createdAt: event.created_at,
     updatedAt: event.updated_at,
   }
@@ -2382,6 +2404,243 @@ async function handleRegistrationDetailRequest({
   })
 }
 
+function getStorageContentType(fileInfo) {
+  const value =
+    fileInfo?.contentType ??
+    fileInfo?.content_type ??
+    fileInfo?.metadata?.mimetype ??
+    fileInfo?.metadata?.contentType ??
+    null
+
+  return typeof value === 'string' ? value.toLowerCase() : null
+}
+
+function getStorageSize(fileInfo) {
+  const value = fileInfo?.size ?? fileInfo?.metadata?.size
+  const numericValue = typeof value === 'string' ? Number(value) : value
+
+  return Number.isInteger(numericValue) ? numericValue : null
+}
+
+function isPosterPathForEvent(eventId, posterPath) {
+  if (typeof posterPath !== 'string') {
+    return false
+  }
+
+  const prefix = `${eventId}/`
+
+  return (
+    posterPath.startsWith(prefix) &&
+    EVENT_POSTER_FILENAME_PATTERN.test(posterPath.slice(prefix.length))
+  )
+}
+
+async function removeEventPosterBestEffort(supabase, posterPath) {
+  if (!posterPath) {
+    return
+  }
+
+  try {
+    const { error } = await supabase.storage
+      .from(EVENT_POSTERS_BUCKET)
+      .remove([posterPath])
+
+    if (error) {
+      console.error('Event poster cleanup failed', {
+        code: error.statusCode ?? error.status ?? 'unknown',
+      })
+    }
+  } catch {
+    console.error('Event poster cleanup failed', { code: 'unknown' })
+  }
+}
+
+function filterByCurrentPoster(query, posterPath) {
+  return posterPath === null
+    ? query.is('poster_path', null)
+    : query.eq('poster_path', posterPath)
+}
+
+async function handlePosterRequest({
+  request,
+  response,
+  supabase,
+  eventId,
+}) {
+  if (!['POST', 'PATCH', 'DELETE'].includes(request.method)) {
+    response.setHeader('Allow', 'POST, PATCH, DELETE')
+    return response.status(405).json({ error: 'method_not_allowed' })
+  }
+
+  if (!eventId || !UUID_PATTERN.test(eventId)) {
+    return response.status(400).json({ error: 'invalid_event_id' })
+  }
+
+  const { data: event, error: eventError } = await supabase
+    .from('events')
+    .select(EVENT_SELECT)
+    .eq('id', eventId)
+    .maybeSingle()
+
+  if (eventError) {
+    console.error('Admin event poster event query failed', {
+      code: eventError.code ?? 'unknown',
+    })
+    return response.status(500).json({ error: 'internal_error' })
+  }
+
+  if (!event) {
+    return response.status(404).json({ error: 'event_not_found' })
+  }
+
+  if (request.method === 'POST') {
+    const { action, mimeType, sizeBytes } = request.body || {}
+
+    if (
+      action !== 'create_upload' ||
+      typeof mimeType !== 'string' ||
+      !Object.hasOwn(EVENT_POSTER_TYPES, mimeType) ||
+      !Number.isInteger(sizeBytes) ||
+      sizeBytes <= 0 ||
+      sizeBytes > EVENT_POSTER_MAX_SIZE_BYTES
+    ) {
+      return response.status(400).json({ error: 'invalid_poster_file' })
+    }
+
+    const extension = EVENT_POSTER_TYPES[mimeType]
+    const posterPath = `${eventId}/${randomUUID()}.${extension}`
+    const { data: signedUpload, error: uploadError } =
+      await supabase.storage
+        .from(EVENT_POSTERS_BUCKET)
+        .createSignedUploadUrl(posterPath, { upsert: false })
+
+    if (uploadError || !signedUpload?.signedUrl || !signedUpload?.path) {
+      console.error('Creating event poster upload URL failed', {
+        code: uploadError?.statusCode ?? uploadError?.status ?? 'unknown',
+      })
+      return response.status(500).json({ error: 'internal_error' })
+    }
+
+    return response.status(200).json({
+      path: signedUpload.path,
+      signedUrl: signedUpload.signedUrl,
+      mimeType,
+      sizeBytes,
+      expiresInSeconds: 7200,
+    })
+  }
+
+  if (request.method === 'PATCH') {
+    const { action, path: posterPath } = request.body || {}
+
+    if (
+      action !== 'confirm' ||
+      !isPosterPathForEvent(eventId, posterPath)
+    ) {
+      return response.status(400).json({ error: 'invalid_poster_path' })
+    }
+
+    const { data: fileInfo, error: fileInfoError } =
+      await supabase.storage
+        .from(EVENT_POSTERS_BUCKET)
+        .info(posterPath)
+
+    if (fileInfoError || !fileInfo) {
+      const status = fileInfoError?.statusCode ?? fileInfoError?.status
+
+      if (status === 404 || status === '404') {
+        return response.status(404).json({ error: 'poster_not_found' })
+      }
+
+      console.error('Reading uploaded event poster failed', {
+        code: status ?? 'unknown',
+      })
+      return response.status(500).json({ error: 'internal_error' })
+    }
+
+    const actualMimeType = getStorageContentType(fileInfo)
+    const actualSizeBytes = getStorageSize(fileInfo)
+    const expectedExtension = EVENT_POSTER_TYPES[actualMimeType]
+    const actualExtension = posterPath.split('.').pop()?.toLowerCase()
+
+    if (
+      !expectedExtension ||
+      expectedExtension !== actualExtension ||
+      actualSizeBytes === null ||
+      actualSizeBytes <= 0 ||
+      actualSizeBytes > EVENT_POSTER_MAX_SIZE_BYTES
+    ) {
+      await removeEventPosterBestEffort(supabase, posterPath)
+      return response.status(400).json({ error: 'invalid_poster_file' })
+    }
+
+    let updateQuery = supabase
+      .from('events')
+      .update({ poster_path: posterPath })
+      .eq('id', eventId)
+
+    updateQuery = filterByCurrentPoster(updateQuery, event.poster_path)
+
+    const { data: updatedEvent, error: updateError } = await updateQuery
+      .select(EVENT_SELECT)
+      .maybeSingle()
+
+    if (updateError) {
+      console.error('Admin event poster confirmation failed', {
+        code: updateError.code ?? 'unknown',
+      })
+      return response.status(500).json({ error: 'internal_error' })
+    }
+
+    if (!updatedEvent) {
+      await removeEventPosterBestEffort(supabase, posterPath)
+      return response.status(409).json({ error: 'poster_changed' })
+    }
+
+    if (event.poster_path && event.poster_path !== posterPath) {
+      await removeEventPosterBestEffort(supabase, event.poster_path)
+    }
+
+    return response.status(200).json({
+      event: mapEvent(updatedEvent, supabase),
+    })
+  }
+
+  if (!event.poster_path) {
+    return response.status(200).json({
+      event: mapEvent(event, supabase),
+    })
+  }
+
+  let removeQuery = supabase
+    .from('events')
+    .update({ poster_path: null })
+    .eq('id', eventId)
+
+  removeQuery = filterByCurrentPoster(removeQuery, event.poster_path)
+
+  const { data: updatedEvent, error: updateError } = await removeQuery
+    .select(EVENT_SELECT)
+    .maybeSingle()
+
+  if (updateError) {
+    console.error('Admin event poster removal failed', {
+      code: updateError.code ?? 'unknown',
+    })
+    return response.status(500).json({ error: 'internal_error' })
+  }
+
+  if (!updatedEvent) {
+    return response.status(409).json({ error: 'poster_changed' })
+  }
+
+  await removeEventPosterBestEffort(supabase, event.poster_path)
+
+  return response.status(200).json({
+    event: mapEvent(updatedEvent, supabase),
+  })
+}
+
 async function handlePublicationRequest({
   request,
   response,
@@ -2435,7 +2694,7 @@ async function handlePublicationRequest({
     return response.status(404).json({ error: 'event_not_found' })
   }
 
-  return response.status(200).json({ event: mapEvent(event) })
+  return response.status(200).json({ event: mapEvent(event, supabase) })
 }
 
 async function handlePreviewRequest({
@@ -2539,6 +2798,7 @@ async function handlePreviewRequest({
       partnersResult.data ?? [],
       documentsResult.data ?? [],
       consentsResult.data ?? [],
+      getEventPosterUrl(supabase, event.poster_path),
     ),
   })
 }
@@ -2627,6 +2887,15 @@ export default async function handler(request, response) {
 
     if (resource === 'publication') {
       return handlePublicationRequest({
+        request,
+        response,
+        supabase,
+        eventId: resourceEventId,
+      })
+    }
+
+    if (resource === 'poster') {
+      return handlePosterRequest({
         request,
         response,
         supabase,
@@ -2755,7 +3024,7 @@ export default async function handler(request, response) {
     }
 
     return response.status(201).json({
-      event: mapEvent(createdEvent),
+      event: mapEvent(createdEvent, supabase),
     })
   }
 
@@ -2777,7 +3046,9 @@ export default async function handler(request, response) {
     }
 
     return response.status(200).json({
-      events: (events ?? []).map(mapListEvent),
+      events: (events ?? []).map((event) =>
+        mapListEvent(event, supabase),
+      ),
     })
   }
 
@@ -2908,6 +3179,8 @@ export default async function handler(request, response) {
         .status(404)
         .json({ error: 'event_not_found' })
     }
+
+    await removeEventPosterBestEffort(supabase, event.poster_path)
 
     return response.status(200).json({ deleted: true })
   }
@@ -3063,7 +3336,7 @@ export default async function handler(request, response) {
     }
 
     return response.status(200).json({
-      event: mapEvent(updatedEvent),
+      event: mapEvent(updatedEvent, supabase),
     })
   }
 
@@ -3136,7 +3409,7 @@ export default async function handler(request, response) {
   }
 
   return response.status(200).json({
-    event: mapEvent(event),
+    event: mapEvent(event, supabase),
 
     groups: (groupsResult.data ?? []).map(mapGroup),
 

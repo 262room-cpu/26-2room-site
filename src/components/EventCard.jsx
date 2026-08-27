@@ -53,6 +53,12 @@ function EventCard({ event }) {
 
   return (
     <article className="activeEventCard">
+      {event.posterUrl && (
+        <div className="activeEventCardPoster">
+          <img src={event.posterUrl} alt={`Постер ${event.title}`} />
+        </div>
+      )}
+
       <div className="activeEventCardTop">
         <span className="activeEventCardStatus">{statusLabel}</span>
         {event.eventType && <small>{event.eventType}</small>}

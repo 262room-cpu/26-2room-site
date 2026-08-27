@@ -2,6 +2,7 @@ import { getSupabaseAdmin, SupabaseConfigurationError } from './_supabase.js'
 
 const MAX_SLUG_LENGTH = 120
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
+const EVENT_POSTERS_BUCKET = 'event-posters'
 
 const EVENT_LIST_SELECT = [
   'slug',
@@ -19,6 +20,7 @@ const EVENT_LIST_SELECT = [
   'capacity',
   'price_minor',
   'currency',
+  'poster_path',
 ].join(',')
 
 const EVENT_SELECT = [
@@ -46,6 +48,7 @@ const EVENT_SELECT = [
   'price_minor',
   'currency',
   'cover_image_path',
+  'poster_path',
   'participant_note',
   'distance_selection_note',
 ].join(',')
@@ -102,6 +105,22 @@ function isValidSlug(slug) {
 
 function normalizeNullable(value) {
   return value === null || value === 'null' ? null : value
+}
+
+export function getEventPosterUrl(supabase, posterPath) {
+  const normalizedPath = normalizeNullable(posterPath)
+
+  if (typeof normalizedPath !== 'string' || !normalizedPath) {
+    return null
+  }
+
+  const { data } = supabase.storage
+    .from(EVENT_POSTERS_BUCKET)
+    .getPublicUrl(normalizedPath)
+
+  return typeof data?.publicUrl === 'string' && data.publicUrl
+    ? data.publicUrl
+    : null
 }
 
 function normalizeTime(value) {
@@ -182,7 +201,7 @@ function mapConsentRequirement(requirement) {
   }
 }
 
-export function mapEventListItem(event) {
+export function mapEventListItem(event, posterUrl = null) {
   return {
     slug: event.slug,
     title: event.title,
@@ -199,6 +218,7 @@ export function mapEventListItem(event) {
     capacity: normalizeNullable(event.capacity),
     priceMinor: normalizeNullable(event.price_minor),
     currency: normalizeNullable(event.currency),
+    posterUrl: normalizeNullable(posterUrl),
   }
 }
 
@@ -210,6 +230,7 @@ export function mapEvent(
   partners,
   documentRequirements = [],
   consentRequirements = [],
+  posterUrl = null,
 ) {
   const eventWindowStart = normalizeTime(event.event_window_start)
   const eventWindowEnd = normalizeTime(event.event_window_end)
@@ -244,6 +265,7 @@ export function mapEvent(
     priceMinor: normalizeNullable(event.price_minor),
     currency: normalizeNullable(event.currency),
     coverImage: normalizeNullable(event.cover_image_path),
+    posterUrl: normalizeNullable(posterUrl),
     participantNote: normalizeNullable(event.participant_note),
     distanceSelectionNote: normalizeNullable(event.distance_selection_note),
     registrationGroups: groups.map(mapRegistrationGroup),
@@ -305,7 +327,14 @@ export default async function handler(request, response) {
       return response.status(500).json({ error: 'internal_error' })
     }
 
-    return response.status(200).json((events ?? []).map(mapEventListItem))
+    return response.status(200).json(
+      (events ?? []).map((event) =>
+        mapEventListItem(
+          event,
+          getEventPosterUrl(supabase, event.poster_path),
+        ),
+      ),
+    )
   }
 
   const { data: event, error: eventError } = await supabase
@@ -387,6 +416,7 @@ export default async function handler(request, response) {
       partnersResult.data ?? [],
       documentRequirementsResult.data ?? [],
       consentRequirementsResult.data ?? [],
+      getEventPosterUrl(supabase, event.poster_path),
     ),
   )
 }

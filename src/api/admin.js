@@ -149,6 +149,82 @@ export function updateAdminEventPublication(
   })
 }
 
+export function createAdminPosterUpload(
+  eventId,
+  file,
+  { signal } = {},
+) {
+  const query = new URLSearchParams({
+    resource: 'poster',
+    eventId,
+  })
+
+  return requestJson(`/api/admin/event?${query.toString()}`, {
+    method: 'POST',
+    body: {
+      action: 'create_upload',
+      mimeType: file.type,
+      sizeBytes: file.size,
+    },
+    signal,
+  })
+}
+
+export async function uploadAdminPoster(
+  { signedUrl, file },
+  { signal } = {},
+) {
+  const formData = new FormData()
+  formData.append('cacheControl', '3600')
+  formData.append('', file)
+
+  let response
+
+  try {
+    response = await fetch(signedUrl, {
+      method: 'PUT',
+      headers: { 'x-upsert': 'false' },
+      body: formData,
+      signal,
+    })
+  } catch {
+    throw new AdminAuthError('network_error')
+  }
+
+  if (!response.ok) {
+    throw new AdminAuthError('poster_upload_failed', response.status)
+  }
+}
+
+export function confirmAdminPoster(
+  eventId,
+  path,
+  { signal } = {},
+) {
+  const query = new URLSearchParams({
+    resource: 'poster',
+    eventId,
+  })
+
+  return requestJson(`/api/admin/event?${query.toString()}`, {
+    method: 'PATCH',
+    body: { action: 'confirm', path },
+    signal,
+  })
+}
+
+export function removeAdminPoster(eventId, { signal } = {}) {
+  const query = new URLSearchParams({
+    resource: 'poster',
+    eventId,
+  })
+
+  return requestJson(`/api/admin/event?${query.toString()}`, {
+    method: 'DELETE',
+    signal,
+  })
+}
+
 export function createAdminDocumentRequirement(
   eventId,
   changes,

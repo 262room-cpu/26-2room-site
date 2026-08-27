@@ -363,6 +363,94 @@
   text-transform: uppercase;
 }
 
+.adminPosterContent {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  align-items: center;
+  gap: 20px;
+}
+
+.adminPosterThumbnail {
+  display: block;
+  width: 140px;
+  aspect-ratio: 1;
+  border: 1px solid rgba(255, 214, 0, 0.22);
+  border-radius: 8px;
+  object-fit: cover;
+  background: #090909;
+}
+
+.adminPosterEmpty {
+  min-height: 140px;
+  margin: 0;
+  border: 1px dashed rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  color: #9ca3af;
+  font-size: 13px;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.adminPosterControls {
+  display: grid;
+  gap: 12px;
+}
+
+.adminPosterControls > p {
+  margin: 0;
+  color: #9ca3af;
+  font-size: 13px;
+}
+
+.adminPosterControls > div {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.adminPosterUploadButton {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.adminPosterUploadButton input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.adminPosterUploadButton:has(input:disabled) {
+  cursor: wait;
+  opacity: 0.58;
+}
+
+.adminPosterRemoveButton {
+  min-height: 38px;
+  border: 1px solid rgba(248, 113, 113, 0.48);
+  border-radius: 8px;
+  padding: 8px 14px;
+  background: rgba(127, 29, 29, 0.16);
+  color: #fca5a5;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.adminPosterRemoveButton:disabled {
+  cursor: wait;
+  opacity: 0.58;
+}
+
 .adminEventFormGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1245,6 +1333,15 @@
 }
 
 @media (max-width: 520px) {
+  .adminPosterContent {
+    grid-template-columns: 1fr;
+  }
+
+  .adminPosterThumbnail,
+  .adminPosterEmpty {
+    width: min(100%, 220px);
+  }
+
   .adminEventFormGroup {
     padding: 16px;
   }

@@ -29,6 +29,7 @@ function adaptEventListItem(event) {
     capacity: event.capacity,
     price: event.priceMinor === null ? null : event.priceMinor / 100,
     currency: event.currency,
+    posterUrl: event.posterUrl,
   }
 }
 

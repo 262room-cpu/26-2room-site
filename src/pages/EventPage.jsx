@@ -292,8 +292,11 @@ function EventPage() {
           </div>
 
           <div className="eventPageVisual" aria-label={event.title}>
-            {event.coverImage ? (
-              <img src={event.coverImage} alt={event.title} />
+            {event.posterUrl || event.coverImage ? (
+              <img
+                src={event.posterUrl ?? event.coverImage}
+                alt={`Постер ${event.title}`}
+              />
             ) : (
               <div className="eventPageVisualFallback">
                 <span>26.2</span>

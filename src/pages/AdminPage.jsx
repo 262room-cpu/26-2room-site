@@ -1,17 +1,21 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
   AdminAuthError,
+  confirmAdminPoster,
   createAdminConsentRequirement,
   createAdminDistance,
   createAdminDocumentRequirement,
   createAdminEvent,
   createAdminGroup,
+  createAdminPosterUpload,
   deleteAdminEvent,
   getAdminEvent,
   getAdminEvents,
   getAdminSession,
   loginAdmin,
   logoutAdmin,
+  removeAdminPoster,
+  uploadAdminPoster,
   updateAdminDistance,
   updateAdminConsentRequirement,
   updateAdminDocumentRequirement,
@@ -69,6 +73,12 @@ const EVENT_STATUS_OPTIONS = [
 const EVENT_STATUS_LABELS = Object.fromEntries(
   EVENT_STATUS_OPTIONS,
 )
+const EVENT_POSTER_MAX_SIZE_BYTES = 5 * 1024 * 1024
+const EVENT_POSTER_MIME_TYPES = new Set([
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+])
 const READINESS_REASON_LABELS = {
   incomplete_public_details: 'Заполните основные данные мероприятия.',
   invalid_registration_form_type: 'Выберите тип формы регистрации.',
@@ -857,6 +867,8 @@ function updateEventListItem(event, updatedEvent) {
     capacity: updatedEvent.capacity,
     priceMinor: updatedEvent.priceMinor,
     currency: updatedEvent.currency,
+    posterPath: updatedEvent.posterPath,
+    posterUrl: updatedEvent.posterUrl,
     updatedAt: updatedEvent.updatedAt,
   }
 }
@@ -1063,6 +1075,10 @@ function AdminPage() {
   const [eventSaveMessage, setEventSaveMessage] = useState('')
   const [eventDeleteState, setEventDeleteState] = useState({
     confirming: false,
+    status: 'idle',
+    message: '',
+  })
+  const [posterState, setPosterState] = useState({
     status: 'idle',
     message: '',
   })
@@ -1320,6 +1336,7 @@ function AdminPage() {
       status: 'idle',
       message: '',
     })
+    setPosterState({ status: 'idle', message: '' })
     setGroupForms({})
     setGroupSaveStates({})
     setNewGroupForm(createNewGroupForm([], 'participant'))
@@ -1593,6 +1610,118 @@ function AdminPage() {
           ? 'Мероприятие не найдено.'
           : 'Не удалось изменить публикацию. Попробуйте ещё раз.',
       )
+    }
+  }
+
+  const applyPosterEvent = (updatedEvent) => {
+    setEventDetail((currentDetail) => ({
+      ...currentDetail,
+      event: updatedEvent,
+    }))
+    setEvents((currentEvents) =>
+      currentEvents.map((event) =>
+        event.id === updatedEvent.id
+          ? updateEventListItem(event, updatedEvent)
+          : event,
+      ),
+    )
+  }
+
+  const handlePosterFileChange = async (changeEvent) => {
+    const input = changeEvent.currentTarget
+    const file = input.files?.[0]
+    input.value = ''
+
+    if (!file || !eventDetail?.event) {
+      return
+    }
+
+    if (
+      !EVENT_POSTER_MIME_TYPES.has(file.type) ||
+      file.size <= 0 ||
+      file.size > EVENT_POSTER_MAX_SIZE_BYTES
+    ) {
+      setPosterState({
+        status: 'error',
+        message: 'Выберите JPG, PNG или WEBP размером до 5 МБ.',
+      })
+      return
+    }
+
+    setPosterState({ status: 'saving', message: '' })
+
+    try {
+      const uploadInfo = await createAdminPosterUpload(
+        eventDetail.event.id,
+        file,
+      )
+
+      if (
+        typeof uploadInfo?.signedUrl !== 'string' ||
+        typeof uploadInfo?.path !== 'string'
+      ) {
+        throw new AdminAuthError('invalid_server_response')
+      }
+
+      await uploadAdminPoster({
+        signedUrl: uploadInfo.signedUrl,
+        file,
+      })
+
+      const result = await confirmAdminPoster(
+        eventDetail.event.id,
+        uploadInfo.path,
+      )
+
+      if (!result.event || typeof result.event !== 'object') {
+        throw new AdminAuthError('invalid_server_response')
+      }
+
+      applyPosterEvent(result.event)
+      setPosterState({ status: 'success', message: 'Постер сохранён.' })
+    } catch (error) {
+      if (error instanceof AdminAuthError && error.status === 401) {
+        setSessionStatus('unauthenticated')
+        return
+      }
+
+      setPosterState({
+        status: 'error',
+        message:
+          error instanceof AdminAuthError &&
+          ['invalid_poster_file', 'invalid_poster_path'].includes(error.code)
+            ? 'Выберите корректное изображение JPG, PNG или WEBP до 5 МБ.'
+            : 'Не удалось загрузить постер. Попробуйте ещё раз.',
+      })
+    }
+  }
+
+  const handleRemovePoster = async () => {
+    if (!eventDetail?.event || posterState.status === 'saving') {
+      return
+    }
+
+    setPosterState({ status: 'saving', message: '' })
+
+    try {
+      const result = await removeAdminPoster(eventDetail.event.id)
+
+      if (!result.event || typeof result.event !== 'object') {
+        throw new AdminAuthError('invalid_server_response')
+      }
+
+      applyPosterEvent(result.event)
+      setPosterState({ status: 'success', message: 'Постер удалён.' })
+    } catch (error) {
+      if (error instanceof AdminAuthError && error.status === 401) {
+        setSessionStatus('unauthenticated')
+        return
+      }
+
+      setPosterState({
+        status: 'error',
+        message: 'Не удалось удалить постер. Попробуйте ещё раз.',
+      })
     }
   }
 
@@ -2624,6 +2753,7 @@ function AdminPage() {
       setConsentSaveStates({})
       setNewConsentForm(createNewConsentForm([]))
       setNewConsentSaveState({ status: 'idle', message: '' })
+      setPosterState({ status: 'idle', message: '' })
       setSessionStatus('unauthenticated')
     } catch {
       setLogoutStatus('idle')
@@ -3283,6 +3413,12 @@ function AdminPage() {
                         {eventReadiness?.summary.consentCount ? '✓' : '○'} Согласия:{' '}
                         {eventReadiness?.summary.consentCount || 'не требуются'}
                       </span>
+                      <span className={eventDetail.event.posterPath ? 'isReady' : 'isMissing'}>
+                        {eventDetail.event.posterPath ? '✓' : '○'}{' '}
+                        {eventDetail.event.posterPath
+                          ? 'Постер добавлен'
+                          : 'Постер не добавлен'}
+                      </span>
                     </div>
                     <p className={eventReadiness?.registration.ready ? 'adminReadinessSuccess' : 'adminReadinessWarning'}>
                       {eventReadiness?.registration.ready
@@ -3309,6 +3445,64 @@ function AdminPage() {
 
                   {workspaceModule === 'main' && (
                     <>
+                  <fieldset className="adminEventFormGroup adminPosterSection">
+                    <legend>Постер мероприятия</legend>
+                    <div className="adminPosterContent">
+                      {eventDetail.event.posterUrl ? (
+                        <img
+                          className="adminPosterThumbnail"
+                          src={eventDetail.event.posterUrl}
+                          alt={`Постер ${eventDetail.event.title}`}
+                        />
+                      ) : (
+                        <p className="adminPosterEmpty">
+                          Постер пока не добавлен
+                        </p>
+                      )}
+
+                      <div className="adminPosterControls">
+                        <p>JPG, PNG или WEBP · до 5 МБ</p>
+                        <div>
+                          <label className="adminInlineButton adminPosterUploadButton">
+                            {posterState.status === 'saving'
+                              ? 'Загружаем...'
+                              : eventDetail.event.posterPath
+                                ? 'Заменить'
+                                : 'Загрузить постер'}
+                            <input
+                              type="file"
+                              accept="image/jpeg,image/png,image/webp"
+                              onChange={handlePosterFileChange}
+                              disabled={posterState.status === 'saving'}
+                            />
+                          </label>
+                          {eventDetail.event.posterPath && (
+                            <button
+                              className="adminPosterRemoveButton"
+                              type="button"
+                              onClick={handleRemovePoster}
+                              disabled={posterState.status === 'saving'}
+                            >
+                              Удалить
+                            </button>
+                          )}
+                        </div>
+                        {posterState.message && (
+                          <p
+                            className={
+                              posterState.status === 'success'
+                                ? 'adminSaveSuccess'
+                                : 'adminAuthMessage'
+                            }
+                            role={posterState.status === 'error' ? 'alert' : 'status'}
+                          >
+                            {posterState.message}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </fieldset>
+
                   <fieldset className="adminEventFormGroup">
                     <legend>Основные данные</legend>
                     <div className="adminEventFormGrid">
