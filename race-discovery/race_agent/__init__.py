@@ -235,6 +235,9 @@ def _refined_candidate_from_document(
 
 _core.candidate_from_document = _refined_candidate_from_document
 
+from .dedup_guard import install as _install_dedup_guard
+_install_dedup_guard(_core)
+
 from . import organizers as _organizers
 from .organizer_identity_guard import install as _install_organizer_identity_guard
 from .organizer_queue import build_runtime_progressive_organizer_research_queue
