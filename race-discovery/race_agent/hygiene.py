@@ -28,6 +28,9 @@ _GENERIC_SERIES_TITLES = {
 _GENERIC_ORGANIZER_TITLES = {
     "беговое сообщество", "running community", "running club", "беговой клуб",
 }
+_ORGANIZATION_NAME_MARKERS = (
+    "федерация ", " federation", "federation ", "ассоциация ", " association", "association ",
+)
 _ANCILLARY_TITLES = {
     "pasta party", "паста пати", "expo", "экспо", "race expo", "press conference",
     "пресс конференция", "packet pickup", "race pack pickup", "выдача стартовых пакетов",
@@ -89,12 +92,28 @@ def _all_rootish_sources(row: dict) -> bool:
     return True
 
 
+def _generic_organization_multi_event_merge(row: dict, normalized_name: str) -> bool:
+    """Detect an old parser record that merged several event pages under a federation/site title."""
+    if not any(marker.strip() in normalized_name for marker in _ORGANIZATION_NAME_MARKERS):
+        return False
+    urls = [str(x) for x in row.get("source_urls", []) if str(x).startswith("http")]
+    event_paths = set()
+    for url in urls:
+        try:
+            path = urlparse(url).path.casefold().rstrip("/")
+        except Exception:
+            continue
+        if "/events/" in path or "/event/" in path or "/competitions/" in path or "/competition/" in path:
+            event_paths.add(path)
+    return len(event_paths) >= 2
+
+
 def artifact_reason(row: dict) -> str:
     """Return a reason only for high-precision machine-detectable non-event records.
 
     Ambiguous races stay in review. Specific calendar leads stay discoverable. We quarantine only
-    impossible/template titles, whole-page aggregates, generic series parents and clearly ancillary
-    program items that have no race distance of their own.
+    impossible/template titles, whole-page aggregates, generic series parents, historical generic
+    organization merges and clearly ancillary program items that have no race distance of their own.
     """
     name = str(row.get("name") or "").strip()
     low = name.casefold()
@@ -123,6 +142,8 @@ def artifact_reason(row: dict) -> str:
         return "ORGANIZER_HOMEPAGE_SERIALIZED_AS_EVENT"
     if rootish and normalized in _GENERIC_SERIES_TITLES:
         return "SERIES_LANDING_PAGE_SERIALIZED_AS_SINGLE_EVENT"
+    if _generic_organization_multi_event_merge(row, normalized):
+        return "GENERIC_ORGANIZATION_MULTI_EVENT_MERGE"
 
     if normalized in _ANCILLARY_TITLES and not distances:
         return "ANCILLARY_PROGRAM_ITEM_NOT_RACE"
@@ -171,7 +192,7 @@ def clean_market(code: str) -> dict:
             **row,
             "quarantine_reason": reason,
             "quarantined_at": observed,
-            "hygiene_version": 4,
+            "hygiene_version": 5,
         })
 
     if rejected or evidence_removed:
