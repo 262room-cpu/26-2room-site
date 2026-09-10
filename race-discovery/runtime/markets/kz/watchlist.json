@@ -2,7 +2,7 @@
   "domains": {
     "almaty-marathon.kz": {
       "first_seen": "2026-09-10T12:23:53Z",
-      "last_checked": "2026-09-10T15:46:37+00:00",
+      "last_checked": "2026-09-10T16:03:37+00:00",
       "source_urls": [
         "https://almaty-marathon.kz/ru/events/almaty_marathon_2026/",
         "https://almaty-marathon.kz/ru/events/almaty_marathon_2026/regulation?page=text",
@@ -14,7 +14,7 @@
     },
     "athletex.kz": {
       "first_seen": "2026-09-10T12:23:53Z",
-      "last_checked": "2026-09-10T15:46:37+00:00",
+      "last_checked": "2026-09-10T16:03:37+00:00",
       "source_urls": [
         "https://athletex.kz/competitions/rrautumn26",
         "https://athletex.kz/competitions/zhm5",
@@ -33,7 +33,7 @@
     },
     "caspian-marathon.kz": {
       "first_seen": "2026-09-10T12:23:53Z",
-      "last_checked": "2026-09-10T15:46:37+00:00",
+      "last_checked": "2026-09-10T16:03:37+00:00",
       "source_urls": [
         "https://www.caspian-marathon.kz/ru/calendar/?title=CASPIAN_MARATHON_2026_%E2%80%94_bolshe%2C_chem_prosto_zabeg_252",
         "https://caspian-marathon.kz/ru/users_list?distance=5",
@@ -43,7 +43,7 @@
     },
     "qhm26.athleticfamily.kz": {
       "first_seen": "2026-09-10T12:23:53Z",
-      "last_checked": "2026-09-10T15:46:37+00:00",
+      "last_checked": "2026-09-10T16:03:37+00:00",
       "source_urls": [
         "https://qhm26.athleticfamily.kz/ru"
       ],
@@ -51,7 +51,7 @@
     },
     "reg.elordasport.kz": {
       "first_seen": "2026-09-10T12:23:53Z",
-      "last_checked": "2026-09-10T15:46:37+00:00",
+      "last_checked": "2026-09-10T16:03:37+00:00",
       "source_urls": [
         "https://reg.elordasport.kz/ru/events/12sep-jana-men-kuz-run/",
         "https://reg.elordasport.kz/ru/"
@@ -60,7 +60,7 @@
     },
     "gov.kz": {
       "first_seen": "2026-09-10T12:23:53Z",
-      "last_checked": "2026-09-10T15:46:37+00:00",
+      "last_checked": "2026-09-10T16:03:37+00:00",
       "source_urls": [
         "https://www.gov.kz/memleket/entities/astana/press/news/details/1286800"
       ],
@@ -72,7 +72,7 @@
         "https://rwsrun.kz/ru/"
       ],
       "event_count": 1,
-      "last_checked": "2026-09-10T15:46:37+00:00"
+      "last_checked": "2026-09-10T16:03:37+00:00"
     }
   },
   "organizers": {
@@ -133,7 +133,7 @@
       ],
       "name": "Дирекция по проведению спортивно-массовых мероприятий акимата города Астаны",
       "instagram": [],
-      "last_checked": "2026-09-10T15:46:37+00:00"
+      "last_checked": "2026-09-10T16:03:37+00:00"
     },
     "dbad1d470c96b22649ce": {
       "first_seen": "2026-09-10T13:51:14+00:00",
@@ -192,6 +192,207 @@
       "name": "Корпоративный фонд «Смелость быть первым»",
       "instagram": [],
       "last_checked": "2026-09-10T15:46:37+00:00"
+    },
+    "14790839da3f544a3a95": {
+      "first_seen": "2026-09-10T13:51:14+00:00",
+      "event_ids": [
+        "f99601d1229e5b3728a6",
+        "eb67caca3ee984b0394e"
+      ],
+      "name": "Корпоративный фонд «Смелость быть первым»",
+      "instagram": [],
+      "last_checked": "2026-09-10T16:03:37+00:00"
+    },
+    "13ed074d6e813f6cdf99": {
+      "first_seen": "2026-09-10T16:03:37+00:00",
+      "event_ids": [
+        "f74d76d089817c860c6b",
+        "00317196b5ee669a0850"
+      ],
+      "name": "Корпоративный фонд «Смелость быть первым»",
+      "instagram": [],
+      "last_checked": "2026-09-10T16:03:37+00:00"
+    },
+    "8bf9805a640144266816": {
+      "first_seen": "2026-09-10T16:03:37+00:00",
+      "event_ids": [
+        "05850758ebc06baf087f"
+      ],
+      "name": "Корпоративный фонд «Смелость быть первым»",
+      "instagram": [],
+      "last_checked": "2026-09-10T16:03:37+00:00"
+    },
+    "e1cd17ef203ab0e3431e": {
+      "first_seen": "2026-09-10T16:03:37+00:00",
+      "event_ids": [
+        "ffb025fc86e974339ab6"
+      ],
+      "name": "",
+      "instagram": [],
+      "last_checked": "2026-09-10T16:03:37+00:00"
+    },
+    "38fb6af6162ea3e3ee9a": {
+      "first_seen": "2026-09-10T16:03:37+00:00",
+      "event_ids": [
+        "8f567df9d7ea5f9e0f81"
+      ],
+      "name": "",
+      "instagram": [],
+      "last_checked": "2026-09-10T16:03:37+00:00"
+    },
+    "d9bdf9e014705fe8c807": {
+      "first_seen": "2026-09-10T16:03:37+00:00",
+      "event_ids": [
+        "91a5618d9a25e40bc497"
+      ],
+      "name": "",
+      "instagram": [],
+      "last_checked": "2026-09-10T16:03:37+00:00"
+    },
+    "ac9de4a2e71b57f8c7a9": {
+      "first_seen": "2026-09-10T16:03:37+00:00",
+      "event_ids": [
+        "0849561b0b34db2d4b75"
+      ],
+      "name": "",
+      "instagram": [],
+      "last_checked": "2026-09-10T16:03:37+00:00"
+    },
+    "948a1dd53572724d77d7": {
+      "first_seen": "2026-09-10T16:03:37+00:00",
+      "event_ids": [
+        "db637633c2f26ae9a7ed"
+      ],
+      "name": "",
+      "instagram": [],
+      "last_checked": "2026-09-10T16:03:37+00:00"
+    },
+    "7d1c2cd37e92e93803e1": {
+      "first_seen": "2026-09-10T16:03:37+00:00",
+      "event_ids": [
+        "8594284542683da69c00"
+      ],
+      "name": "",
+      "instagram": [],
+      "last_checked": "2026-09-10T16:03:37+00:00"
+    },
+    "a8c0ec955d9d960bf4b9": {
+      "first_seen": "2026-09-10T16:03:37+00:00",
+      "event_ids": [
+        "a1c9a360271c6c1ed203"
+      ],
+      "name": "",
+      "instagram": [],
+      "last_checked": "2026-09-10T16:03:37+00:00"
+    },
+    "d16c6e16619132d706e4": {
+      "first_seen": "2026-09-10T16:03:37+00:00",
+      "event_ids": [
+        "d99f3b407b82c34209f1"
+      ],
+      "name": "",
+      "instagram": [],
+      "last_checked": "2026-09-10T16:03:37+00:00"
+    },
+    "e29842ef5dadb26b8b14": {
+      "first_seen": "2026-09-10T16:03:37+00:00",
+      "event_ids": [
+        "9a2a780c84859e0f231c"
+      ],
+      "name": "",
+      "instagram": [],
+      "last_checked": "2026-09-10T16:03:37+00:00"
+    },
+    "0e742e28f4a41a058d63": {
+      "first_seen": "2026-09-10T16:03:37+00:00",
+      "event_ids": [
+        "cf598e75284cde8e59c8"
+      ],
+      "name": "",
+      "instagram": [],
+      "last_checked": "2026-09-10T16:03:37+00:00"
+    },
+    "d4482a9bdf442c521134": {
+      "first_seen": "2026-09-10T16:03:37+00:00",
+      "event_ids": [
+        "832b3c7a4754e1fcdb17"
+      ],
+      "name": "",
+      "instagram": [],
+      "last_checked": "2026-09-10T16:03:37+00:00"
+    },
+    "7e76ef9411455c9e1c40": {
+      "first_seen": "2026-09-10T16:03:37+00:00",
+      "event_ids": [
+        "5241a5fed59554dcce89"
+      ],
+      "name": "",
+      "instagram": [],
+      "last_checked": "2026-09-10T16:03:37+00:00"
+    },
+    "f6ed2491f5930f3e89da": {
+      "first_seen": "2026-09-10T16:03:37+00:00",
+      "event_ids": [
+        "41f381f5b9f3d6e9053c"
+      ],
+      "name": "",
+      "instagram": [],
+      "last_checked": "2026-09-10T16:03:37+00:00"
+    },
+    "19f59a8d5fcacc73ed79": {
+      "first_seen": "2026-09-10T16:03:37+00:00",
+      "event_ids": [
+        "f6c61906d4b8949f3fd4"
+      ],
+      "name": "",
+      "instagram": [],
+      "last_checked": "2026-09-10T16:03:37+00:00"
+    },
+    "fb983a7f73666138902d": {
+      "first_seen": "2026-09-10T16:03:37+00:00",
+      "event_ids": [
+        "05d499be50f0c73ff51f"
+      ],
+      "name": "",
+      "instagram": [],
+      "last_checked": "2026-09-10T16:03:37+00:00"
+    },
+    "daf6eb82fe707922e8e3": {
+      "first_seen": "2026-09-10T16:03:37+00:00",
+      "event_ids": [
+        "b9cfa1887602faccebad"
+      ],
+      "name": "",
+      "instagram": [],
+      "last_checked": "2026-09-10T16:03:37+00:00"
+    },
+    "f75daeeb15c9f7fce1f7": {
+      "first_seen": "2026-09-10T16:03:37+00:00",
+      "event_ids": [
+        "33e8d6e54ded1ff7c435"
+      ],
+      "name": "",
+      "instagram": [],
+      "last_checked": "2026-09-10T16:03:37+00:00"
+    },
+    "209ae7468eb070486e50": {
+      "first_seen": "2026-09-10T16:03:37+00:00",
+      "event_ids": [
+        "0a9c5d7e66570d2f5fb4"
+      ],
+      "name": "",
+      "instagram": [],
+      "last_checked": "2026-09-10T16:03:37+00:00"
+    },
+    "6208d3bd37a83d0d7f8f": {
+      "first_seen": "2026-09-10T13:51:14+00:00",
+      "event_ids": [
+        "a7aeba6db818169203ae",
+        "a8dc9cd256752be0a77b"
+      ],
+      "name": "Управление физической культуры и туризма города Караганды",
+      "instagram": [],
+      "last_checked": "2026-09-10T16:03:37+00:00"
     }
   },
   "social_sources": {}

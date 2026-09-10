@@ -1,0 +1,1513 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-10T16:07:23+00:00",
+  "catalog_connected": false,
+  "catalog_note": "APP_CATALOG_NOT_CONNECTED_YET",
+  "counts": {
+    "events_total": 40,
+    "event_statuses": {
+      "VERIFIED": 13,
+      "UPDATED": 19,
+      "NEW": 3,
+      "CONFLICT": 5
+    },
+    "catalog_relations": {
+      "CATALOG_NOT_CONNECTED": 40
+    },
+    "events_not_in_app": null,
+    "events_changed_in_app": null,
+    "possible_app_matches": null,
+    "conflicts_or_review": 5,
+    "cancelled_or_postponed": 0,
+    "organizers_total": 29,
+    "organizer_identity_statuses": {
+      "NAMED": 3,
+      "UNRESOLVED": 24,
+      "PROVISIONAL_IDENTITY": 2
+    },
+    "organizer_contact_statuses": {
+      "CONTACTS_MISSING": 3,
+      "NEEDS_IDENTITY_CHECK": 26
+    },
+    "outreach_ready": 0,
+    "unknown_organizers_with_contact_route": 0
+  },
+  "queues": {
+    "new_events_not_in_app": [],
+    "app_changes": [],
+    "possible_app_matches": [],
+    "conflicts_and_review": [
+      {
+        "candidate_id": "ea97c32fd42ae4d92ca1",
+        "name": "Федерация Триатлона Кыргызской Республики",
+        "date": "2026-09-12",
+        "city": "Чолпон-Ата",
+        "country": "Kyrgyzstan",
+        "market_code": "kg",
+        "status": "CONFLICT",
+        "confidence": 0.87,
+        "catalog_relation": "CATALOG_NOT_CONNECTED",
+        "app_match_id": "",
+        "app_diffs": [],
+        "organizer": "",
+        "organizer_id": "da823a097ee21926ab54",
+        "organizer_contact_status": "NEEDS_IDENTITY_CHECK",
+        "source_urls": [
+          "http://triathlon.kg/events/2026-visa-asia-triathlon-cup-cholpon-ata-ag-super-sprint",
+          "http://triathlon.kg/events/2026-visa-asia-triathlon-cup-cholpon-ata-ag-relay",
+          "http://triathlon.kg/events/2026-visa-asia-triathlon-cup-cholpon-ata-ag-standard",
+          "http://triathlon.kg/events/etap-ckr-po-triatlonu-super-sprint"
+        ],
+        "last_checked_at": "2026-09-10T15:49:17+00:00"
+      },
+      {
+        "candidate_id": "05705e9b0695cc09c5f4",
+        "name": "Кишиневский марафон 2026",
+        "date": "2026-09-13",
+        "city": "Кишинёв",
+        "country": "Moldova",
+        "market_code": "md",
+        "status": "CONFLICT",
+        "confidence": 0.96,
+        "catalog_relation": "CATALOG_NOT_CONNECTED",
+        "app_match_id": "",
+        "app_diffs": [],
+        "organizer": "",
+        "organizer_id": "d166d9f199eb413b8641",
+        "organizer_contact_status": "NEEDS_IDENTITY_CHECK",
+        "source_urls": [
+          "https://marathon.md/ru/marathon42km",
+          "https://marathon.md/ru/halfmarathon21km",
+          "https://marathon.md/ru/marathon10km",
+          "https://marathon.md/ru/marathon5km",
+          "https://marathon.md/en/run-2026"
+        ],
+        "last_checked_at": "2026-09-10T15:31:29+00:00"
+      },
+      {
+        "candidate_id": "a8dc9cd256752be0a77b",
+        "name": "Qaragandy Half Marathon 2026",
+        "date": "2026-09-20",
+        "city": "Караганда",
+        "country": "Kazakhstan",
+        "market_code": "kz",
+        "status": "CONFLICT",
+        "confidence": 0.96,
+        "catalog_relation": "CATALOG_NOT_CONNECTED",
+        "app_match_id": "",
+        "app_diffs": [],
+        "organizer": "Управление физической культуры и туризма города Караганды",
+        "organizer_id": "6208d3bd37a83d0d7f8f",
+        "organizer_contact_status": "CONTACTS_MISSING",
+        "source_urls": [
+          "https://qhm26.athleticfamily.kz/ru"
+        ],
+        "last_checked_at": "2026-09-10T16:03:37+00:00"
+      },
+      {
+        "candidate_id": "00317196b5ee669a0850",
+        "name": "ALMATY MARATHON 2026",
+        "date": "2026-09-25",
+        "city": "Туркестан",
+        "country": "Kazakhstan",
+        "market_code": "kz",
+        "status": "CONFLICT",
+        "confidence": 0.97,
+        "catalog_relation": "CATALOG_NOT_CONNECTED",
+        "app_match_id": "",
+        "app_diffs": [],
+        "organizer": "Корпоративный фонд «Смелость быть первым»",
+        "organizer_id": "13ed074d6e813f6cdf99",
+        "organizer_contact_status": "CONTACTS_MISSING",
+        "source_urls": [
+          "https://almaty-marathon.kz/ru/events/almaty_marathon_2026/",
+          "https://almaty-marathon.kz/ru/events/almaty_marathon_2026/regulation?page=text"
+        ],
+        "last_checked_at": "2026-09-10T16:03:37+00:00"
+      },
+      {
+        "candidate_id": "d99f3b407b82c34209f1",
+        "name": "Caspian Marathon 2026",
+        "date": "2026-10-11",
+        "city": "Актау",
+        "country": "Kazakhstan",
+        "market_code": "kz",
+        "status": "CONFLICT",
+        "confidence": 0.98,
+        "catalog_relation": "CATALOG_NOT_CONNECTED",
+        "app_match_id": "",
+        "app_diffs": [],
+        "organizer": "",
+        "organizer_id": "d16c6e16619132d706e4",
+        "organizer_contact_status": "NEEDS_IDENTITY_CHECK",
+        "source_urls": [
+          "https://www.caspian-marathon.kz/ru/calendar/?title=CASPIAN_MARATHON_2026_%E2%80%94_bolshe%2C_chem_prosto_zabeg_252",
+          "https://caspian-marathon.kz/ru/users_list?distance=5"
+        ],
+        "last_checked_at": "2026-09-10T12:23:53Z"
+      }
+    ],
+    "cancelled_and_postponed": [],
+    "organizers_ready_to_contact": [],
+    "organizer_identity_research": [
+      {
+        "global_organizer_id": "88306c0c387311698c18",
+        "organizer_id": "e1cd17ef203ab0e3431e",
+        "name": "",
+        "display_name": "Неустановленный организатор — 25th Amangeldy Race 2026",
+        "identity_status": "UNRESOLVED",
+        "contact_status": "NEEDS_IDENTITY_CHECK",
+        "countries": [
+          "Kazakhstan"
+        ],
+        "cities": [
+          "Астана"
+        ],
+        "contacts": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "contact_candidates": {
+          "instagram": [
+            "https://www.instagram.com/athletex.production/",
+            "https://www.instagram.com/athletex.photo/",
+            "https://www.instagram.com/athletex_kz/"
+          ],
+          "telegram": [
+            "https://t.me/mystartkz",
+            "https://t.me/athletex"
+          ],
+          "whatsapp": [],
+          "email": [],
+          "phone": [
+            "+77056024249",
+            "+77767373667",
+            "+77716653220"
+          ],
+          "website": [
+            "https://athletex.kz/competitions/AmangeldyRace2026"
+          ]
+        },
+        "event_ids": [
+          "ffb025fc86e974339ab6"
+        ],
+        "crm_status": "NEW_LEAD",
+        "last_contacted_at": "",
+        "source_urls": [
+          "https://athletex.kz/competitions/AmangeldyRace2026"
+        ]
+      },
+      {
+        "global_organizer_id": "5cf1c2603512c0dc36a2",
+        "organizer_id": "38fb6af6162ea3e3ee9a",
+        "name": "",
+        "display_name": "Неустановленный организатор — adidas Irbis Race 2026",
+        "identity_status": "UNRESOLVED",
+        "contact_status": "NEEDS_IDENTITY_CHECK",
+        "countries": [
+          "Kazakhstan"
+        ],
+        "cities": [
+          "Алматы"
+        ],
+        "contacts": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "contact_candidates": {
+          "instagram": [
+            "https://www.instagram.com/athletex.production/",
+            "https://www.instagram.com/aitea.kz/",
+            "https://www.instagram.com/athletex_kz/"
+          ],
+          "telegram": [
+            "https://t.me/mystartkz",
+            "https://t.me/athletex"
+          ],
+          "whatsapp": [],
+          "email": [],
+          "phone": [
+            "+77056024249",
+            "+77767373667",
+            "+77716653220"
+          ],
+          "website": [
+            "https://athletex.kz/competitions/IrbisRace2026"
+          ]
+        },
+        "event_ids": [
+          "8f567df9d7ea5f9e0f81"
+        ],
+        "crm_status": "NEW_LEAD",
+        "last_contacted_at": "",
+        "source_urls": [
+          "https://athletex.kz/competitions/IrbisRace2026"
+        ]
+      },
+      {
+        "global_organizer_id": "461a08bec87be1632f61",
+        "organizer_id": "d9bdf9e014705fe8c807",
+        "name": "",
+        "display_name": "Неустановленный организатор — Alpine Race 2026",
+        "identity_status": "UNRESOLVED",
+        "contact_status": "NEEDS_IDENTITY_CHECK",
+        "countries": [
+          "Kazakhstan"
+        ],
+        "cities": [
+          "Алматы"
+        ],
+        "contacts": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "contact_candidates": {
+          "instagram": [
+            "https://www.instagram.com/athletex.production/",
+            "https://www.instagram.com/athletex.photo/",
+            "https://www.instagram.com/athletex_kz/"
+          ],
+          "telegram": [
+            "https://t.me/mystartkz",
+            "https://t.me/athletex"
+          ],
+          "whatsapp": [],
+          "email": [],
+          "phone": [
+            "+77056024249",
+            "+77767373667",
+            "+77716653220"
+          ],
+          "website": [
+            "https://athletex.kz/competitions/AlpineRace2026"
+          ]
+        },
+        "event_ids": [
+          "91a5618d9a25e40bc497"
+        ],
+        "crm_status": "NEW_LEAD",
+        "last_contacted_at": "",
+        "source_urls": [
+          "https://athletex.kz/competitions/AlpineRace2026"
+        ]
+      },
+      {
+        "global_organizer_id": "2eb1b67f0de16e583bca",
+        "organizer_id": "ac9de4a2e71b57f8c7a9",
+        "name": "",
+        "display_name": "Неустановленный организатор — Astana Trail",
+        "identity_status": "UNRESOLVED",
+        "contact_status": "NEEDS_IDENTITY_CHECK",
+        "countries": [
+          "Kazakhstan"
+        ],
+        "cities": [
+          "Алматы"
+        ],
+        "contacts": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "contact_candidates": {
+          "instagram": [
+            "https://www.instagram.com/athletex.production/",
+            "https://www.instagram.com/athletex.photo/",
+            "https://www.instagram.com/athletex_kz/"
+          ],
+          "telegram": [
+            "https://t.me/athletex"
+          ],
+          "whatsapp": [],
+          "email": [],
+          "phone": [
+            "+77056024249",
+            "+77767373667",
+            "+77716653220"
+          ],
+          "website": [
+            "https://athletex.kz/competitions/astanatrail26"
+          ]
+        },
+        "event_ids": [
+          "0849561b0b34db2d4b75"
+        ],
+        "crm_status": "NEW_LEAD",
+        "last_contacted_at": "",
+        "source_urls": [
+          "https://athletex.kz/competitions/astanatrail26"
+        ]
+      },
+      {
+        "global_organizer_id": "d52abaf8d3b6ea8fbf24",
+        "organizer_id": "948a1dd53572724d77d7",
+        "name": "",
+        "display_name": "Неустановленный организатор — Backyard Ultra KZ 2026",
+        "identity_status": "UNRESOLVED",
+        "contact_status": "NEEDS_IDENTITY_CHECK",
+        "countries": [
+          "Kazakhstan"
+        ],
+        "cities": [
+          "Алматы"
+        ],
+        "contacts": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "contact_candidates": {
+          "instagram": [
+            "https://www.instagram.com/athletex.production/",
+            "https://www.instagram.com/athletex.photo/",
+            "https://www.instagram.com/athletex_kz/"
+          ],
+          "telegram": [
+            "https://t.me/mystartkz",
+            "https://t.me/athletex"
+          ],
+          "whatsapp": [],
+          "email": [],
+          "phone": [
+            "+77056024249",
+            "+77767373667",
+            "+77716653220"
+          ],
+          "website": [
+            "https://athletex.kz/competitions/Backyard_Ultra_2026"
+          ]
+        },
+        "event_ids": [
+          "db637633c2f26ae9a7ed"
+        ],
+        "crm_status": "NEW_LEAD",
+        "last_contacted_at": "",
+        "source_urls": [
+          "https://athletex.kz/competitions/Backyard_Ultra_2026"
+        ]
+      },
+      {
+        "global_organizer_id": "91323f8dac54a5cab62d",
+        "organizer_id": "7d1c2cd37e92e93803e1",
+        "name": "",
+        "display_name": "Неустановленный организатор — Basqaru Race Nation Kazakhstan 2026",
+        "identity_status": "UNRESOLVED",
+        "contact_status": "NEEDS_IDENTITY_CHECK",
+        "countries": [
+          "Kazakhstan"
+        ],
+        "cities": [
+          "Алматы"
+        ],
+        "contacts": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "contact_candidates": {
+          "instagram": [
+            "https://www.instagram.com/athletex.production/",
+            "https://www.instagram.com/athletex.photo/",
+            "https://www.instagram.com/zatecky_gus_kz/",
+            "https://www.instagram.com/aitea.kz/",
+            "https://www.instagram.com/athletex_kz/"
+          ],
+          "telegram": [
+            "https://t.me/mystartkz",
+            "https://t.me/athletex"
+          ],
+          "whatsapp": [],
+          "email": [],
+          "phone": [
+            "+77056024249",
+            "+77767373667",
+            "+77716653220"
+          ],
+          "website": [
+            "https://athletex.kz/competitions/racenation2026"
+          ]
+        },
+        "event_ids": [
+          "8594284542683da69c00"
+        ],
+        "crm_status": "NEW_LEAD",
+        "last_contacted_at": "",
+        "source_urls": [
+          "https://athletex.kz/competitions/racenation2026"
+        ]
+      },
+      {
+        "global_organizer_id": "d964abc9802e476824f1",
+        "organizer_id": "a8c0ec955d9d960bf4b9",
+        "name": "",
+        "display_name": "Неустановленный организатор — CASPIAN MARATHON",
+        "identity_status": "UNRESOLVED",
+        "contact_status": "NEEDS_IDENTITY_CHECK",
+        "countries": [
+          "Kazakhstan"
+        ],
+        "cities": [
+          "Актау"
+        ],
+        "contacts": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "contact_candidates": {
+          "instagram": [
+            "https://www.instagram.com/caspianmarathon/"
+          ],
+          "telegram": [
+            "https://t.me/caspianmarathon"
+          ],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": [
+            "https://www.caspian-marathon.kz/ru/calendar"
+          ]
+        },
+        "event_ids": [
+          "a1c9a360271c6c1ed203"
+        ],
+        "crm_status": "NEW_LEAD",
+        "last_contacted_at": "",
+        "source_urls": [
+          "https://www.caspian-marathon.kz/ru/calendar"
+        ]
+      },
+      {
+        "global_organizer_id": "ffd8ffabb479747d8519",
+        "organizer_id": "d16c6e16619132d706e4",
+        "name": "",
+        "display_name": "Неустановленный организатор — Caspian Marathon 2026",
+        "identity_status": "UNRESOLVED",
+        "contact_status": "NEEDS_IDENTITY_CHECK",
+        "countries": [
+          "Kazakhstan"
+        ],
+        "cities": [
+          "Актау"
+        ],
+        "contacts": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "contact_candidates": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "event_ids": [
+          "d99f3b407b82c34209f1"
+        ],
+        "crm_status": "NEW_LEAD",
+        "last_contacted_at": "",
+        "source_urls": [
+          "https://www.caspian-marathon.kz/ru/calendar/?title=CASPIAN_MARATHON_2026_%E2%80%94_bolshe%2C_chem_prosto_zabeg_252",
+          "https://caspian-marathon.kz/ru/users_list?distance=5"
+        ]
+      },
+      {
+        "global_organizer_id": "7395474c9583e8051c03",
+        "organizer_id": "e29842ef5dadb26b8b14",
+        "name": "",
+        "display_name": "Неустановленный организатор — Karkyra Ultra 2026",
+        "identity_status": "UNRESOLVED",
+        "contact_status": "NEEDS_IDENTITY_CHECK",
+        "countries": [
+          "Kazakhstan"
+        ],
+        "cities": [
+          "Алматы"
+        ],
+        "contacts": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "contact_candidates": {
+          "instagram": [
+            "https://www.instagram.com/athletex.production/",
+            "https://www.instagram.com/athletex.photo/",
+            "https://www.instagram.com/athletex_kz/"
+          ],
+          "telegram": [
+            "https://t.me/athletex"
+          ],
+          "whatsapp": [],
+          "email": [
+            "help@athletex.kz"
+          ],
+          "phone": [
+            "+77056024249",
+            "+77767373667",
+            "+77716653220"
+          ],
+          "website": [
+            "https://athletex.kz/competitions/KarkyraUltra2026"
+          ]
+        },
+        "event_ids": [
+          "9a2a780c84859e0f231c"
+        ],
+        "crm_status": "NEW_LEAD",
+        "last_contacted_at": "",
+        "source_urls": [
+          "https://athletex.kz/competitions/KarkyraUltra2026"
+        ]
+      },
+      {
+        "global_organizer_id": "cad16ad96c9c84b7fd55",
+        "organizer_id": "0e742e28f4a41a058d63",
+        "name": "",
+        "display_name": "Неустановленный организатор — KAZ MINERALS HALF MARATHON OSKEMEN 2026",
+        "identity_status": "UNRESOLVED",
+        "contact_status": "NEEDS_IDENTITY_CHECK",
+        "countries": [
+          "Kazakhstan"
+        ],
+        "cities": [
+          "Усть-Каменогорск"
+        ],
+        "contacts": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "contact_candidates": {
+          "instagram": [
+            "https://www.instagram.com/pepsi_kazakhstan/",
+            "https://www.instagram.com/zhigulibarnoekz/",
+            "https://www.instagram.com/athletex.production/",
+            "https://www.instagram.com/athletex.photo/",
+            "https://www.instagram.com/athletex_kz/"
+          ],
+          "telegram": [
+            "https://t.me/athletex"
+          ],
+          "whatsapp": [],
+          "email": [],
+          "phone": [
+            "+77056024249",
+            "+77767373667",
+            "+77716653220"
+          ],
+          "website": [
+            "https://athletex.kz/competitions/HMOskemen2026"
+          ]
+        },
+        "event_ids": [
+          "cf598e75284cde8e59c8"
+        ],
+        "crm_status": "NEW_LEAD",
+        "last_contacted_at": "",
+        "source_urls": [
+          "https://athletex.kz/competitions/HMOskemen2026"
+        ]
+      },
+      {
+        "global_organizer_id": "10ed8960e1314b633786",
+        "organizer_id": "d4482a9bdf442c521134",
+        "name": "",
+        "display_name": "Неустановленный организатор — race-card { border-left: 4px solid var(--color-primary, #0d6efd); }",
+        "identity_status": "UNRESOLVED",
+        "contact_status": "NEEDS_IDENTITY_CHECK",
+        "countries": [
+          "Kazakhstan"
+        ],
+        "cities": [],
+        "contacts": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "contact_candidates": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "event_ids": [
+          "832b3c7a4754e1fcdb17"
+        ],
+        "crm_status": "NEW_LEAD",
+        "last_contacted_at": "",
+        "source_urls": [
+          "https://reg.elordasport.kz/ru/"
+        ]
+      },
+      {
+        "global_organizer_id": "dd85c6e5030e46869251",
+        "organizer_id": "7e76ef9411455c9e1c40",
+        "name": "",
+        "display_name": "Неустановленный организатор — Road Race",
+        "identity_status": "UNRESOLVED",
+        "contact_status": "NEEDS_IDENTITY_CHECK",
+        "countries": [
+          "Kazakhstan"
+        ],
+        "cities": [
+          "Алматы"
+        ],
+        "contacts": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "contact_candidates": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "event_ids": [
+          "5241a5fed59554dcce89"
+        ],
+        "crm_status": "NEW_LEAD",
+        "last_contacted_at": "",
+        "source_urls": [
+          "https://athletex.kz/competitions/rrautumn26"
+        ]
+      },
+      {
+        "global_organizer_id": "dbb87c23bfedadef1eb8",
+        "organizer_id": "f6ed2491f5930f3e89da",
+        "name": "",
+        "display_name": "Неустановленный организатор — Road Race 2026",
+        "identity_status": "UNRESOLVED",
+        "contact_status": "NEEDS_IDENTITY_CHECK",
+        "countries": [
+          "Kazakhstan"
+        ],
+        "cities": [
+          "Алматы"
+        ],
+        "contacts": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "contact_candidates": {
+          "instagram": [
+            "https://www.instagram.com/athletex.production/",
+            "https://www.instagram.com/athletex.photo/",
+            "https://www.instagram.com/aitea.kz/",
+            "https://www.instagram.com/athletex_kz/"
+          ],
+          "telegram": [
+            "https://t.me/athletex"
+          ],
+          "whatsapp": [],
+          "email": [],
+          "phone": [
+            "+77056024249",
+            "+77767373667",
+            "+77716653220"
+          ],
+          "website": [
+            "https://athletex.kz/competitions/rrspring2026"
+          ]
+        },
+        "event_ids": [
+          "41f381f5b9f3d6e9053c"
+        ],
+        "crm_status": "NEW_LEAD",
+        "last_contacted_at": "",
+        "source_urls": [
+          "https://athletex.kz/competitions/rrspring2026"
+        ]
+      },
+      {
+        "global_organizer_id": "486d352c6caf1189dad6",
+        "organizer_id": "19f59a8d5fcacc73ed79",
+        "name": "",
+        "display_name": "Неустановленный организатор — Salomon Trail 2026",
+        "identity_status": "UNRESOLVED",
+        "contact_status": "NEEDS_IDENTITY_CHECK",
+        "countries": [
+          "Kazakhstan"
+        ],
+        "cities": [
+          "Алматы"
+        ],
+        "contacts": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "contact_candidates": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "event_ids": [
+          "f6c61906d4b8949f3fd4"
+        ],
+        "crm_status": "NEW_LEAD",
+        "last_contacted_at": "",
+        "source_urls": [
+          "https://athletex.kz/competitions/calendar"
+        ]
+      },
+      {
+        "global_organizer_id": "69c0abe33920ec58ec74",
+        "organizer_id": "fb983a7f73666138902d",
+        "name": "",
+        "display_name": "Неустановленный организатор — Tengri Ultra 2026",
+        "identity_status": "UNRESOLVED",
+        "contact_status": "NEEDS_IDENTITY_CHECK",
+        "countries": [
+          "Kazakhstan"
+        ],
+        "cities": [
+          "Алматы"
+        ],
+        "contacts": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "contact_candidates": {
+          "instagram": [
+            "https://www.instagram.com/pepsi_kazakhstan/",
+            "https://www.instagram.com/kotofey_kz/",
+            "https://www.instagram.com/clorts.gluna.kz/",
+            "https://www.instagram.com/aitea.kz/",
+            "https://www.instagram.com/athletex.photo/"
+          ],
+          "telegram": [
+            "https://t.me/mystartkz",
+            "https://t.me/athletex"
+          ],
+          "whatsapp": [],
+          "email": [],
+          "phone": [
+            "+77056024249",
+            "+77767373667",
+            "+77716653220"
+          ],
+          "website": [
+            "https://athletex.kz/competitions/TengriUltra2026"
+          ]
+        },
+        "event_ids": [
+          "05d499be50f0c73ff51f"
+        ],
+        "crm_status": "NEW_LEAD",
+        "last_contacted_at": "",
+        "source_urls": [
+          "https://athletex.kz/competitions/TengriUltra2026"
+        ]
+      },
+      {
+        "global_organizer_id": "cc6f4ccd236123768213",
+        "organizer_id": "daf6eb82fe707922e8e3",
+        "name": "",
+        "display_name": "Неустановленный организатор — Tengriseries",
+        "identity_status": "UNRESOLVED",
+        "contact_status": "NEEDS_IDENTITY_CHECK",
+        "countries": [
+          "Kazakhstan"
+        ],
+        "cities": [
+          "Усть-Каменогорск"
+        ],
+        "contacts": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "contact_candidates": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "event_ids": [
+          "b9cfa1887602faccebad"
+        ],
+        "crm_status": "NEW_LEAD",
+        "last_contacted_at": "",
+        "source_urls": [
+          "https://athletex.kz/competitions/calendar"
+        ]
+      },
+      {
+        "global_organizer_id": "29703022f7972d02a544",
+        "organizer_id": "f75daeeb15c9f7fce1f7",
+        "name": "",
+        "display_name": "Неустановленный организатор — Zerenda Half Marathon",
+        "identity_status": "UNRESOLVED",
+        "contact_status": "NEEDS_IDENTITY_CHECK",
+        "countries": [
+          "Kazakhstan"
+        ],
+        "cities": [
+          "Зеренда"
+        ],
+        "contacts": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "contact_candidates": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "event_ids": [
+          "33e8d6e54ded1ff7c435"
+        ],
+        "crm_status": "NEW_LEAD",
+        "last_contacted_at": "",
+        "source_urls": [
+          "https://athletex.kz/competitions/zhm5"
+        ]
+      },
+      {
+        "global_organizer_id": "39404c14f3210cf89433",
+        "organizer_id": "209ae7468eb070486e50",
+        "name": "",
+        "display_name": "Неустановленный организатор — Регистрация на Ekibastuz Half Marathon 2026",
+        "identity_status": "UNRESOLVED",
+        "contact_status": "NEEDS_IDENTITY_CHECK",
+        "countries": [
+          "Kazakhstan"
+        ],
+        "cities": [
+          "Экибастуз"
+        ],
+        "contacts": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "contact_candidates": {
+          "instagram": [
+            "https://www.instagram.com/abeysekin/",
+            "https://www.instagram.com/astana_triathlon/",
+            "https://www.instagram.com/asu_water/",
+            "https://www.instagram.com/ekibastuz_run_club/",
+            "https://www.instagram.com/mma_ekibastuz/"
+          ],
+          "telegram": [],
+          "whatsapp": [
+            "https://wa.me/77775911157"
+          ],
+          "email": [
+            "info@rws.kz"
+          ],
+          "phone": [],
+          "website": [
+            "https://rwsrun.kz/ru/"
+          ]
+        },
+        "event_ids": [
+          "0a9c5d7e66570d2f5fb4"
+        ],
+        "crm_status": "NEW_LEAD",
+        "last_contacted_at": "",
+        "source_urls": [
+          "https://rwsrun.kz/ru/"
+        ]
+      },
+      {
+        "global_organizer_id": "6d9feb7b25aa6546d32f",
+        "organizer_id": "b89fc4e64aeca481fbf6",
+        "name": "",
+        "display_name": "Неустановленный организатор — Беговое сообщество",
+        "identity_status": "UNRESOLVED",
+        "contact_status": "NEEDS_IDENTITY_CHECK",
+        "countries": [
+          "Russia"
+        ],
+        "cities": [
+          "Москва"
+        ],
+        "contacts": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "contact_candidates": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "event_ids": [
+          "f5f1f2eecd8b63daba37"
+        ],
+        "crm_status": "NEW_LEAD",
+        "last_contacted_at": "",
+        "source_urls": [
+          "https://runc.run/"
+        ]
+      },
+      {
+        "global_organizer_id": "e32a9ffa6529e24646cc",
+        "organizer_id": "d120a5d1e37dfca267a1",
+        "name": "",
+        "display_name": "Неустановленный организатор — Детские забеги",
+        "identity_status": "UNRESOLVED",
+        "contact_status": "NEEDS_IDENTITY_CHECK",
+        "countries": [
+          "Russia"
+        ],
+        "cities": [
+          "Санкт-Петербург"
+        ],
+        "contacts": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "contact_candidates": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "event_ids": [
+          "7ba8728cf60607640b17"
+        ],
+        "crm_status": "NEW_LEAD",
+        "last_contacted_at": "",
+        "source_urls": [
+          "https://kids.runc.run/"
+        ]
+      },
+      {
+        "global_organizer_id": "2d233d8589932faf0f11",
+        "organizer_id": "367d4a9677b6edf7227c",
+        "name": "",
+        "display_name": "Неустановленный организатор — Забег «Апрель»",
+        "identity_status": "UNRESOLVED",
+        "contact_status": "NEEDS_IDENTITY_CHECK",
+        "countries": [
+          "Russia"
+        ],
+        "cities": [
+          "Москва"
+        ],
+        "contacts": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "contact_candidates": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "event_ids": [
+          "a43c9dd38e9b1f673bc5"
+        ],
+        "crm_status": "NEW_LEAD",
+        "last_contacted_at": "",
+        "source_urls": [
+          "https://aprilrun5km.runc.run/"
+        ]
+      },
+      {
+        "global_organizer_id": "5196c662635e091a5881",
+        "organizer_id": "8534f2c99de9c1a8f5a6",
+        "name": "",
+        "display_name": "Неустановленный организатор — СберПрайм Московский Марафон",
+        "identity_status": "UNRESOLVED",
+        "contact_status": "NEEDS_IDENTITY_CHECK",
+        "countries": [
+          "Russia"
+        ],
+        "cities": [
+          "Санкт-Петербург"
+        ],
+        "contacts": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "contact_candidates": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "event_ids": [
+          "ad3660a84e4ed3d26e17"
+        ],
+        "crm_status": "NEW_LEAD",
+        "last_contacted_at": "",
+        "source_urls": [
+          "https://moscowmarathon.runc.run/"
+        ]
+      },
+      {
+        "global_organizer_id": "cdb63cd86f7d950b1b64",
+        "organizer_id": "a05c16a86ad915b9fef1",
+        "name": "",
+        "display_name": "Неустановленный организатор — СПБ полумарафон «Северная столица»",
+        "identity_status": "UNRESOLVED",
+        "contact_status": "NEEDS_IDENTITY_CHECK",
+        "countries": [
+          "Russia"
+        ],
+        "cities": [
+          "Санкт-Петербург"
+        ],
+        "contacts": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "contact_candidates": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "event_ids": [
+          "6203eac8f927caa4c83f"
+        ],
+        "crm_status": "NEW_LEAD",
+        "last_contacted_at": "",
+        "source_urls": [
+          "https://spbhalf.runc.run/"
+        ]
+      },
+      {
+        "global_organizer_id": "149a8c671e27e9b69727",
+        "organizer_id": "da823a097ee21926ab54",
+        "name": "triathlon.kg",
+        "display_name": "",
+        "identity_status": "PROVISIONAL_IDENTITY",
+        "contact_status": "NEEDS_IDENTITY_CHECK",
+        "countries": [
+          "Kyrgyzstan"
+        ],
+        "cities": [
+          "Чолпон-Ата",
+          "Ош"
+        ],
+        "contacts": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "contact_candidates": {
+          "instagram": [
+            "https://www.instagram.com/triathlon.kg/",
+            "https://www.instagram.com/triathloncenter.kg/",
+            "https://www.instagram.com/bulak.sport/"
+          ],
+          "telegram": [],
+          "whatsapp": [
+            "https://wa.me/996770080108"
+          ],
+          "email": [
+            "triathlon.kg@gmail.com",
+            "office@triathlon.kg",
+            "bulak@2x.jpg",
+            "invite-image@2x.jpg"
+          ],
+          "phone": [
+            "+996770080108",
+            "+996227000180"
+          ],
+          "website": [
+            "https://triathlon.kg/news/kalendar-sorevnovanii-na-2026-god",
+            "http://triathlon.kg/events/etap-ckr-po-triatlonu-super-sprint",
+            "http://triathlon.kg/events/2026-visa-asia-triathlon-cup-cholpon-ata-ag-super-sprint",
+            "http://triathlon.kg/events/2026-visa-asia-triathlon-cup-cholpon-ata-ag-relay",
+            "http://triathlon.kg/events/2026-visa-asia-triathlon-cup-cholpon-ata-ag-standard"
+          ]
+        },
+        "event_ids": [
+          "bf71c6826d70d6e7980c",
+          "ea97c32fd42ae4d92ca1",
+          "72f9c891ca43fee6ddf3",
+          "ef7b2070358759b58823"
+        ],
+        "crm_status": "NEW_LEAD",
+        "last_contacted_at": "",
+        "source_urls": [
+          "https://triathlon.kg/news/kalendar-sorevnovanii-na-2026-god",
+          "http://triathlon.kg/events/etap-ckr-po-triatlonu-super-sprint",
+          "http://triathlon.kg/events/2026-visa-asia-triathlon-cup-cholpon-ata-ag-super-sprint",
+          "http://triathlon.kg/events/2026-visa-asia-triathlon-cup-cholpon-ata-ag-relay",
+          "http://triathlon.kg/events/2026-visa-asia-triathlon-cup-cholpon-ata-ag-standard"
+        ]
+      },
+      {
+        "global_organizer_id": "24591f6e496a41fdf2e3",
+        "organizer_id": "2a86403cc5203efd6312",
+        "name": "",
+        "display_name": "Неустановленный организатор — თბილისიმარათონი 2026",
+        "identity_status": "UNRESOLVED",
+        "contact_status": "NEEDS_IDENTITY_CHECK",
+        "countries": [
+          "Georgia"
+        ],
+        "cities": [],
+        "contacts": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "contact_candidates": {
+          "instagram": [
+            "https://www.instagram.com/jaka.sports/",
+            "https://www.instagram.com/stay_strong_parmalat/",
+            "https://www.instagram.com/tbilisimarathon/"
+          ],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [
+            "tbilisimarathon@cement.ge",
+            "tbilisimarathon@heidelbergcement.ge"
+          ],
+          "phone": [
+            "+995322474747164"
+          ],
+          "website": [
+            "https://www.tbilisimarathon.ge/en/index"
+          ]
+        },
+        "event_ids": [
+          "3cda59c0079f4491e5b7"
+        ],
+        "crm_status": "NEW_LEAD",
+        "last_contacted_at": "",
+        "source_urls": [
+          "https://www.tbilisimarathon.ge/en/index"
+        ]
+      },
+      {
+        "global_organizer_id": "aeb20b933fad77459cb6",
+        "organizer_id": "d166d9f199eb413b8641",
+        "name": "chisinaumarathon",
+        "display_name": "",
+        "identity_status": "PROVISIONAL_IDENTITY",
+        "contact_status": "NEEDS_IDENTITY_CHECK",
+        "countries": [
+          "Moldova"
+        ],
+        "cities": [
+          "Кишинёв",
+          "Chișinău"
+        ],
+        "contacts": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "contact_candidates": {
+          "instagram": [
+            "https://www.instagram.com/chisinaumarathon/"
+          ],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [
+            "event@sporter.md"
+          ],
+          "phone": [
+            "+37322111072"
+          ],
+          "website": [
+            "https://marathon.md/en/run-2026",
+            "https://marathon.md/en/marathon42km",
+            "https://marathon.md/en/halfmarathon21km",
+            "https://marathon.md/en/marathon10km",
+            "https://marathon.md/en/marathon5km"
+          ]
+        },
+        "event_ids": [
+          "05705e9b0695cc09c5f4",
+          "e09a0f24f90879d71f5f",
+          "3d106acab8c194371c6b",
+          "6614072108fd985e6a5f",
+          "0fe8a2640a1ca289d3fa",
+          "731ecfff9bb92819f219",
+          "51db3d2f3c3be7b5bdce"
+        ],
+        "crm_status": "NEW_LEAD",
+        "last_contacted_at": "",
+        "source_urls": [
+          "https://marathon.md/en/run-2026",
+          "https://marathon.md/en/marathon42km",
+          "https://marathon.md/en/halfmarathon21km",
+          "https://marathon.md/en/marathon10km",
+          "https://marathon.md/en/marathon5km"
+        ]
+      }
+    ],
+    "contact_route_identity_pending": []
+  },
+  "market_activity": {
+    "kz": {
+      "country": "Kazakhstan",
+      "events": 24,
+      "organizers": 23,
+      "last_run_id": "20260910T160337Z",
+      "status": "PASS_WITH_REVIEW_QUEUE",
+      "organizer_research": {
+        "market_code": "kz",
+        "observed_at": "2026-09-10T16:06:58+00:00",
+        "tasks_processed": 5,
+        "search_hits": 43,
+        "candidates_found": 0,
+        "contacts_promoted": 0,
+        "identities_resolved": 0,
+        "outreach_ready": 0,
+        "web_pages_verified": 0
+      }
+    },
+    "ru": {
+      "country": "Russia",
+      "events": 5,
+      "organizers": 5,
+      "last_run_id": "20260910T160443Z",
+      "status": "PASS_WITH_REVIEW_QUEUE",
+      "organizer_research": {
+        "market_code": "ru",
+        "observed_at": "2026-09-10T16:07:16+00:00",
+        "tasks_processed": 5,
+        "search_hits": 45,
+        "candidates_found": 0,
+        "contacts_promoted": 0,
+        "identities_resolved": 0,
+        "outreach_ready": 0,
+        "web_pages_verified": 0
+      }
+    },
+    "kg": {
+      "country": "Kyrgyzstan",
+      "events": 5,
+      "organizers": 1,
+      "last_run_id": "20260910T154917Z",
+      "status": "PASS_WITH_REVIEW_QUEUE",
+      "organizer_research": {
+        "market_code": "kg",
+        "observed_at": "2026-09-10T16:07:11+00:00",
+        "tasks_processed": 5,
+        "search_hits": 48,
+        "candidates_found": 0,
+        "contacts_promoted": 0,
+        "identities_resolved": 0,
+        "outreach_ready": 0,
+        "web_pages_verified": 0
+      }
+    },
+    "uz": {
+      "country": "Uzbekistan",
+      "events": 1,
+      "organizers": 0,
+      "last_run_id": "20260910T155012Z",
+      "status": "PASS_WITH_REVIEW_QUEUE",
+      "organizer_research": {
+        "market_code": "uz",
+        "observed_at": "2026-09-10T15:27:45+00:00",
+        "tasks_processed": 1,
+        "search_hits": 8,
+        "candidates_found": 0,
+        "contacts_promoted": 0,
+        "outreach_ready": 0,
+        "web_pages_verified": 0
+      }
+    },
+    "am": {
+      "country": "Armenia",
+      "events": 0,
+      "organizers": 0,
+      "last_run_id": "20260910T155038Z",
+      "status": "PASS",
+      "organizer_research": {}
+    },
+    "az": {
+      "country": "Azerbaijan",
+      "events": 0,
+      "organizers": 0,
+      "last_run_id": "20260910T160601Z",
+      "status": "PASS",
+      "organizer_research": {}
+    },
+    "by": {
+      "country": "Belarus",
+      "events": 0,
+      "organizers": 0,
+      "last_run_id": "20260910T160620Z",
+      "status": "PASS",
+      "organizer_research": {}
+    },
+    "ge": {
+      "country": "Georgia",
+      "events": 1,
+      "organizers": 1,
+      "last_run_id": "20260910T160644Z",
+      "status": "PASS_WITH_REVIEW_QUEUE",
+      "organizer_research": {
+        "market_code": "ge",
+        "observed_at": "2026-09-10T16:07:22+00:00",
+        "tasks_processed": 1,
+        "search_hits": 7,
+        "candidates_found": 0,
+        "contacts_promoted": 0,
+        "identities_resolved": 0,
+        "outreach_ready": 0,
+        "web_pages_verified": 0
+      }
+    },
+    "md": {
+      "country": "Moldova",
+      "events": 6,
+      "organizers": 1,
+      "last_run_id": "20260910T153129Z",
+      "status": "PASS_WITH_REVIEW_QUEUE",
+      "organizer_research": {
+        "market_code": "md",
+        "observed_at": "2026-09-10T16:07:05+00:00",
+        "tasks_processed": 5,
+        "search_hits": 40,
+        "candidates_found": 0,
+        "contacts_promoted": 0,
+        "identities_resolved": 0,
+        "outreach_ready": 0,
+        "web_pages_verified": 0
+      }
+    },
+    "tj": {
+      "country": "Tajikistan",
+      "events": 0,
+      "organizers": 0,
+      "last_run_id": "20260910T153612Z",
+      "status": "PASS",
+      "organizer_research": {}
+    },
+    "tm": {
+      "country": "Turkmenistan",
+      "events": 0,
+      "organizers": 0,
+      "last_run_id": "20260910T153630Z",
+      "status": "PASS",
+      "organizer_research": {}
+    },
+    "mn": {
+      "country": "Mongolia",
+      "events": 0,
+      "organizers": 0,
+      "last_run_id": "20260910T153649Z",
+      "status": "PASS",
+      "organizer_research": {}
+    }
+  }
+}
