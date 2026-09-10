@@ -7,6 +7,7 @@ import pathlib
 import re
 from urllib.parse import urlparse
 
+from .dedup_guard import purge_incompatible_variant_evidence
 from .edition_dedup import collapse_same_editions
 from .organizers import outreach_ready
 from .provenance import compact_record_provenance
@@ -175,7 +176,8 @@ def clean_market(code: str) -> dict:
     if not candidates:
         return {
             "market_code": code, "candidates_before": 0, "quarantined": 0,
-            "same_edition_duplicates_collapsed": 0, "candidates_after": 0,
+            "same_edition_duplicates_collapsed": 0, "variant_evidence_rows_removed": 0,
+            "variant_sources_sanitized": 0, "candidates_after": 0,
             "evidence_rows_compacted": 0,
         }
 
@@ -194,15 +196,27 @@ def clean_market(code: str) -> dict:
             **row,
             "quarantine_reason": reason,
             "quarantined_at": observed,
-            "hygiene_version": 6,
+            "hygiene_version": 7,
         })
+
+    # This pass is intentionally outside collapse_same_editions so sanitizer-only changes are
+    # observable and persisted even when there is no quarantine, provenance compaction or duplicate.
+    sanitized_kept = []
+    variant_evidence_rows_removed = 0
+    variant_sources_sanitized = 0
+    for original in kept:
+        row, removed, blocked = purge_incompatible_variant_evidence(original)
+        variant_evidence_rows_removed += removed
+        variant_sources_sanitized += len(blocked)
+        sanitized_kept.append(row)
+    kept = sanitized_kept
 
     kept, duplicate_archived = collapse_same_editions(kept)
     duplicate_archived = [{
         **row,
         "quarantine_reason": "SAME_EDITION_DUPLICATE_COLLAPSED",
         "quarantined_at": observed,
-        "hygiene_version": 6,
+        "hygiene_version": 7,
     } for row in duplicate_archived]
 
     # The canonicalizer combines provenance from both records. Compact that union once more so
@@ -215,7 +229,8 @@ def clean_market(code: str) -> dict:
     kept = compacted_kept
 
     archived = artifact_rejected + duplicate_archived
-    if archived or evidence_removed:
+    candidate_changed = bool(archived or evidence_removed or variant_evidence_rows_removed or variant_sources_sanitized)
+    if candidate_changed:
         _write_jsonl(candidates_path, kept)
 
     if archived:
@@ -255,6 +270,8 @@ def clean_market(code: str) -> dict:
         "quarantined": len(artifact_rejected),
         "quarantine_reasons": dict(_count(r.get("quarantine_reason") for r in artifact_rejected)),
         "same_edition_duplicates_collapsed": len(duplicate_archived),
+        "variant_evidence_rows_removed": variant_evidence_rows_removed,
+        "variant_sources_sanitized": variant_sources_sanitized,
         "candidates_after": len(kept),
         "related_rows_removed": removed_queue + removed_discovery + removed_existing + removed_model,
         "organizers_removed": organizer_removed,
@@ -282,7 +299,9 @@ def main() -> int:
     results = [clean_market(code) for code in codes]
 
     if any(
-        r.get("quarantined") or r.get("same_edition_duplicates_collapsed") or r.get("evidence_rows_compacted")
+        r.get("quarantined") or r.get("same_edition_duplicates_collapsed")
+        or r.get("variant_evidence_rows_removed") or r.get("variant_sources_sanitized")
+        or r.get("evidence_rows_compacted")
         for r in results
     ):
         from .market_runner import aggregate_global
@@ -294,6 +313,12 @@ def main() -> int:
         "quarantined_total": sum(int(r.get("quarantined", 0)) for r in results),
         "same_edition_duplicates_collapsed_total": sum(
             int(r.get("same_edition_duplicates_collapsed", 0)) for r in results
+        ),
+        "variant_evidence_rows_removed_total": sum(
+            int(r.get("variant_evidence_rows_removed", 0)) for r in results
+        ),
+        "variant_sources_sanitized_total": sum(
+            int(r.get("variant_sources_sanitized", 0)) for r in results
         ),
         "evidence_rows_compacted_total": sum(int(r.get("evidence_rows_compacted", 0)) for r in results),
     }
