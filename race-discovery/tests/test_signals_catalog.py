@@ -20,6 +20,13 @@ class SignalAndCatalogTests(unittest.TestCase):
         self.assertTrue(accept_hit(hit, CFG))
         self.assertFalse(should_fetch_direct(hit.url))
 
+    def test_only_isolated_public_telegram_targets_are_fetchable(self):
+        self.assertTrue(should_fetch_direct("https://t.me/s/athletex"))
+        self.assertTrue(should_fetch_direct("https://t.me/athletex/1974"))
+        self.assertFalse(should_fetch_direct("https://t.me/athletex"))
+        self.assertFalse(should_fetch_direct("https://instagram.com/athletex_kz"))
+        self.assertFalse(should_fetch_direct("https://facebook.com/raceclub"))
+
     def test_catalog_suppresses_existing_event(self):
         app = normalize_catalog_row({"id":"app1","name":"Caspian Marathon 2026","date":"2026-10-11","city":"Актау","website":"https://caspian-marathon.kz"})
         candidate = {"name":"Caspian Marathon 2026","date":"2026-10-11","city":"Актау","location":"","distances":[],"registration_status":"UNKNOWN","registration_url":"","instagram":"","organizer":"","source_urls":["https://caspian-marathon.kz/ru/calendar"]}
