@@ -1,0 +1,19 @@
+{
+  "queries": [
+    "site:marathon.mn 2026 Ulaanbaatar Marathon",
+    "Ulaanbaatar Marathon 2026 registration",
+    "Mongolia trail race 2026 registration",
+    "Монголия марафон 2026 регистрация"
+  ],
+  "social_queries": [
+    "site:instagram.com Ulaanbaatar Marathon 2026",
+    "site:t.me Mongolia marathon 2026"
+  ],
+  "seed_urls": [
+    "https://ulaanbaatar.marathon.mn/register"
+  ],
+  "source_hints": {
+    "marathon.mn": "official_event"
+  },
+  "event_terms": ["ulaanbaatar marathon", "улаанбаатар марафон"]
+}
