@@ -41,7 +41,8 @@ jobs:
           MARKET_MAX_QUERIES: '16'
           MARKET_RESULTS_PER_QUERY: '7'
           MARKET_MAX_URLS: '45'
-          MARKET_TIMEOUT_SECONDS: '420'
+          MARKET_TIMEOUT_SECONDS: '300'
+          MULTI_MARKET_BUDGET_SECONDS: '1200'
         run: python -m race_agent.market_runner --limit 5
 
       - name: Quarantine historical parser artifacts
