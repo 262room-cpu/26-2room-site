@@ -1,0 +1,8 @@
+# Never commit private chat/group content or credentials from source ingestion.
+runtime/private_inbox/
+runtime/private_signals/
+*.session
+*.session-journal
+.env
+.env.*
+secrets/
