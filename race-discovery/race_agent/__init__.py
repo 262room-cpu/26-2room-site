@@ -12,7 +12,7 @@ import re
 from urllib.parse import unquote
 
 from . import core as _core
-from .locales import focused_event_text, parse_dates as _parse_dates, parse_prices as _parse_prices
+from .locales import focused_event_text, parse_dates as _parse_dates, parse_prices as _parse_prices, primary_event_dates
 
 # Upgrade v1 parser globals before candidate_from_document is called.
 _core.parse_dates = _parse_dates
@@ -190,20 +190,18 @@ def _refined_candidate_from_document(
     identity_city = _event_identity_city(candidate.get("name") or "", url, known_cities)
     if identity_city and identity_city != candidate.get("city"):
         replace_field("city", identity_city, "EVENT_IDENTITY")
-        # Preserve a real venue/address. Only synthesize location when the original parser had no
-        # location (or only a bare, contradictory city token).
         current_location = str(candidate.get("location") or "").strip()
         normalized_known = {_identity_text(x) for x in (known_cities or [])}
         if not current_location or _identity_text(current_location) in normalized_known:
             replace_field("location", identity_city, "EVENT_IDENTITY")
 
     if focused != text:
-        # JSON-LD startDate is stronger than any neighboring date in human-visible text. For
-        # unstructured pages, focused parsing still fixes navigation/header dates.
+        # Structured startDate always wins. Unstructured pages need a semantic date ranker because
+        # race sites often place registration/packet/expo dates closer to repeated event titles.
         if not has_structured_event:
-            dates = _parse_dates(focused)
+            dates = primary_event_dates(text, candidate.get("name") or "") or _parse_dates(focused)
             if dates and dates[0] != candidate.get("date"):
-                replace_field("date", dates[0])
+                replace_field("date", dates[0], "PRIMARY_EVENT_DATE")
 
         # If title/URL did not identify the city, focused text may fill a missing city but must not
         # overwrite an already established one.
@@ -214,8 +212,6 @@ def _refined_candidate_from_document(
                 if not candidate.get("location"):
                     replace_field("location", focused_city)
 
-        # Focused values are useful for detail fields, but an empty/UNKNOWN heuristic never erases
-        # stronger information already parsed from the full/structured page.
         focused_distances = _core.parse_distances(focused)
         if focused_distances:
             replace_field("distances", focused_distances)
@@ -248,9 +244,6 @@ from .organizer_identity_guard import install as _install_organizer_identity_gua
 from .organizer_queue import build_runtime_progressive_organizer_research_queue
 
 _install_organizer_identity_guard(_organizers)
-
-# Keep organizer research history and put primary-domain identity queries first without changing
-# the public cli.py call signature.
 _organizers.build_organizer_research_queue = build_runtime_progressive_organizer_research_queue
 
 __all__ = []
