@@ -14,13 +14,11 @@
     "site:instagram.com Uzbekistan marathon 2026"
   ],
   "seed_urls": [
-    "https://t.me/s/prorunuz",
     "https://gov.uz/ru/yoshlar/news/view/143031"
   ],
   "source_hints": {
     "gov.uz": "government",
-    "prorun.uz": "official_organizer",
-    "t.me": "official_organizer"
+    "prorun.uz": "official_organizer"
   },
   "event_terms": ["park run", "lady run", "chimgan sky", "aral sea marathon", "barsa kelmes", "xiva 10k"]
 }
