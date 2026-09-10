@@ -1,0 +1,18 @@
+{
+  "queries": [
+    "site:marathon.az 2026 Baku Marathon",
+    "Baku Marathon 2026 registration",
+    "Azerbaijan running race 2026 registration"
+  ],
+  "social_queries": [
+    "site:instagram.com Baku Marathon 2026",
+    "site:t.me Azerbaijan marathon 2026"
+  ],
+  "seed_urls": [
+    "https://www.marathon.az/?lang=en"
+  ],
+  "source_hints": {
+    "marathon.az": "official_event"
+  },
+  "event_terms": ["baku marathon", "bakı marafonu"]
+}
