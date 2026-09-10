@@ -1,8 +1,7 @@
 """26.2 ROOM race discovery package bootstrap.
 
-The original v1 core stays intentionally small. Multi-market deterministic parsers are installed
-here so every importer (CLI and tests included) gets the same locale-aware behavior without a
-second extraction path.
+The original v1 core stays intentionally small. Multi-market deterministic parsers and safety
+identity guards are installed here so every importer gets the same behavior.
 """
 
 from . import core as _core
@@ -53,7 +52,7 @@ def _refined_candidate_from_document(
         candidate[field] = value
         evidence = [row for row in evidence if row.get("field") != field]
         if value not in (None, "", [], {}):
-            row = {
+            evidence.append({
                 "field": field,
                 "value": value,
                 "url": template.get("url", url),
@@ -62,8 +61,7 @@ def _refined_candidate_from_document(
                 "weight": template.get("weight", _core.source_weight(source_type)),
                 "content_hash": template.get("content_hash", ""),
                 "scope": "FOCUSED_EVENT_BLOCK",
-            }
-            evidence.append(row)
+            })
 
     dates = _parse_dates(focused)
     if dates:
@@ -90,5 +88,12 @@ def _refined_candidate_from_document(
 
 
 _core.candidate_from_document = _refined_candidate_from_document
+
+# Organizer identity is stricter than social discovery: an arbitrary Instagram handle from an
+# event page is never allowed to become the organizer's identity without explicit evidence.
+from . import organizers as _organizers
+from .organizer_identity_guard import install as _install_organizer_identity_guard
+
+_install_organizer_identity_guard(_organizers)
 
 __all__ = []
