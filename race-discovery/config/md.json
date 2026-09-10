@@ -1,0 +1,19 @@
+{
+  "queries": [
+    "site:marathon.md 2026 marathon Chisinau",
+    "Chisinau Marathon 2026 registration",
+    "Moldova running race 2026 registration"
+  ],
+  "social_queries": [
+    "site:instagram.com Chisinau Marathon 2026",
+    "site:t.me Moldova marathon 2026"
+  ],
+  "seed_urls": [
+    "https://marathon.md/en"
+  ],
+  "source_hints": {
+    "marathon.md": "official_event",
+    "sporter.md": "official_organizer"
+  },
+  "event_terms": ["chisinau marathon", "kids marathon", "marathon for all"]
+}
