@@ -4,6 +4,8 @@ import html
 from html.parser import HTMLParser
 from urllib.parse import urlparse
 
+VOID_TAGS = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"}
+
 
 class _TelegramMessageParser(HTMLParser):
     """Split Telegram public preview HTML into individual message records.
@@ -20,6 +22,7 @@ class _TelegramMessageParser(HTMLParser):
         self._depth = 0
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        tag_l = tag.lower()
         data = dict(attrs)
         post = (data.get("data-post") or "").strip()
         if self._active is None and post and "/" in post:
@@ -30,7 +33,7 @@ class _TelegramMessageParser(HTMLParser):
                 "datetime": "",
             }
             self._depth = 1
-        elif self._active is not None:
+        elif self._active is not None and tag_l not in VOID_TAGS:
             self._depth += 1
 
         if self._active is None:
@@ -59,6 +62,8 @@ class _TelegramMessageParser(HTMLParser):
 
     def handle_endtag(self, tag: str) -> None:
         if self._active is None:
+            return
+        if tag.lower() in VOID_TAGS:
             return
         self._depth -= 1
         if self._depth > 0:
