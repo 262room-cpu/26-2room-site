@@ -7,6 +7,9 @@ from race_agent.organizers import (
 )
 
 
+EMPTY = {"instagram": [], "telegram": [], "whatsapp": [], "email": [], "phone": [], "website": []}
+
+
 class OrganizerIdentityGuardTests(unittest.TestCase):
     def _event(self, event_id, name):
         return {
@@ -51,14 +54,46 @@ class OrganizerIdentityGuardTests(unittest.TestCase):
             "event_ids": ["event-a"],
             "identity_status": "PROVISIONAL_IDENTITY",
             "contact_status": "NEEDS_IDENTITY_CHECK",
-            "contacts": {"instagram": [], "telegram": [], "whatsapp": [], "email": [], "phone": [], "website": []},
-            "contact_candidates": {"instagram": ["https://www.instagram.com/random_partner/"], "telegram": [], "whatsapp": [], "email": [], "phone": [], "website": []},
+            "contacts": dict(EMPTY),
+            "contact_candidates": {**EMPTY, "instagram": ["https://www.instagram.com/random_partner/"]},
         }]
         rows = build_organizer_database([event], [], previous, "2026-09-10T00:00:00Z")
         self.assertEqual(len(rows), 1)
         self.assertEqual(rows[0]["identity_status"], "UNRESOLVED")
         self.assertEqual(rows[0]["name"], "")
         self.assertNotEqual(rows[0]["organizer_id"], "legacy")
+
+    def test_safe_unresolved_research_survives_next_discovery_run(self):
+        event = self._event("event-a", "Беготня")
+        previous = [{
+            "schema_version": 3,
+            "organizer_id": "safe-unknown",
+            "name": "",
+            "display_name": "Неустановленный организатор — Беготня",
+            "country": "Russia",
+            "cities": ["Москва"],
+            "event_ids": ["event-a"],
+            "identity_status": "UNRESOLVED",
+            "identity_source": "EVENT_SCOPED_UNKNOWN",
+            "contact_status": "CONTACT_ROUTE_FOUND_IDENTITY_PENDING",
+            "contacts": {**EMPTY, "email": ["hello@begotnya.ru"]},
+            "contact_candidates": {**EMPTY, "instagram": ["https://www.instagram.com/begotnya/"]},
+            "source_urls": ["https://begotnya.ru"],
+            "evidence": [{"field": "contact.email", "value": "hello@begotnya.ru"}],
+            "first_seen_at": "2026-09-01T00:00:00Z",
+            "last_seen_at": "2026-09-09T00:00:00Z",
+            "crm_status": "NEW_LEAD",
+            "last_contacted_at": "",
+            "notes": "",
+        }]
+        rows = build_organizer_database([event], [], previous, "2026-09-10T00:00:00Z")
+        self.assertEqual(len(rows), 1)
+        row = rows[0]
+        self.assertEqual(row["identity_status"], "UNRESOLVED")
+        self.assertIn("hello@begotnya.ru", row["contacts"]["email"])
+        self.assertIn("https://www.instagram.com/begotnya/", row["contact_candidates"]["instagram"])
+        self.assertEqual(row["contact_status"], "CONTACT_ROUTE_FOUND_IDENTITY_PENDING")
+        self.assertEqual(row["first_seen_at"], "2026-09-01T00:00:00Z")
 
     def test_explicit_named_organizer_stays_named(self):
         event = self._event("event-a", "Беготня")
