@@ -30,6 +30,20 @@ class HubTests(unittest.TestCase):
         self.assertTrue(out["is_hub"])
         self.assertEqual(len(out["event_links"]), 3)
 
+    def test_organizer_root_can_link_event_subdomains(self):
+        raw = '''
+        <a href="https://aprilrun.runc.run/">April Run</a>
+        <a href="https://moscowhalf.runc.run/">Moscow Half Marathon</a>
+        <a href="https://moscowmarathon.runc.run/">SberPrime Moscow Marathon</a>
+        <a href="https://evilrunc.run/">Fake Marathon</a>
+        '''
+        out = extract_hub_event_links("https://runc.run/", raw)
+        self.assertTrue(out["is_hub"])
+        urls = {x["url"] for x in out["event_links"]}
+        self.assertIn("https://moscowmarathon.runc.run/", urls)
+        self.assertIn("https://moscowhalf.runc.run/", urls)
+        self.assertNotIn("https://evilrunc.run/", urls)
+
     def test_single_event_page_is_not_hub(self):
         raw = '''
         <html><body>
