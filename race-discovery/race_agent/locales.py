@@ -114,6 +114,82 @@ def _date_phrase_spans(text:str)->list[tuple[int,int]]:
     return sorted(set(spans))
 
 
+_NEGATIVE_DATE_CONTEXT = re.compile(
+    r'регистрац|при\s+регистрац|registration|register\s+from|registration\s+period|'
+    r'стоимост|взнос|оплат|цена|price|fee|early\s+bird|deadline|'
+    r'выдач(?:а|и)?\s+(?:стартов|номер|пакет)|пакет(?:ов)?\s+участник|получени[ея]\s+номер|'
+    r'packet\s+pickup|race\s+pack|expo|экспо|press\s+conference|пресс.?конференц',
+    flags=re.I,
+)
+_POSITIVE_DATE_CONTEXT = re.compile(
+    r'дата\s+(?:забега|старта|соревнован)|race\s+day|event\s+date|'
+    r'состоится|пройд[её]т|забег|марафон|полумарафон|trail|трейл|race|run|start|старт',
+    flags=re.I,
+)
+
+
+def _event_date_rank(text:str,event_name:str,pos:int,span:tuple[int,int])->float:
+    """Rank a date as the event date, not a registration/expo/admin date."""
+    start,end=span
+    if end<=pos:
+        gap=pos-end
+    elif start>=pos+len(event_name):
+        gap=start-(pos+len(event_name))
+    else:
+        gap=0
+    score=20.0-min(gap,1800)/90.0
+
+    # Race sites often render `DATE  EVENT NAME`; this is our strongest unstructured signature.
+    if end<=pos and gap<=140:
+        score+=16.0
+    elif start>=pos+len(event_name) and gap<=140:
+        score+=12.0
+    elif gap<=350:
+        score+=5.0
+
+    local=text[max(0,start-140):min(len(text),end+180)]
+    between=text[min(end,pos):max(start,pos+len(event_name))] if abs(start-pos)<500 else ''
+    if _POSITIVE_DATE_CONTEXT.search(local):
+        score+=5.0
+    if _NEGATIVE_DATE_CONTEXT.search(local):
+        score-=24.0
+    if _NEGATIVE_DATE_CONTEXT.search(between):
+        score-=18.0
+
+    # A distance next to the date/title is a useful race-day signature.
+    if re.search(r'\b\d{1,3}(?:[.,]\d+)?\s*(?:km|км|m|м)\b',local,flags=re.I):
+        score+=3.0
+    return score
+
+
+def primary_event_dates(text:str,event_name:str,year_min:int=2026,year_max:int=2028)->list[str]:
+    """Return the best-supported event date/range for an unstructured event page.
+
+    Dates tied to registration, price windows, packet pickup or expo are deliberately down-ranked.
+    If no event-name-local candidate exists, callers can fall back to ordinary parse_dates().
+    """
+    if not text or not event_name or len(event_name.strip())<4:
+        return []
+    positions=[m.start() for m in re.finditer(re.escape(event_name.strip()),text,flags=re.I)]
+    spans=_date_phrase_spans(text)
+    best:tuple[float,int,int]|None=None
+    for pos in positions:
+        for start,end in spans:
+            # Prevent a title occurrence in the document head from stealing a remote unrelated date.
+            if min(abs(start-pos),abs(end-pos))>1200:
+                continue
+            dates=parse_dates(text[start:end],year_min=year_min,year_max=year_max)
+            if not dates:
+                continue
+            score=_event_date_rank(text,event_name,pos,(start,end))
+            candidate=(score,start,end)
+            if best is None or candidate[0]>best[0] or (candidate[0]==best[0] and start<best[1]):
+                best=candidate
+    if best is None:
+        return []
+    return parse_dates(text[best[1]:best[2]],year_min=year_min,year_max=year_max)
+
+
 def focused_event_text(text:str,event_name:str,year_min:int=2026,year_max:int=2028)->str:
     if not text or not event_name or len(event_name.strip())<4:
         return text
@@ -125,24 +201,14 @@ def focused_event_text(text:str,event_name:str,year_min:int=2026,year_max:int=20
     best_span=None
     best_score=-1e9
     for pos in positions:
-        nearby=[span for span in spans if span[0]>=max(0,pos-500) and span[0]<=pos+500]
-        if not nearby:
-            continue
-        span=min(nearby,key=lambda s:min(abs(s[0]-pos),abs(s[1]-pos)))
-        immediate=text[max(0,pos-80):min(len(text),pos+260)]
-        local=text[max(0,min(pos,span[0])-80):min(len(text),max(pos,span[1])+700)]
-        dates=parse_dates(local,year_min=year_min,year_max=year_max)
-        score=10.0
-        if span[1]<=pos:
-            score+=6.0
-        score-=abs(span[0]-pos)/150.0
-        if re.search(r'\b(?:start|старт|registration|регистрац|distance|дистанц|route|маршрут)\b',immediate,flags=re.I):
-            score+=4.0
-        if re.search(r'\b\d{1,3}(?:[.,]\d+)?\s*(?:km|км|m|м)\b',immediate,flags=re.I):
-            score+=2.0
-        score-=max(0,len(dates)-2)*0.5
-        if score>best_score or (score==best_score and best_pos is not None and pos>best_pos):
-            best_pos,best_span,best_score=pos,span,score
+        for span in spans:
+            if min(abs(span[0]-pos),abs(span[1]-pos))>1200:
+                continue
+            if not parse_dates(text[span[0]:span[1]],year_min=year_min,year_max=year_max):
+                continue
+            score=_event_date_rank(text,event_name,pos,span)
+            if score>best_score or (score==best_score and best_pos is not None and pos>best_pos):
+                best_pos,best_span,best_score=pos,span,score
     if best_pos is None or best_span is None:
         return text
     start=min(best_pos,best_span[0])
