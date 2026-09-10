@@ -6,7 +6,39 @@
         "https://runc.run/"
       ],
       "event_count": 1,
-      "last_checked": "2026-09-10T15:04:24+00:00"
+      "last_checked": "2026-09-10T15:07:26+00:00"
+    },
+    "aprilrun5km.runc.run": {
+      "first_seen": "2026-09-10T15:07:26+00:00",
+      "source_urls": [
+        "https://aprilrun5km.runc.run/"
+      ],
+      "event_count": 1,
+      "last_checked": "2026-09-10T15:07:26+00:00"
+    },
+    "spbhalf.runc.run": {
+      "first_seen": "2026-09-10T15:07:26+00:00",
+      "source_urls": [
+        "https://spbhalf.runc.run/"
+      ],
+      "event_count": 1,
+      "last_checked": "2026-09-10T15:07:26+00:00"
+    },
+    "moscowmarathon.runc.run": {
+      "first_seen": "2026-09-10T15:07:26+00:00",
+      "source_urls": [
+        "https://moscowmarathon.runc.run/"
+      ],
+      "event_count": 1,
+      "last_checked": "2026-09-10T15:07:26+00:00"
+    },
+    "kids.runc.run": {
+      "first_seen": "2026-09-10T15:07:26+00:00",
+      "source_urls": [
+        "https://kids.runc.run/"
+      ],
+      "event_count": 1,
+      "last_checked": "2026-09-10T15:07:26+00:00"
     }
   },
   "organizers": {},
