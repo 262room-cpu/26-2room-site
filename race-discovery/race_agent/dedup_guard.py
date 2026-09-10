@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import re
 from typing import Any
 
@@ -46,6 +47,48 @@ def incompatible_event_variants(a: dict, b: dict) -> bool:
     left = event_variants(str(a.get("name") or ""))
     right = event_variants(str(b.get("name") or ""))
     return bool(left and right and left != right)
+
+
+def purge_incompatible_variant_evidence(row: dict) -> tuple[dict, int, list[str]]:
+    """Remove evidence leaked into a record by an older cross-format fuzzy merge.
+
+    We only remove a URL when that exact URL has its own `name` evidence and that name explicitly
+    identifies a different variant from the canonical record. Generic/shared evidence is retained.
+    """
+    canonical_variants = event_variants(str(row.get("name") or ""))
+    if not canonical_variants:
+        return row, 0, []
+
+    evidence = list(row.get("evidence") or [])
+    blocked_urls: set[str] = set()
+    for item in evidence:
+        if item.get("field") != "name":
+            continue
+        url = str(item.get("url") or "")
+        if not url:
+            continue
+        evidence_variants = event_variants(str(item.get("value") or ""))
+        if evidence_variants and evidence_variants != canonical_variants:
+            blocked_urls.add(url)
+
+    if not blocked_urls:
+        return row, 0, []
+
+    out = copy.deepcopy(row)
+    old_evidence = list(out.get("evidence") or [])
+    out["evidence"] = [item for item in old_evidence if str(item.get("url") or "") not in blocked_urls]
+    out["source_urls"] = [url for url in list(out.get("source_urls") or []) if str(url) not in blocked_urls]
+
+    for field in ("official_site", "registration_url"):
+        if str(out.get(field) or "") in blocked_urls:
+            out[field] = ""
+
+    audit = list(out.get("sanitized_variant_sources") or [])
+    for url in sorted(blocked_urls):
+        if url not in audit:
+            audit.append(url)
+    out["sanitized_variant_sources"] = audit[-50:]
+    return out, len(old_evidence) - len(out["evidence"]), sorted(blocked_urls)
 
 
 def install(core_module) -> None:
