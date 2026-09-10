@@ -7,7 +7,7 @@ import urllib.request
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 
-UA = "262room-race-discovery/0.1 (+https://26-2room.com)"
+UA = "262room-race-discovery/0.2 (+https://26-2room.com)"
 
 @dataclass
 class SearchHit:
@@ -27,20 +27,65 @@ def fetch_url(url: str, timeout: int = 18) -> str:
     return data.decode("utf-8", errors="replace")
 
 
+def _rss_hits(raw: str, limit: int) -> list[SearchHit]:
+    root = ET.fromstring(raw)
+    hits: list[SearchHit] = []
+    for item in root.findall(".//item"):
+        link = (item.findtext("link") or "").strip()
+        title = html.unescape((item.findtext("title") or "").strip())
+        desc = html.unescape((item.findtext("description") or "").strip())
+        if link.startswith("http"):
+            hits.append(SearchHit(title=title, url=link, snippet=desc))
+        if len(hits) >= limit:
+            break
+    return hits
+
+
 class BingRssSearchProvider:
-    """Zero-secret bootstrap search provider. Replace/augment with a supported search API later."""
+    """Zero-secret broad discovery source. It is intentionally not trusted as evidence."""
+
+    name = "BING_RSS"
 
     def search(self, query: str, limit: int = 10) -> list[SearchHit]:
         url = "https://www.bing.com/search?" + urllib.parse.urlencode({"q": query, "format": "rss"})
-        raw = fetch_url(url)
-        root = ET.fromstring(raw)
-        hits: list[SearchHit] = []
-        for item in root.findall(".//item"):
-            link = (item.findtext("link") or "").strip()
-            title = html.unescape((item.findtext("title") or "").strip())
-            desc = html.unescape((item.findtext("description") or "").strip())
-            if link.startswith("http"):
-                hits.append(SearchHit(title=title, url=link, snippet=desc))
-            if len(hits) >= limit:
-                break
-        return hits
+        return _rss_hits(fetch_url(url), limit)
+
+
+class GoogleNewsRssSearchProvider:
+    """Zero-secret news/newspaper discovery for Kazakhstan. Discovery only, not verification."""
+
+    name = "GOOGLE_NEWS_RSS"
+
+    def search(self, query: str, limit: int = 10) -> list[SearchHit]:
+        url = "https://news.google.com/rss/search?" + urllib.parse.urlencode({
+            "q": query,
+            "hl": "ru",
+            "gl": "KZ",
+            "ceid": "KZ:ru",
+        })
+        return _rss_hits(fetch_url(url), limit)
+
+
+class CombinedSearchProvider:
+    """Fan out to cheap independent discovery providers and deduplicate URLs."""
+
+    def __init__(self) -> None:
+        self.providers = [BingRssSearchProvider(), GoogleNewsRssSearchProvider()]
+
+    def search(self, query: str, limit: int = 12) -> list[SearchHit]:
+        per_provider = max(4, limit // len(self.providers) + 2)
+        out: list[SearchHit] = []
+        seen: set[str] = set()
+        for provider in self.providers:
+            try:
+                hits = provider.search(query, limit=per_provider)
+            except Exception:
+                continue
+            for hit in hits:
+                if hit.url in seen:
+                    continue
+                seen.add(hit.url)
+                out.append(hit)
+                if len(out) >= limit:
+                    return out
+        return out
