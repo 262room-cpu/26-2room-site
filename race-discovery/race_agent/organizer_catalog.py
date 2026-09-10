@@ -49,6 +49,25 @@ def _email(value: str) -> str:
     return str(value or "").strip().lower()
 
 
+# CRM rows often use short legal forms while official pages spell them out. Expanding only
+# well-known legal-form tokens is safer than globally lowering fuzzy-name thresholds.
+_LEGAL_FORM_ALIASES = (
+    (r"\bкф\b", "корпоративный фонд"),
+    (r"\bоо\b", "общественное объединение"),
+    (r"\bтоо\b", "товарищество с ограниченной ответственностью"),
+    (r"\bип\b", "индивидуальный предприниматель"),
+    (r"\bооо\b", "общество с ограниченной ответственностью"),
+    (r"\bано\b", "автономная некоммерческая организация"),
+)
+
+
+def _identity_name(value: str) -> str:
+    text = normalize(str(value or ""))
+    for pattern, replacement in _LEGAL_FORM_ALIASES:
+        text = re.sub(pattern, replacement, text)
+    return " ".join(text.split())
+
+
 def normalize_crm_row(row: dict) -> dict:
     """Normalize either exported 26.2 ROOM CRM columns or canonical JSON fields."""
     contacts = row.get("contacts") or {}
@@ -172,7 +191,7 @@ def _name_similarity(profile: dict, row: dict) -> float:
     best = 0.0
     for a in names:
         for b in targets:
-            na, nb = normalize(a), normalize(b)
+            na, nb = _identity_name(a), _identity_name(b)
             if not na or not nb:
                 continue
             if na == nb:
