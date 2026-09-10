@@ -15,6 +15,13 @@ concurrency:
   group: race-discovery-v1-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  # Public project id is safe in workflow source. Collection/auth stay in GitHub config.
+  FIRESTORE_CATALOG_PROJECT: room26-2app
+  FIRESTORE_CATALOG_COLLECTION: ${{ vars.FIRESTORE_CATALOG_COLLECTION }}
+  FIRESTORE_CATALOG_BEARER_TOKEN: ${{ secrets.FIRESTORE_CATALOG_BEARER_TOKEN }}
+  FIRESTORE_CATALOG_API_KEY: ${{ secrets.FIRESTORE_CATALOG_API_KEY }}
+
 jobs:
   discover:
     runs-on: ubuntu-latest
