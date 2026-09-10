@@ -2,7 +2,7 @@
   "domains": {
     "almaty-marathon.kz": {
       "first_seen": "2026-09-10T12:23:53Z",
-      "last_checked": "2026-09-10T13:51:14+00:00",
+      "last_checked": "2026-09-10T13:54:35+00:00",
       "source_urls": [
         "https://almaty-marathon.kz/ru/events/almaty_marathon_2026/",
         "https://almaty-marathon.kz/ru/events/almaty_marathon_2026/regulation?page=text",
@@ -13,7 +13,7 @@
     },
     "athletex.kz": {
       "first_seen": "2026-09-10T12:23:53Z",
-      "last_checked": "2026-09-10T13:51:14+00:00",
+      "last_checked": "2026-09-10T13:54:35+00:00",
       "source_urls": [
         "https://athletex.kz/competitions/rrautumn26",
         "https://athletex.kz/competitions/zhm5",
@@ -23,7 +23,7 @@
     },
     "caspian-marathon.kz": {
       "first_seen": "2026-09-10T12:23:53Z",
-      "last_checked": "2026-09-10T13:51:14+00:00",
+      "last_checked": "2026-09-10T13:54:35+00:00",
       "source_urls": [
         "https://www.caspian-marathon.kz/ru/calendar/?title=CASPIAN_MARATHON_2026_%E2%80%94_bolshe%2C_chem_prosto_zabeg_252",
         "https://caspian-marathon.kz/ru/users_list?distance=5",
@@ -33,7 +33,7 @@
     },
     "qhm26.athleticfamily.kz": {
       "first_seen": "2026-09-10T12:23:53Z",
-      "last_checked": "2026-09-10T13:51:14+00:00",
+      "last_checked": "2026-09-10T13:54:35+00:00",
       "source_urls": [
         "https://qhm26.athleticfamily.kz/ru"
       ],
@@ -41,7 +41,7 @@
     },
     "reg.elordasport.kz": {
       "first_seen": "2026-09-10T12:23:53Z",
-      "last_checked": "2026-09-10T13:51:14+00:00",
+      "last_checked": "2026-09-10T13:54:35+00:00",
       "source_urls": [
         "https://reg.elordasport.kz/ru/events/12sep-jana-men-kuz-run/",
         "https://reg.elordasport.kz/ru/"
@@ -50,7 +50,7 @@
     },
     "gov.kz": {
       "first_seen": "2026-09-10T12:23:53Z",
-      "last_checked": "2026-09-10T13:51:14+00:00",
+      "last_checked": "2026-09-10T13:54:35+00:00",
       "source_urls": [
         "https://www.gov.kz/memleket/entities/astana/press/news/details/1286800"
       ],
@@ -62,7 +62,7 @@
         "https://rwsrun.kz/ru/"
       ],
       "event_count": 1,
-      "last_checked": "2026-09-10T13:51:14+00:00"
+      "last_checked": "2026-09-10T13:54:35+00:00"
     }
   },
   "organizers": {
@@ -95,33 +95,8 @@
         "0a9c5d7e66570d2f5fb4"
       ],
       "name": "abeysekin",
-      "instagram": [
-        "https://www.instagram.com/abeysekin/",
-        "https://www.instagram.com/astana_triathlon/",
-        "https://www.instagram.com/asu_water/",
-        "https://www.instagram.com/ekibastuz_run_club/",
-        "https://www.instagram.com/mma_ekibastuz/",
-        "https://www.instagram.com/home.parq/",
-        "https://www.instagram.com/terra.ekibastuz/",
-        "https://www.instagram.com/zebracoffee.ekb/",
-        "https://www.instagram.com/izmir_cafe_ekibastuz/",
-        "https://www.instagram.com/bmaipvl/",
-        "https://www.instagram.com/gastrobar.thegarden/",
-        "https://www.instagram.com/kenguru_toys_kz/",
-        "https://www.instagram.com/hyundai_ekibastuz/",
-        "https://www.instagram.com/mixue_ekibastuz/",
-        "https://www.instagram.com/wowland_pavlodar/",
-        "https://www.instagram.com/coffeeboom.ekibastuz/",
-        "https://www.instagram.com/medcollege.ekb/",
-        "https://www.instagram.com/angel_dpso/",
-        "https://www.instagram.com/poiskoviki_ekibas_vita/",
-        "https://www.instagram.com/lider.kz.ekibastuz/",
-        "https://www.instagram.com/fond_p.m.o/",
-        "https://www.instagram.com/too_bk_omd/",
-        "https://www.instagram.com/janajastar2024/",
-        "https://www.instagram.com/railways_systems_kz/"
-      ],
-      "last_checked": "2026-09-10T13:51:14+00:00"
+      "instagram": [],
+      "last_checked": "2026-09-10T13:54:35+00:00"
     },
     "8220c02b8cbb1b71e927": {
       "first_seen": "2026-09-10T13:51:14+00:00",
@@ -129,10 +104,8 @@
         "b9cfa1887602faccebad"
       ],
       "name": "athletex_kz",
-      "instagram": [
-        "https://www.instagram.com/athletex_kz/"
-      ],
-      "last_checked": "2026-09-10T13:51:14+00:00"
+      "instagram": [],
+      "last_checked": "2026-09-10T13:54:35+00:00"
     },
     "e4222437bc919da91669": {
       "first_seen": "2026-09-10T13:51:14+00:00",
@@ -140,10 +113,8 @@
         "a1c9a360271c6c1ed203"
       ],
       "name": "caspianmarathon",
-      "instagram": [
-        "https://www.instagram.com/caspianmarathon/"
-      ],
-      "last_checked": "2026-09-10T13:51:14+00:00"
+      "instagram": [],
+      "last_checked": "2026-09-10T13:54:35+00:00"
     },
     "4c600b849ad8ff817944": {
       "first_seen": "2026-09-10T13:51:14+00:00",
@@ -152,7 +123,7 @@
       ],
       "name": "Дирекция по проведению спортивно-массовых мероприятий акимата города Астаны",
       "instagram": [],
-      "last_checked": "2026-09-10T13:51:14+00:00"
+      "last_checked": "2026-09-10T13:54:35+00:00"
     },
     "dbad1d470c96b22649ce": {
       "first_seen": "2026-09-10T13:51:14+00:00",
@@ -163,7 +134,7 @@
       ],
       "name": "Корпоративный фонд «Смелость быть первым»",
       "instagram": [],
-      "last_checked": "2026-09-10T13:51:14+00:00"
+      "last_checked": "2026-09-10T13:54:35+00:00"
     },
     "c4978a6c06a26f1f44e9": {
       "first_seen": "2026-09-10T13:51:14+00:00",
@@ -172,10 +143,8 @@
         "a8dc9cd256752be0a77b"
       ],
       "name": "Управление физической культуры и туризма города Караганды",
-      "instagram": [
-        "https://www.instagram.com/qaragandymarathon.kz/"
-      ],
-      "last_checked": "2026-09-10T13:51:14+00:00"
+      "instagram": [],
+      "last_checked": "2026-09-10T13:54:35+00:00"
     }
   },
   "social_sources": {}
