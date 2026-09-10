@@ -96,6 +96,40 @@ class RaceVariantDedupTests(unittest.TestCase):
         self.assertTrue(all(e["url"] == super_url for e in cleaned["evidence"]))
         self.assertEqual(set(cleaned["sanitized_variant_sources"]), {relay_url, standard_url})
 
+    def test_historical_sanitized_sources_clear_false_conflicts_and_restore_status(self):
+        super_url = "https://triathlon.kg/events/ag-super-sprint"
+        relay_url = "https://triathlon.kg/events/ag-relay"
+        standard_url = "https://triathlon.kg/events/ag-standard"
+        row = {
+            "name": "2026 VISA Asia Triathlon Cup Cholpon-Ata AG Super Sprint",
+            "source_urls": [super_url],
+            "evidence": [
+                {"field": "name", "value": "2026 VISA Asia Triathlon Cup Cholpon-Ata AG Super Sprint", "url": super_url},
+            ],
+            "confidence": 0.87,
+            "status": "CONFLICT",
+            "pipeline_status": "NEEDS_REVIEW",
+            "changes": [],
+            "conflicts": [
+                {"field": "name", "incoming": "2026 VISA Asia Triathlon Cup Cholpon-Ata AG Relay", "incoming_sources": [relay_url]},
+                {"field": "distances", "incoming": ["40 км"], "incoming_sources": [relay_url]},
+                {"field": "name", "incoming": "2026 VISA Asia Triathlon Cup Cholpon-Ata AG Standard", "incoming_sources": [standard_url]},
+            ],
+            "sanitized_variant_sources": [relay_url, standard_url],
+        }
+
+        cleaned, removed, blocked = purge_incompatible_variant_evidence(row)
+        self.assertEqual(removed, 0)
+        self.assertEqual(set(blocked), {relay_url, standard_url})
+        self.assertEqual(cleaned["conflicts"], [])
+        self.assertEqual(cleaned["status"], "NEW")
+        self.assertEqual(cleaned["pipeline_status"], "DISCOVERED")
+
+        again, removed_again, blocked_again = purge_incompatible_variant_evidence(cleaned)
+        self.assertEqual(again, cleaned)
+        self.assertEqual(removed_again, 0)
+        self.assertEqual(blocked_again, [])
+
 
 if __name__ == "__main__":
     unittest.main()
