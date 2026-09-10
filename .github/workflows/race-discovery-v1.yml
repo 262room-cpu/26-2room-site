@@ -13,7 +13,7 @@ permissions:
 
 concurrency:
   group: race-discovery-v1-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   discover:
@@ -50,7 +50,7 @@ jobs:
           ORGANIZER_RESEARCH_TASKS: '5'
           ORGANIZER_RESEARCH_QUERIES: '2'
           ORGANIZER_RESEARCH_RESULTS: '5'
-        run: python -m race_agent.organizer_research --all --max-markets 5 --max-tasks 5 --queries-per-task 2 --results-per-query 5
+        run: python -m race_agent.organizer_research --max-markets 5 --max-tasks 5 --queries-per-task 2 --results-per-query 5
 
       - name: Persist checkpoints, evidence and global index
         shell: bash
@@ -67,7 +67,7 @@ jobs:
 
           # The branch may receive safe code/source-pack updates while discovery is running.
           # Rebase the checkpoint on the newest branch head instead of losing the whole run
-          # to a non-fast-forward push. Concurrency prevents two discovery writers at once.
+          # to a non-fast-forward push. Only the newest discovery run remains active.
           for attempt in 1 2 3; do
             git fetch origin agent/race-discovery-v1
             if git rebase origin/agent/race-discovery-v1; then
