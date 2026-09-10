@@ -1,0 +1,48 @@
+{
+  "last_success": {
+    "kz": "2026-09-10T14:30:02+00:00",
+    "ru": "2026-09-10T14:30:15+00:00",
+    "kg": "2026-09-10T14:30:28+00:00",
+    "uz": "2026-09-10T14:30:39+00:00",
+    "am": "2026-09-10T14:30:49+00:00"
+  },
+  "history": [
+    {
+      "at": "2026-09-10T14:30:49+00:00",
+      "selected": [
+        "kz",
+        "ru",
+        "kg",
+        "uz",
+        "am"
+      ],
+      "results": [
+        {
+          "market_code": "kz",
+          "status": "PASS_WITH_REVIEW_QUEUE",
+          "returncode": 0
+        },
+        {
+          "market_code": "ru",
+          "status": "PASS",
+          "returncode": 0
+        },
+        {
+          "market_code": "kg",
+          "status": "PASS",
+          "returncode": 0
+        },
+        {
+          "market_code": "uz",
+          "status": "PASS",
+          "returncode": 0
+        },
+        {
+          "market_code": "am",
+          "status": "PASS",
+          "returncode": 0
+        }
+      ]
+    }
+  ]
+}
