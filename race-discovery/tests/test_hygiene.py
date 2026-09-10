@@ -19,6 +19,15 @@ class CandidateHygieneTests(unittest.TestCase):
         }
         self.assertEqual(artifact_reason(row), "CALENDAR_PAGE_SERIALIZED_AS_EVENT")
 
+    def test_specific_event_calendar_lead_is_preserved(self):
+        row = {
+            "name": "Salomon Trail 2026",
+            "source_urls": ["https://athletex.kz/competitions/calendar"],
+            "distances": [],
+            "status": "NEW",
+        }
+        self.assertEqual(artifact_reason(row), "")
+
     def test_real_event_with_calendar_as_secondary_evidence_is_not_quarantined(self):
         row = {
             "name": "Salomon Trail 2026",
