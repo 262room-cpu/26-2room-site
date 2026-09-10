@@ -1,7 +1,11 @@
 import unittest
 
 from race_agent.core import deduplicate, match_score
-from race_agent.dedup_guard import event_variants, incompatible_event_variants
+from race_agent.dedup_guard import (
+    event_variants,
+    incompatible_event_variants,
+    purge_incompatible_variant_evidence,
+)
 
 
 class RaceVariantDedupTests(unittest.TestCase):
@@ -68,6 +72,29 @@ class RaceVariantDedupTests(unittest.TestCase):
         merged, duplicates = deduplicate([a, b])
         self.assertEqual(duplicates, 1)
         self.assertEqual(len(merged), 1)
+
+    def test_old_super_sprint_record_drops_relay_and_standard_evidence(self):
+        super_url = "https://triathlon.kg/events/ag-super-sprint"
+        relay_url = "https://triathlon.kg/events/ag-relay"
+        standard_url = "https://triathlon.kg/events/ag-standard"
+        row = {
+            "name": "2026 VISA Asia Triathlon Cup Cholpon-Ata AG Super Sprint",
+            "source_urls": [super_url, relay_url, standard_url],
+            "evidence": [
+                {"field": "name", "value": "2026 VISA Asia Triathlon Cup Cholpon-Ata AG Super Sprint", "url": super_url},
+                {"field": "date", "value": "2026-09-13", "url": super_url},
+                {"field": "name", "value": "2026 VISA Asia Triathlon Cup Cholpon-Ata AG Relay", "url": relay_url},
+                {"field": "distances", "value": ["40 км"], "url": relay_url},
+                {"field": "name", "value": "2026 VISA Asia Triathlon Cup Cholpon-Ata AG Standard", "url": standard_url},
+                {"field": "distances", "value": ["40 км", "10 км"], "url": standard_url},
+            ],
+        }
+        cleaned, removed, blocked = purge_incompatible_variant_evidence(row)
+        self.assertEqual(set(blocked), {relay_url, standard_url})
+        self.assertEqual(removed, 4)
+        self.assertEqual(cleaned["source_urls"], [super_url])
+        self.assertTrue(all(e["url"] == super_url for e in cleaned["evidence"]))
+        self.assertEqual(set(cleaned["sanitized_variant_sources"]), {relay_url, standard_url})
 
 
 if __name__ == "__main__":
