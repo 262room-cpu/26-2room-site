@@ -1,5 +1,24 @@
 {
-  "domains": {},
-  "organizers": {},
+  "domains": {
+    "ulaanbaatar.marathon.mn": {
+      "first_seen": "2026-09-10T16:41:10+00:00",
+      "source_urls": [
+        "https://ulaanbaatar.marathon.mn/register"
+      ],
+      "event_count": 1,
+      "last_checked": "2026-09-10T16:41:10+00:00"
+    }
+  },
+  "organizers": {
+    "86290f386f1529e05f48": {
+      "first_seen": "2026-09-10T16:41:10+00:00",
+      "event_ids": [
+        "05c0ae4fa31f7206f7a4"
+      ],
+      "name": "UB Marathon Committee",
+      "instagram": [],
+      "last_checked": "2026-09-10T16:41:10+00:00"
+    }
+  },
   "social_sources": {}
 }

@@ -11,7 +11,7 @@
         "http://triathlon.kg/events/cempionat-respubliki-po-duatlonu-2026"
       ],
       "event_count": 5,
-      "last_checked": "2026-09-10T15:49:17+00:00"
+      "last_checked": "2026-09-10T16:41:20+00:00"
     }
   },
   "organizers": {
@@ -26,6 +26,42 @@
       "name": "triathlon.kg",
       "instagram": [],
       "last_checked": "2026-09-10T15:49:17+00:00"
+    },
+    "694fce0ed416c45d93b6": {
+      "first_seen": "2026-09-10T16:41:20+00:00",
+      "event_ids": [
+        "bf71c6826d70d6e7980c"
+      ],
+      "name": "",
+      "instagram": [],
+      "last_checked": "2026-09-10T16:41:20+00:00"
+    },
+    "1969edeb0f1e9e66ce22": {
+      "first_seen": "2026-09-10T16:41:20+00:00",
+      "event_ids": [
+        "ea97c32fd42ae4d92ca1"
+      ],
+      "name": "",
+      "instagram": [],
+      "last_checked": "2026-09-10T16:41:20+00:00"
+    },
+    "25f42feb6c424107946e": {
+      "first_seen": "2026-09-10T16:41:20+00:00",
+      "event_ids": [
+        "72f9c891ca43fee6ddf3"
+      ],
+      "name": "",
+      "instagram": [],
+      "last_checked": "2026-09-10T16:41:20+00:00"
+    },
+    "86e7b637a04cfe1dbb0f": {
+      "first_seen": "2026-09-10T16:41:20+00:00",
+      "event_ids": [
+        "ef7b2070358759b58823"
+      ],
+      "name": "",
+      "instagram": [],
+      "last_checked": "2026-09-10T16:41:20+00:00"
     }
   },
   "social_sources": {}

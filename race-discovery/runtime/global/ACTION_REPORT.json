@@ -1,41 +1,40 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-10T16:29:35+00:00",
+  "generated_at": "2026-09-10T16:43:01+00:00",
   "catalog_connected": false,
   "catalog_note": "APP_CATALOG_NOT_CONNECTED_YET",
   "organizer_crm_connected": false,
   "organizer_crm_source": "PRIVATE_CRM_BLOCKED_IN_PUBLIC_RUNTIME",
   "organizer_crm_note": "PRIVATE_CRM_BLOCKED_IN_PUBLIC_RUNTIME",
   "counts": {
-    "events_total": 40,
+    "events_total": 39,
     "event_statuses": {
-      "VERIFIED": 13,
       "UPDATED": 19,
+      "VERIFIED": 12,
       "NEW": 3,
       "CONFLICT": 5
     },
     "catalog_relations": {
-      "CATALOG_NOT_CONNECTED": 40
+      "CATALOG_NOT_CONNECTED": 39
     },
     "events_not_in_app": null,
     "events_changed_in_app": null,
     "possible_app_matches": null,
     "conflicts_or_review": 5,
     "cancelled_or_postponed": 0,
-    "organizers_total": 33,
+    "organizers_total": 36,
     "organizer_identity_statuses": {
-      "NAMED": 3,
-      "UNRESOLVED": 29,
-      "PROVISIONAL_IDENTITY": 1
+      "NAMED": 4,
+      "UNRESOLVED": 32
     },
     "organizer_contact_statuses": {
-      "CONTACTS_MISSING": 3,
-      "NEEDS_IDENTITY_CHECK": 30
+      "CONTACTS_MISSING": 4,
+      "NEEDS_IDENTITY_CHECK": 32
     },
     "outreach_ready": 0,
     "unknown_organizers_with_contact_route": 0,
     "organizer_crm_relations": {
-      "CRM_NOT_CONNECTED": 33
+      "CRM_NOT_CONNECTED": 36
     },
     "organizers_existing_in_crm": null,
     "organizer_contact_updates_for_crm": null,
@@ -62,7 +61,7 @@
         "app_match_id": "",
         "app_diffs": [],
         "organizer": "",
-        "organizer_id": "da823a097ee21926ab54",
+        "organizer_id": "1969edeb0f1e9e66ce22",
         "organizer_contact_status": "NEEDS_IDENTITY_CHECK",
         "source_urls": [
           "http://triathlon.kg/events/2026-visa-asia-triathlon-cup-cholpon-ata-ag-super-sprint",
@@ -70,7 +69,7 @@
           "http://triathlon.kg/events/2026-visa-asia-triathlon-cup-cholpon-ata-ag-standard",
           "http://triathlon.kg/events/etap-ckr-po-triatlonu-super-sprint"
         ],
-        "last_checked_at": "2026-09-10T15:49:17+00:00"
+        "last_checked_at": "2026-09-10T16:41:20+00:00"
       },
       {
         "candidate_id": "05705e9b0695cc09c5f4",
@@ -114,13 +113,13 @@
         "source_urls": [
           "https://qhm26.athleticfamily.kz/ru"
         ],
-        "last_checked_at": "2026-09-10T16:24:01+00:00"
+        "last_checked_at": "2026-09-10T16:38:27+00:00"
       },
       {
         "candidate_id": "00317196b5ee669a0850",
         "name": "ALMATY MARATHON 2026",
         "date": "2026-09-25",
-        "city": "Туркестан",
+        "city": "Алматы",
         "country": "Kazakhstan",
         "market_code": "kz",
         "status": "CONFLICT",
@@ -129,13 +128,13 @@
         "app_match_id": "",
         "app_diffs": [],
         "organizer": "Корпоративный фонд «Смелость быть первым»",
-        "organizer_id": "13ed074d6e813f6cdf99",
+        "organizer_id": "34754fd33aefe0ba89a7",
         "organizer_contact_status": "CONTACTS_MISSING",
         "source_urls": [
           "https://almaty-marathon.kz/ru/events/almaty_marathon_2026/",
           "https://almaty-marathon.kz/ru/events/almaty_marathon_2026/regulation?page=text"
         ],
-        "last_checked_at": "2026-09-10T16:24:01+00:00"
+        "last_checked_at": "2026-09-10T16:38:27+00:00"
       },
       {
         "candidate_id": "d99f3b407b82c34209f1",
@@ -344,7 +343,7 @@
           "Kazakhstan"
         ],
         "cities": [
-          "Алматы"
+          "Астана"
         ],
         "contacts": {
           "instagram": [],
@@ -669,7 +668,7 @@
           "Kazakhstan"
         ],
         "cities": [
-          "Усть-Каменогорск"
+          "Өскемен"
         ],
         "contacts": {
           "instagram": [],
@@ -714,48 +713,6 @@
         "last_contacted_at": "",
         "source_urls": [
           "https://athletex.kz/competitions/HMOskemen2026"
-        ]
-      },
-      {
-        "global_organizer_id": "10ed8960e1314b633786",
-        "organizer_id": "d4482a9bdf442c521134",
-        "name": "",
-        "display_name": "Неустановленный организатор — race-card { border-left: 4px solid var(--color-primary, #0d6efd); }",
-        "identity_status": "UNRESOLVED",
-        "contact_status": "NEEDS_IDENTITY_CHECK",
-        "countries": [
-          "Kazakhstan"
-        ],
-        "cities": [],
-        "contacts": {
-          "instagram": [],
-          "telegram": [],
-          "whatsapp": [],
-          "email": [],
-          "phone": [],
-          "website": []
-        },
-        "contact_candidates": {
-          "instagram": [],
-          "telegram": [],
-          "whatsapp": [],
-          "email": [],
-          "phone": [],
-          "website": []
-        },
-        "event_ids": [
-          "832b3c7a4754e1fcdb17"
-        ],
-        "crm_status": "NEW_LEAD",
-        "crm_relation": "CRM_NOT_CONNECTED",
-        "crm_match_id": "",
-        "crm_match_name": "",
-        "crm_match_score": 0.0,
-        "crm_match_reasons": [],
-        "crm_contact_additions": [],
-        "last_contacted_at": "",
-        "source_urls": [
-          "https://reg.elordasport.kz/ru/"
         ]
       },
       {
@@ -813,7 +770,7 @@
           "Kazakhstan"
         ],
         "cities": [
-          "Алматы"
+          "Астана"
         ],
         "contacts": {
           "instagram": [],
@@ -960,50 +917,6 @@
         "last_contacted_at": "",
         "source_urls": [
           "https://athletex.kz/competitions/TengriUltra2026"
-        ]
-      },
-      {
-        "global_organizer_id": "cc6f4ccd236123768213",
-        "organizer_id": "daf6eb82fe707922e8e3",
-        "name": "",
-        "display_name": "Неустановленный организатор — Tengriseries",
-        "identity_status": "UNRESOLVED",
-        "contact_status": "NEEDS_IDENTITY_CHECK",
-        "countries": [
-          "Kazakhstan"
-        ],
-        "cities": [
-          "Усть-Каменогорск"
-        ],
-        "contacts": {
-          "instagram": [],
-          "telegram": [],
-          "whatsapp": [],
-          "email": [],
-          "phone": [],
-          "website": []
-        },
-        "contact_candidates": {
-          "instagram": [],
-          "telegram": [],
-          "whatsapp": [],
-          "email": [],
-          "phone": [],
-          "website": []
-        },
-        "event_ids": [
-          "b9cfa1887602faccebad"
-        ],
-        "crm_status": "NEW_LEAD",
-        "crm_relation": "CRM_NOT_CONNECTED",
-        "crm_match_id": "",
-        "crm_match_name": "",
-        "crm_match_score": 0.0,
-        "crm_match_reasons": [],
-        "crm_contact_additions": [],
-        "last_contacted_at": "",
-        "source_urls": [
-          "https://athletex.kz/competitions/calendar"
         ]
       },
       {
@@ -1161,7 +1074,7 @@
           "Russia"
         ],
         "cities": [
-          "Санкт-Петербург"
+          "Москва"
         ],
         "contacts": {
           "instagram": [],
@@ -1327,17 +1240,205 @@
         ]
       },
       {
-        "global_organizer_id": "149a8c671e27e9b69727",
-        "organizer_id": "da823a097ee21926ab54",
-        "name": "triathlon.kg",
-        "display_name": "",
-        "identity_status": "PROVISIONAL_IDENTITY",
+        "global_organizer_id": "222ca908ee9dfe4533e1",
+        "organizer_id": "694fce0ed416c45d93b6",
+        "name": "",
+        "display_name": "Неустановленный организатор — org\", \"@type\": \"WebSite\", \"name\": \"Triathlon\", \"url\": \"https://www",
+        "identity_status": "UNRESOLVED",
         "contact_status": "NEEDS_IDENTITY_CHECK",
         "countries": [
           "Kyrgyzstan"
         ],
         "cities": [
-          "Чолпон-Ата",
+          "Чолпон-Ата"
+        ],
+        "contacts": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "contact_candidates": {
+          "instagram": [
+            "https://www.instagram.com/triathlon.kg/",
+            "https://www.instagram.com/triathloncenter.kg/",
+            "https://www.instagram.com/bulak.sport/"
+          ],
+          "telegram": [],
+          "whatsapp": [
+            "https://wa.me/996770080108"
+          ],
+          "email": [
+            "triathlon.kg@gmail.com",
+            "office@triathlon.kg",
+            "bulak@2x.jpg",
+            "invite-image@2x.jpg"
+          ],
+          "phone": [
+            "+996770080108",
+            "+996227000180"
+          ],
+          "website": [
+            "https://triathlon.kg/news/kalendar-sorevnovanii-na-2026-god"
+          ]
+        },
+        "event_ids": [
+          "bf71c6826d70d6e7980c"
+        ],
+        "crm_status": "NEW_LEAD",
+        "crm_relation": "CRM_NOT_CONNECTED",
+        "crm_match_id": "",
+        "crm_match_name": "",
+        "crm_match_score": 0.0,
+        "crm_match_reasons": [],
+        "crm_contact_additions": [],
+        "last_contacted_at": "",
+        "source_urls": [
+          "https://triathlon.kg/news/kalendar-sorevnovanii-na-2026-god"
+        ]
+      },
+      {
+        "global_organizer_id": "90608690d610f2c3a02d",
+        "organizer_id": "1969edeb0f1e9e66ce22",
+        "name": "",
+        "display_name": "Неустановленный организатор — Федерация Триатлона Кыргызской Республики",
+        "identity_status": "UNRESOLVED",
+        "contact_status": "NEEDS_IDENTITY_CHECK",
+        "countries": [
+          "Kyrgyzstan"
+        ],
+        "cities": [
+          "Чолпон-Ата"
+        ],
+        "contacts": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "contact_candidates": {
+          "instagram": [
+            "https://www.instagram.com/triathlon.kg/",
+            "https://www.instagram.com/triathloncenter.kg/",
+            "https://www.instagram.com/bulak.sport/"
+          ],
+          "telegram": [],
+          "whatsapp": [
+            "https://wa.me/996770080108"
+          ],
+          "email": [
+            "triathlon.kg@gmail.com",
+            "office@triathlon.kg",
+            "bulak@2x.jpg",
+            "invite-image@2x.jpg"
+          ],
+          "phone": [
+            "+996770080108",
+            "+996227000180"
+          ],
+          "website": [
+            "http://triathlon.kg/events/etap-ckr-po-triatlonu-super-sprint",
+            "http://triathlon.kg/events/2026-visa-asia-triathlon-cup-cholpon-ata-ag-super-sprint",
+            "http://triathlon.kg/events/2026-visa-asia-triathlon-cup-cholpon-ata-ag-relay",
+            "http://triathlon.kg/events/2026-visa-asia-triathlon-cup-cholpon-ata-ag-standard"
+          ]
+        },
+        "event_ids": [
+          "ea97c32fd42ae4d92ca1"
+        ],
+        "crm_status": "NEW_LEAD",
+        "crm_relation": "CRM_NOT_CONNECTED",
+        "crm_match_id": "",
+        "crm_match_name": "",
+        "crm_match_score": 0.0,
+        "crm_match_reasons": [],
+        "crm_contact_additions": [],
+        "last_contacted_at": "",
+        "source_urls": [
+          "http://triathlon.kg/events/2026-visa-asia-triathlon-cup-cholpon-ata-ag-super-sprint",
+          "http://triathlon.kg/events/2026-visa-asia-triathlon-cup-cholpon-ata-ag-relay",
+          "http://triathlon.kg/events/2026-visa-asia-triathlon-cup-cholpon-ata-ag-standard",
+          "http://triathlon.kg/events/etap-ckr-po-triatlonu-super-sprint"
+        ]
+      },
+      {
+        "global_organizer_id": "f73034c2f7fcfbf8cd3a",
+        "organizer_id": "25f42feb6c424107946e",
+        "name": "",
+        "display_name": "Неустановленный организатор — Федерация Триатлона Кыргызской Республики",
+        "identity_status": "UNRESOLVED",
+        "contact_status": "NEEDS_IDENTITY_CHECK",
+        "countries": [
+          "Kyrgyzstan"
+        ],
+        "cities": [
+          "Чолпон-Ата"
+        ],
+        "contacts": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "contact_candidates": {
+          "instagram": [
+            "https://www.instagram.com/triathlon.kg/",
+            "https://www.instagram.com/triathloncenter.kg/",
+            "https://www.instagram.com/bulak.sport/"
+          ],
+          "telegram": [],
+          "whatsapp": [
+            "https://wa.me/996770080108"
+          ],
+          "email": [
+            "triathlon.kg@gmail.com",
+            "office@triathlon.kg",
+            "bulak@2x.jpg",
+            "invite-image@2x.jpg"
+          ],
+          "phone": [
+            "+996770080108",
+            "+996227000180"
+          ],
+          "website": [
+            "http://triathlon.kg/events/cempionat-respubliki-po-duatlonu-2026"
+          ]
+        },
+        "event_ids": [
+          "72f9c891ca43fee6ddf3"
+        ],
+        "crm_status": "NEW_LEAD",
+        "crm_relation": "CRM_NOT_CONNECTED",
+        "crm_match_id": "",
+        "crm_match_name": "",
+        "crm_match_score": 0.0,
+        "crm_match_reasons": [],
+        "crm_contact_additions": [],
+        "last_contacted_at": "",
+        "source_urls": [
+          "http://triathlon.kg/events/cempionat-respubliki-po-duatlonu-2026",
+          "http://triathlon.kg/events/2026-visa-asia-triathlon-cup-cholpon-ata-ag-super-sprint",
+          "http://triathlon.kg/events/2026-visa-asia-triathlon-cup-cholpon-ata-ag-relay",
+          "http://triathlon.kg/events/2026-visa-asia-triathlon-cup-cholpon-ata-ag-standard"
+        ]
+      },
+      {
+        "global_organizer_id": "b8e486af4fa126a00393",
+        "organizer_id": "86e7b637a04cfe1dbb0f",
+        "name": "",
+        "display_name": "Неустановленный организатор — Федерация Триатлона Кыргызской Республики",
+        "identity_status": "UNRESOLVED",
+        "contact_status": "NEEDS_IDENTITY_CHECK",
+        "countries": [
+          "Kyrgyzstan"
+        ],
+        "cities": [
           "Ош"
         ],
         "contacts": {
@@ -1369,17 +1470,10 @@
             "+996227000180"
           ],
           "website": [
-            "https://triathlon.kg/news/kalendar-sorevnovanii-na-2026-god",
-            "http://triathlon.kg/events/etap-ckr-po-triatlonu-super-sprint",
-            "http://triathlon.kg/events/2026-visa-asia-triathlon-cup-cholpon-ata-ag-super-sprint",
-            "http://triathlon.kg/events/2026-visa-asia-triathlon-cup-cholpon-ata-ag-relay",
-            "http://triathlon.kg/events/2026-visa-asia-triathlon-cup-cholpon-ata-ag-standard"
+            "http://triathlon.kg/events/indoor-triathlon-series-5"
           ]
         },
         "event_ids": [
-          "bf71c6826d70d6e7980c",
-          "ea97c32fd42ae4d92ca1",
-          "72f9c891ca43fee6ddf3",
           "ef7b2070358759b58823"
         ],
         "crm_status": "NEW_LEAD",
@@ -1391,11 +1485,52 @@
         "crm_contact_additions": [],
         "last_contacted_at": "",
         "source_urls": [
-          "https://triathlon.kg/news/kalendar-sorevnovanii-na-2026-god",
-          "http://triathlon.kg/events/etap-ckr-po-triatlonu-super-sprint",
-          "http://triathlon.kg/events/2026-visa-asia-triathlon-cup-cholpon-ata-ag-super-sprint",
-          "http://triathlon.kg/events/2026-visa-asia-triathlon-cup-cholpon-ata-ag-relay",
-          "http://triathlon.kg/events/2026-visa-asia-triathlon-cup-cholpon-ata-ag-standard"
+          "http://triathlon.kg/events/indoor-triathlon-series-5",
+          "http://triathlon.kg/events/cempionat-respubliki-po-duatlonu-2026"
+        ]
+      },
+      {
+        "global_organizer_id": "4459ff425dfc254c000c",
+        "organizer_id": "3da130123a296fdfe91e",
+        "name": "",
+        "display_name": "Неустановленный организатор — VIII Ташкентский международный марафон – 2026",
+        "identity_status": "UNRESOLVED",
+        "contact_status": "NEEDS_IDENTITY_CHECK",
+        "countries": [
+          "Uzbekistan"
+        ],
+        "cities": [
+          "Ташкент"
+        ],
+        "contacts": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "contact_candidates": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "event_ids": [
+          "47579f55486d9712a344"
+        ],
+        "crm_status": "NEW_LEAD",
+        "crm_relation": "CRM_NOT_CONNECTED",
+        "crm_match_id": "",
+        "crm_match_name": "",
+        "crm_match_score": 0.0,
+        "crm_match_reasons": [],
+        "crm_contact_additions": [],
+        "last_contacted_at": "",
+        "source_urls": [
+          "https://gov.uz/ru/yoshlar/news/view/143031"
         ]
       },
       {
@@ -1738,15 +1873,15 @@
   "market_activity": {
     "kz": {
       "country": "Kazakhstan",
-      "events": 24,
-      "organizers": 23,
-      "last_run_id": "20260910T162401Z",
+      "events": 22,
+      "organizers": 21,
+      "last_run_id": "20260910T163827Z",
       "status": "PASS_WITH_REVIEW_QUEUE",
       "organizer_research": {
         "market_code": "kz",
-        "observed_at": "2026-09-10T16:29:11+00:00",
+        "observed_at": "2026-09-10T16:42:39+00:00",
         "tasks_processed": 5,
-        "search_hits": 42,
+        "search_hits": 44,
         "candidates_found": 0,
         "contacts_promoted": 0,
         "identities_resolved": 0,
@@ -1758,13 +1893,13 @@
       "country": "Russia",
       "events": 5,
       "organizers": 5,
-      "last_run_id": "20260910T162511Z",
+      "last_run_id": "20260910T163935Z",
       "status": "PASS_WITH_REVIEW_QUEUE",
       "organizer_research": {
         "market_code": "ru",
-        "observed_at": "2026-09-10T16:29:27+00:00",
+        "observed_at": "2026-09-10T16:42:55+00:00",
         "tasks_processed": 5,
-        "search_hits": 50,
+        "search_hits": 47,
         "candidates_found": 0,
         "contacts_promoted": 0,
         "identities_resolved": 0,
@@ -1775,12 +1910,12 @@
     "kg": {
       "country": "Kyrgyzstan",
       "events": 5,
-      "organizers": 1,
-      "last_run_id": "20260910T154917Z",
+      "organizers": 5,
+      "last_run_id": "20260910T164120Z",
       "status": "PASS_WITH_REVIEW_QUEUE",
       "organizer_research": {
         "market_code": "kg",
-        "observed_at": "2026-09-10T16:29:23+00:00",
+        "observed_at": "2026-09-10T16:42:50+00:00",
         "tasks_processed": 5,
         "search_hits": 48,
         "candidates_found": 0,
@@ -1793,8 +1928,8 @@
     "uz": {
       "country": "Uzbekistan",
       "events": 1,
-      "organizers": 0,
-      "last_run_id": "20260910T155012Z",
+      "organizers": 1,
+      "last_run_id": "20260910T164214Z",
       "status": "PASS_WITH_REVIEW_QUEUE",
       "organizer_research": {
         "market_code": "uz",
@@ -1839,7 +1974,7 @@
       "status": "PASS_WITH_REVIEW_QUEUE",
       "organizer_research": {
         "market_code": "ge",
-        "observed_at": "2026-09-10T16:29:33+00:00",
+        "observed_at": "2026-09-10T16:43:00+00:00",
         "tasks_processed": 1,
         "search_hits": 8,
         "candidates_found": 0,
@@ -1857,7 +1992,7 @@
       "status": "PASS_WITH_REVIEW_QUEUE",
       "organizer_research": {
         "market_code": "md",
-        "observed_at": "2026-09-10T16:29:17+00:00",
+        "observed_at": "2026-09-10T16:42:45+00:00",
         "tasks_processed": 5,
         "search_hits": 46,
         "candidates_found": 0,
@@ -1885,10 +2020,10 @@
     },
     "mn": {
       "country": "Mongolia",
-      "events": 0,
-      "organizers": 0,
-      "last_run_id": "20260910T153649Z",
-      "status": "PASS",
+      "events": 1,
+      "organizers": 1,
+      "last_run_id": "20260910T164110Z",
+      "status": "PASS_WITH_REVIEW_QUEUE",
       "organizer_research": {}
     }
   }

@@ -1,0 +1,115 @@
+{
+  "generated_at": "2026-09-10T16:42:39+00:00",
+  "markets": [
+    {
+      "market_code": "am",
+      "candidates_before": 0,
+      "quarantined": 0,
+      "candidates_after": 0,
+      "evidence_rows_compacted": 0
+    },
+    {
+      "market_code": "az",
+      "candidates_before": 0,
+      "quarantined": 0,
+      "candidates_after": 0,
+      "evidence_rows_compacted": 0
+    },
+    {
+      "market_code": "by",
+      "candidates_before": 0,
+      "quarantined": 0,
+      "candidates_after": 0,
+      "evidence_rows_compacted": 0
+    },
+    {
+      "market_code": "ge",
+      "candidates_before": 1,
+      "quarantined": 0,
+      "quarantine_reasons": {},
+      "candidates_after": 1,
+      "related_rows_removed": 0,
+      "organizers_removed": 0,
+      "evidence_rows_compacted": 0
+    },
+    {
+      "market_code": "kg",
+      "candidates_before": 5,
+      "quarantined": 0,
+      "quarantine_reasons": {},
+      "candidates_after": 5,
+      "related_rows_removed": 0,
+      "organizers_removed": 0,
+      "evidence_rows_compacted": 0
+    },
+    {
+      "market_code": "kz",
+      "candidates_before": 24,
+      "quarantined": 2,
+      "quarantine_reasons": {
+        "CALENDAR_PAGE_SERIALIZED_AS_EVENT": 1,
+        "CSS_OR_TEMPLATE_AS_EVENT_TITLE": 1
+      },
+      "candidates_after": 22,
+      "related_rows_removed": 4,
+      "organizers_removed": 2,
+      "evidence_rows_compacted": 1061
+    },
+    {
+      "market_code": "md",
+      "candidates_before": 6,
+      "quarantined": 0,
+      "quarantine_reasons": {},
+      "candidates_after": 6,
+      "related_rows_removed": 0,
+      "organizers_removed": 0,
+      "evidence_rows_compacted": 113
+    },
+    {
+      "market_code": "mn",
+      "candidates_before": 1,
+      "quarantined": 0,
+      "quarantine_reasons": {},
+      "candidates_after": 1,
+      "related_rows_removed": 0,
+      "organizers_removed": 0,
+      "evidence_rows_compacted": 0
+    },
+    {
+      "market_code": "ru",
+      "candidates_before": 5,
+      "quarantined": 0,
+      "quarantine_reasons": {},
+      "candidates_after": 5,
+      "related_rows_removed": 0,
+      "organizers_removed": 0,
+      "evidence_rows_compacted": 0
+    },
+    {
+      "market_code": "tj",
+      "candidates_before": 0,
+      "quarantined": 0,
+      "candidates_after": 0,
+      "evidence_rows_compacted": 0
+    },
+    {
+      "market_code": "tm",
+      "candidates_before": 0,
+      "quarantined": 0,
+      "candidates_after": 0,
+      "evidence_rows_compacted": 0
+    },
+    {
+      "market_code": "uz",
+      "candidates_before": 1,
+      "quarantined": 0,
+      "quarantine_reasons": {},
+      "candidates_after": 1,
+      "related_rows_removed": 0,
+      "organizers_removed": 0,
+      "evidence_rows_compacted": 0
+    }
+  ],
+  "quarantined_total": 2,
+  "evidence_rows_compacted_total": 1174
+}
