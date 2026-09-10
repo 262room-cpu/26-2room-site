@@ -12,62 +12,67 @@
   "last_bootstrap_at": "2026-09-10T12:23:53Z",
   "candidate_count": 9,
   "review_queue_count": 3,
-  "run_id": "20260910T123716Z",
-  "started_at": "2026-09-10T12:37:16+00:00",
+  "run_id": "20260910T123751Z",
+  "started_at": "2026-09-10T12:37:51+00:00",
   "queries_completed": 10,
-  "urls_discovered": 64,
-  "urls_checked": 33,
+  "urls_discovered": 66,
+  "urls_checked": 32,
   "raw_candidates": 1,
-  "finished_at": "2026-09-10T12:37:31+00:00",
+  "finished_at": "2026-09-10T12:38:31+00:00",
   "last_summary": {
-    "run_id": "20260910T123716Z",
-    "started_at": "2026-09-10T12:37:16+00:00",
-    "finished_at": "2026-09-10T12:37:31+00:00",
+    "run_id": "20260910T123751Z",
+    "started_at": "2026-09-10T12:37:51+00:00",
+    "finished_at": "2026-09-10T12:38:31+00:00",
     "queries": 10,
-    "urls_discovered": 64,
-    "urls_checked": 33,
+    "urls_discovered": 66,
+    "urls_checked": 32,
     "raw_candidates": 1,
     "deduplicated_candidates": 1,
     "duplicates_discarded": 0,
     "new": 1,
     "updated": 0,
     "conflicts": 0,
-    "needs_manual_review": 4,
+    "needs_manual_review": 5,
     "status_counts": {
-      "NEW": 2,
+      "NEW": 3,
       "VERIFIED": 5,
       "CONFLICT": 3
     },
     "errors": [
       {
         "phase": "FETCH",
-        "url": "https://www.investing.com/brokers/metatrader/",
+        "url": "https://www.etsy.com/market/leather_backpack_men_heritage",
         "error": "HTTPError: HTTP Error 403: Forbidden"
       },
       {
         "phase": "FETCH",
-        "url": "https://www.reddit.com/r/porn/top/?t=all",
-        "error": "HTTPError: HTTP Error 403: Blocked"
+        "url": "https://genius.com/Remini-2027-lyrics",
+        "error": "HTTPError: HTTP Error 403: Forbidden"
       },
       {
         "phase": "FETCH",
-        "url": "https://www.reddit.com/r/all+/",
-        "error": "HTTPError: HTTP Error 403: Blocked"
+        "url": "https://www.boomplay.com/lyrics/179252241",
+        "error": "HTTPError: HTTP Error 403: Forbidden"
       },
       {
         "phase": "FETCH",
-        "url": "https://www.reddit.com/r/AmateurPorn/top/",
-        "error": "HTTPError: HTTP Error 403: Blocked"
+        "url": "https://www.shazam.com/en-us/song/1771757203/2027",
+        "error": "HTTPError: HTTP Error 403: Forbidden"
       },
       {
         "phase": "FETCH",
-        "url": "https://www.reddit.com/r/HairyPussy/",
-        "error": "HTTPError: HTTP Error 403: Blocked"
+        "url": "https://www.merriam-webster.com/dictionary/trail",
+        "error": "HTTPError: HTTP Error 403: Forbidden"
       },
       {
         "phase": "FETCH",
-        "url": "https://unicourt.com/courts/state",
-        "error": "HTTPError: HTTP Error 405: Not Allowed"
+        "url": "https://www.microsoft.com/en-us/microsoft-365",
+        "error": "TimeoutError: The read operation timed out"
+      },
+      {
+        "phase": "FETCH",
+        "url": "https://www.instagram.com/tastyshreds/",
+        "error": "HTTPError: HTTP Error 429: Too Many Requests"
       },
       {
         "phase": "FETCH",
