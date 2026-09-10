@@ -1,0 +1,40 @@
+{
+  "country": "Kazakhstan",
+  "queries": [
+    "марафон Казахстан 2026 официальный",
+    "забег Казахстан октябрь 2026 официальный",
+    "trail Kazakhstan 2026 race",
+    "полумарафон Казахстан 2026 регистрация",
+    "триатлон Казахстан 2026 старт",
+    "дуатлон Казахстан 2026 старт",
+    "OCR obstacle race Kazakhstan 2026",
+    "site:athletex.kz competitions 2026 Kazakhstan",
+    "site:almaty-marathon.kz 2026 events",
+    "site:qazathletics.kz 2026 marathon Kazakhstan",
+    "site:gov.kz забег марафон Казахстан 2026",
+    "site:reg.elordasport.kz забег 2026",
+    "массовый забег Казахстан сентябрь 2026 регистрация",
+    "марафон Казахстан ноябрь 2026 официальный"
+  ],
+  "seed_urls": [
+    "https://athletex.kz/competitions/calendar",
+    "https://almaty-marathon.kz/ru/events/",
+    "https://qhm26.athleticfamily.kz/ru",
+    "https://www.caspian-marathon.kz/ru/calendar",
+    "https://reg.elordasport.kz/ru/",
+    "https://www.gov.kz/memleket/entities/astana/press/news?lang=ru"
+  ],
+  "source_hints": {
+    "almaty-marathon.kz": "official_organizer",
+    "caspian-marathon.kz": "official_event",
+    "aktau-marathon.kz": "official_event",
+    "qhm26.athleticfamily.kz": "official_event",
+    "athletex.kz": "registration",
+    "qazathletics.kz": "federation",
+    "gov.kz": "government",
+    "reg.elordasport.kz": "registration"
+  },
+  "cities": [
+    "Алматы", "Астана", "Караганда", "Актау", "Туркестан", "Зеренда", "Костанай", "Өскемен", "Усть-Каменогорск", "Шымкент", "Актобе", "Атырау", "Бурабай", "Павлодар", "Семей", "Тараз", "Кокшетау", "Талдыкорган", "Балхаш", "Темиртау", "Жезказган", "Конаев", "Қонаев"
+  ]
+}
