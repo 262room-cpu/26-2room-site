@@ -8,6 +8,12 @@ from .core import domain, stable_id
 SOCIAL_DOMAINS = {"instagram.com", "facebook.com", "t.me", "telegram.me", "wa.me", "whatsapp.com"}
 QUERY_BATCH_HINT = 2
 DEEP_RESEARCH_CYCLES = 3
+_COMPLETED_RESEARCH_STATUSES = {
+    "RESEARCHED_NO_CONTACT",
+    "FOUND_CANDIDATES_NEEDS_VERIFICATION",
+    "RESEARCHED_IDENTITY_MISSING",
+    "IDENTITY_MISSING_CONTACT_CANDIDATES",
+}
 
 
 def _unique(values: list[str]) -> list[str]:
@@ -34,7 +40,6 @@ def _query_pack(event: dict, organizer: dict | None) -> list[str]:
 
     queries: list[str] = []
     if org_name:
-        # When identity is already known, finding a real contact is the priority.
         for d in domains:
             queries.append(f'site:{d} "{org_name}" (контакты OR contact OR Instagram OR Telegram)')
         queries.extend([
@@ -44,8 +49,6 @@ def _query_pack(event: dict, organizer: dict | None) -> list[str]:
             f'site:t.me "{org_name}" {country}',
         ])
     else:
-        # Unknown identity: first interrogate the event's own domains. This is both safer and
-        # usually more precise than starting with a broad social search.
         for d in domains:
             queries.append(f'site:{d} "{event_name}" (организатор OR organizer OR организаторы OR contacts)')
         queries.extend([
@@ -58,19 +61,29 @@ def _query_pack(event: dict, organizer: dict | None) -> list[str]:
     return _unique([" ".join(q.split()) for q in queries if q.strip()])
 
 
-def _rotate_queries(queries: list[str], round_index: int) -> tuple[list[str], int, int]:
-    """Put the next cheap query batch first while retaining the complete plan.
-
-    organizer_research currently executes the first N queries from each task. Rotating here keeps
-    that worker simple and makes successive cloud runs cover the whole plan instead of repeating
-    the same first two searches forever.
-    """
+def _rotate_queries(queries: list[str], completed_batches: int) -> tuple[list[str], int, int]:
     if not queries:
         return [], 0, 0
-    offset = (max(0, round_index) * QUERY_BATCH_HINT) % len(queries)
+    offset = (max(0, completed_batches) * QUERY_BATCH_HINT) % len(queries)
     rotated = queries[offset:] + queries[:offset]
-    completed_cycles = (max(0, round_index) * QUERY_BATCH_HINT) // len(queries)
+    completed_cycles = (max(0, completed_batches) * QUERY_BATCH_HINT) // len(queries)
     return rotated, offset, completed_cycles
+
+
+def _completed_batches(previous: dict, same_plan: bool, reason: str) -> int:
+    if not previous or not same_plan:
+        if previous and not previous.get("query_plan_id") and previous.get("reason") == reason and previous.get("last_researched_at"):
+            return 1
+        return 0
+
+    scheduled_round = max(1, int(previous.get("research_round", 1) or 1))
+    status = str(previous.get("status") or "")
+    if status in _COMPLETED_RESEARCH_STATUSES:
+        return scheduled_round
+    if status == "DEEP_RESEARCH_EXHAUSTED_NEEDS_REVIEW":
+        return max(0, scheduled_round)
+    # PENDING_* means the current scheduled batch has not actually been processed yet.
+    return max(0, scheduled_round - 1)
 
 
 def build_progressive_organizer_research_queue(
@@ -80,12 +93,7 @@ def build_progressive_organizer_research_queue(
     run_id: str,
     observed_at: str,
 ) -> list[dict]:
-    """Build a stable research queue while preserving useful history across discovery runs.
-
-    The old v2 queue was regenerated from scratch on every discovery pass. That erased research
-    evidence/status and made the worker repeatedly rediscover the same first clues. The queue now
-    keeps one stable task per event, preserves history and rotates through the full query plan.
-    """
+    """Build a stable queue whose rotation advances only after a real worker pass."""
     by_id = {p.get("organizer_id"): p for p in organizers if p.get("organizer_id")}
     previous_by_event = {q.get("candidate_id"): q for q in previous_queue if q.get("candidate_id")}
     queue: list[dict] = []
@@ -105,32 +113,24 @@ def build_progressive_organizer_research_queue(
         plan_id = stable_id("organizer-query-plan", *base_queries)
         previous = previous_by_event.get(event.get("candidate_id"), {})
         same_plan = previous.get("query_plan_id") == plan_id and previous.get("reason") == reason
-
-        if same_plan:
-            round_index = int(previous.get("research_round", 0) or 0)
-        elif previous and not previous.get("query_plan_id") and previous.get("reason") == reason and previous.get("last_researched_at"):
-            # Safe migration from the pre-rotation queue: assume its first batch already ran.
-            round_index = 1
-        else:
-            round_index = 0
-
-        queries, query_offset, completed_cycles = _rotate_queries(base_queries, round_index)
-        next_round = round_index + 1
+        completed_batches = _completed_batches(previous, same_plan, reason)
+        queries, query_offset, completed_cycles = _rotate_queries(base_queries, completed_batches)
         exhausted = completed_cycles >= DEEP_RESEARCH_CYCLES
+        scheduled_round = completed_batches + 1
 
         task = {
             "task_id": previous.get("task_id") or stable_id("organizer-research", event.get("candidate_id") or run_id),
             "candidate_id": event.get("candidate_id"),
             "organizer_id": event.get("organizer_id") or "",
             "reason": reason,
-            "status": previous.get("status") or "PENDING_DISCOVERY",
+            "status": "DEEP_RESEARCH_EXHAUSTED_NEEDS_REVIEW" if exhausted else "PENDING_RECHECK",
             "created_at": previous.get("created_at") or observed_at,
             "last_seen_at": observed_at,
-            "search_queries": queries,
+            "search_queries": [] if exhausted else queries,
             "query_plan_id": plan_id,
             "query_plan_size": len(base_queries),
             "query_offset": query_offset,
-            "research_round": next_round,
+            "research_round": completed_batches if exhausted else scheduled_round,
             "completed_query_cycles": completed_cycles,
             "deep_research_exhausted": exhausted,
             "escalation_recommended": "STRONG_MODEL_OR_MANUAL_REVIEW" if exhausted else "",
@@ -141,14 +141,10 @@ def build_progressive_organizer_research_queue(
             "last_researched_at": previous.get("last_researched_at", ""),
             "errors": list(previous.get("errors", []))[-10:],
         }
-        # A task that was previously resolved but is no longer ready must be reopened; otherwise
-        # stale status could suppress a real contact regression/change.
-        if task["status"] in {"RESOLVED_READY_TO_CONTACT", "DISMISSED", "STALE_EVENT"}:
-            task["status"] = "PENDING_RECHECK"
-        if exhausted and task["status"] in {"RESEARCHED_NO_CONTACT", "FOUND_CANDIDATES_NEEDS_VERIFICATION"}:
-            task["status"] = "DEEP_RESEARCH_EXHAUSTED_NEEDS_REVIEW"
         queue.append(task)
 
+    # Pending work first; exhausted checkpoints remain visible but never consume a worker slot first.
+    queue.sort(key=lambda r: (bool(r.get("deep_research_exhausted")), r.get("last_researched_at") or ""))
     return queue
 
 
@@ -172,7 +168,6 @@ def _read_runtime_queue() -> list[dict]:
 def build_runtime_progressive_organizer_research_queue(
     events: list[dict], organizers: list[dict], run_id: str, observed_at: str
 ) -> list[dict]:
-    """Drop-in replacement for the legacy four-argument queue builder used by cli.py."""
     return build_progressive_organizer_research_queue(
         events,
         organizers,
