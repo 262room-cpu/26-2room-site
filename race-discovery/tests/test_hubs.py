@@ -36,6 +36,8 @@ class HubTests(unittest.TestCase):
           <h1>Yerevan Marathon 2026</h1>
           <a href="/events">All events</a>
           <a href="/events/yerevan-marathon/registration">Registration</a>
+          <a href="/events/yerevan-marathon/agenda">Agenda</a>
+          <a href="/events/yerevan-marathon/map">Course map</a>
         </body></html>
         '''
         out = extract_hub_event_links("https://example.am/events/yerevan-marathon", raw)
