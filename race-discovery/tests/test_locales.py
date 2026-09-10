@@ -56,6 +56,71 @@ class LocaleParsingTests(unittest.TestCase):
         self.assertNotIn("5 km", candidate["distances"])
         self.assertTrue(any("6500" in x for x in candidate["registration_prices"]))
 
+    def test_structured_almaty_event_is_not_overwritten_by_neighbor_turkistan_event(self):
+        html = '''
+        <html><head><title>ALMATY MARATHON 2026</title>
+        <script type="application/ld+json">
+        {
+          "@context":"https://schema.org",
+          "@type":"SportsEvent",
+          "name":"ALMATY MARATHON 2026",
+          "startDate":"2026-09-27T05:30:00+06:00",
+          "location":{"@type":"Place","name":"Площадь Республики"},
+          "organizer":{"@type":"Organization","name":"Корпоративный фонд Смелость быть первым"}
+        }
+        </script></head><body>
+        <nav>Другие старты: TURKISTAN MARATHON — 25 сентября 2026, Туркестан.</nav>
+        <main>ALMATY MARATHON 2026. 27 сентября 2026. Алматы. Площадь Республики. 42,195 км. Регистрация открыта.</main>
+        <footer>Следующий старт фонда: Туркестан, 25 октября 2026.</footer>
+        </body></html>
+        '''
+        candidate = candidate_from_document(
+            "https://almaty-marathon.kz/ru/events/almaty_marathon_2026/",
+            html,
+            "official_organizer",
+            "2026-09-10T00:00:00Z",
+            known_cities=["Алматы", "Туркестан"],
+            country="Kazakhstan",
+        )
+        self.assertIsNotNone(candidate)
+        self.assertEqual(candidate["name"], "ALMATY MARATHON 2026")
+        self.assertEqual(candidate["date"], "2026-09-27")
+        self.assertEqual(candidate["city"], "Алматы")
+        self.assertEqual(candidate["location"], "Площадь Республики")
+        self.assertTrue(any(e.get("field") == "city" and e.get("scope") == "EVENT_IDENTITY" for e in candidate["evidence"]))
+
+    def test_structured_date_wins_even_when_focused_text_starts_with_another_date(self):
+        html = '''
+        <html><head><title>Yerevan Marathon 2026</title>
+        <script type="application/ld+json">
+        {"@context":"https://schema.org","@type":"Event","name":"Yerevan Marathon 2026","startDate":"2026-10-18"}
+        </script></head><body>
+        <div>17 October 2026 expo and packet pickup.</div>
+        <main>Yerevan Marathon 2026 — race day 18 October 2026, Yerevan.</main>
+        </body></html>
+        '''
+        candidate = candidate_from_document(
+            "https://example.am/yerevan-marathon-2026", html, "official_event", "2026-09-10T00:00:00Z",
+            known_cities=["Ереван"], country="Armenia",
+        )
+        self.assertIsNotNone(candidate)
+        self.assertEqual(candidate["date"], "2026-10-18")
+        self.assertEqual(candidate["city"], "Ереван")
+
+    def test_known_registration_status_is_not_erased_by_unknown_focused_status(self):
+        html = '''
+        <html><head><title>Astana Trail 2026</title></head><body>
+        <div>Регистрация открыта на Astana Trail 2026.</div>
+        <main>Astana Trail 2026, 18 October 2026, Astana, 20 km.</main>
+        </body></html>
+        '''
+        candidate = candidate_from_document(
+            "https://example.kz/astana-trail-2026", html, "official_event", "2026-09-10T00:00:00Z",
+            known_cities=["Астана"], country="Kazakhstan",
+        )
+        self.assertIsNotNone(candidate)
+        self.assertEqual(candidate["registration_status"], "OPEN")
+
 
 if __name__ == "__main__":
     unittest.main()
