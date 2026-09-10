@@ -22,6 +22,18 @@ _GENERIC_HUB_TITLES = {
     "calendar", "календарь", "events", "события", "tengriseries", "race calendar",
     "календарь стартов", "календарь соревнований",
 }
+_GENERIC_SERIES_TITLES = {
+    "детские забеги", "kids races", "kids runs", "серия забегов", "race series", "running series",
+}
+_GENERIC_ORGANIZER_TITLES = {
+    "беговое сообщество", "running community", "running club", "беговой клуб",
+}
+_ANCILLARY_TITLES = {
+    "pasta party", "паста пати", "expo", "экспо", "race expo", "press conference",
+    "пресс конференция", "packet pickup", "race pack pickup", "выдача стартовых пакетов",
+    "выдача стартовых номеров",
+}
+_JSON_TITLE_MARKERS = ('"@type"', "'@type'", '@type:', '"url":', '"name":', 'schema.org')
 
 
 def _read_jsonl(path: pathlib.Path) -> list[dict]:
@@ -63,33 +75,57 @@ def _all_calendar_sources(row: dict) -> bool:
     return True
 
 
-def artifact_reason(row: dict) -> str:
-    """Return a reason only for high-precision machine-detectable garbage.
+def _all_rootish_sources(row: dict) -> bool:
+    urls = [str(x) for x in row.get("source_urls", []) if str(x).startswith("http")]
+    if not urls:
+        return False
+    for url in urls:
+        try:
+            path = urlparse(url).path.casefold().rstrip("/")
+        except Exception:
+            return False
+        if path not in {"", "/ru", "/en", "/kz"}:
+            return False
+    return True
 
-    A calendar entry can be a legitimate *lead* even before we find its event page, so calendar
-    provenance alone is not enough to delete it. We quarantine only impossible/template titles or
-    obvious whole-calendar aggregates.
+
+def artifact_reason(row: dict) -> str:
+    """Return a reason only for high-precision machine-detectable non-event records.
+
+    Ambiguous races stay in review. Specific calendar leads stay discoverable. We quarantine only
+    impossible/template titles, whole-page aggregates, generic series parents and clearly ancillary
+    program items that have no race distance of their own.
     """
     name = str(row.get("name") or "").strip()
     low = name.casefold()
     normalized = _normalized_title(name)
+    distances = list(row.get("distances") or [])
 
     if not name:
         return "EMPTY_EVENT_NAME"
     if any(marker in low for marker in _CSS_MARKERS) or ("{" in name and "}" in name):
         return "CSS_OR_TEMPLATE_AS_EVENT_TITLE"
+    if sum(1 for marker in _JSON_TITLE_MARKERS if marker in low) >= 2 or "@type" in low:
+        return "JSON_OR_SCHEMA_FRAGMENT_AS_EVENT_TITLE"
 
     calendar_only = _all_calendar_sources(row)
     if calendar_only and normalized in _GENERIC_HUB_TITLES:
         return "CALENDAR_PAGE_SERIALIZED_AS_EVENT"
-    if calendar_only and len(row.get("distances") or []) >= 10:
-        # A single race rarely exposes ten+ distinct race distances. On a calendar URL this is a
-        # strong signature that the old parser concatenated several cards into one candidate.
+    if calendar_only and len(distances) >= 10:
         return "CALENDAR_PAGE_SERIALIZED_AS_EVENT"
     if normalized in _GENERIC_HUB_TITLES:
         urls = row.get("source_urls", [])
         if any("calendar" in str(u).casefold() for u in urls):
             return "GENERIC_CALENDAR_ARTIFACT"
+
+    rootish = _all_rootish_sources(row)
+    if rootish and normalized in _GENERIC_ORGANIZER_TITLES and len(distances) >= 4:
+        return "ORGANIZER_HOMEPAGE_SERIALIZED_AS_EVENT"
+    if rootish and normalized in _GENERIC_SERIES_TITLES:
+        return "SERIES_LANDING_PAGE_SERIALIZED_AS_SINGLE_EVENT"
+
+    if normalized in _ANCILLARY_TITLES and not distances:
+        return "ANCILLARY_PROGRAM_ITEM_NOT_RACE"
     return ""
 
 
@@ -135,7 +171,7 @@ def clean_market(code: str) -> dict:
             **row,
             "quarantine_reason": reason,
             "quarantined_at": observed,
-            "hygiene_version": 3,
+            "hygiene_version": 4,
         })
 
     if rejected or evidence_removed:
@@ -143,7 +179,6 @@ def clean_market(code: str) -> dict:
 
     if rejected:
         old_quarantine = _read_jsonl(root / "quarantine.jsonl")
-        # Avoid appending the same artifact forever if an old parser recreates it unexpectedly.
         quarantine_by_key = {}
         for row in old_quarantine + rejected:
             key = (row.get("candidate_id"), row.get("quarantine_reason"), tuple(row.get("source_urls", [])))
@@ -156,8 +191,6 @@ def clean_market(code: str) -> dict:
     removed_existing = _filter_by_candidate_ids(root / "already_in_app.jsonl", active_ids) if rejected else 0
     removed_model = _filter_by_candidate_ids(root / "model_queue.jsonl", active_ids) if rejected else 0
 
-    # Organizer rows may refer to several events. Keep the profile if at least one real event
-    # survives, trim quarantined event links and compact repeated evidence on every hygiene pass.
     organizers = _read_jsonl(root / "organizers.jsonl")
     organizers_kept = []
     organizer_removed = 0
@@ -206,7 +239,6 @@ def main() -> int:
         codes = sorted(p.name for p in MARKETS.iterdir() if p.is_dir()) if MARKETS.exists() else []
     results = [clean_market(code) for code in codes]
 
-    # Rebuild global state after artifacts or provenance compaction so the report sees clean rows.
     if any(r.get("quarantined") or r.get("evidence_rows_compacted") for r in results):
         from .market_runner import aggregate_global
         aggregate_global()
