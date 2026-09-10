@@ -1,0 +1,15 @@
+{
+  "domains": {
+    "almaty-marathon.kz": {"first_seen":"2026-09-10T12:23:53Z","last_checked":"2026-09-10T12:23:53Z","source_urls":["https://almaty-marathon.kz/ru/events/almaty_marathon_2026/","https://almaty-marathon.kz/ru/events/almaty_marathon_2026/regulation?page=text","https://almaty-marathon.kz/ru/events/turkistan_marathon_2026/","https://almaty-marathon.kz/ru/events"],"event_count":3},
+    "athletex.kz": {"first_seen":"2026-09-10T12:23:53Z","last_checked":"2026-09-10T12:23:53Z","source_urls":["https://athletex.kz/competitions/rrautumn26","https://athletex.kz/competitions/zhm5","https://athletex.kz/competitions/calendar"],"event_count":3},
+    "caspian-marathon.kz": {"first_seen":"2026-09-10T12:23:53Z","last_checked":"2026-09-10T12:23:53Z","source_urls":["https://www.caspian-marathon.kz/ru/calendar/?title=CASPIAN_MARATHON_2026_%E2%80%94_bolshe%2C_chem_prosto_zabeg_252"],"event_count":1},
+    "qhm26.athleticfamily.kz": {"first_seen":"2026-09-10T12:23:53Z","last_checked":"2026-09-10T12:23:53Z","source_urls":["https://qhm26.athleticfamily.kz/ru"],"event_count":1},
+    "reg.elordasport.kz": {"first_seen":"2026-09-10T12:23:53Z","last_checked":"2026-09-10T12:23:53Z","source_urls":["https://reg.elordasport.kz/ru/events/12sep-jana-men-kuz-run/"],"event_count":1},
+    "gov.kz": {"first_seen":"2026-09-10T12:23:53Z","last_checked":"2026-09-10T12:23:53Z","source_urls":["https://www.gov.kz/memleket/entities/astana/press/news/details/1286800"],"event_count":1}
+  },
+  "organizers": {
+    "Корпоративный фонд «Смелость быть первым»": {"first_seen":"2026-09-10T12:23:53Z","last_checked":"2026-09-10T12:23:53Z","event_ids":["00317196b5ee669a0850","05850758ebc06baf087f","eb67caca3ee984b0394e"]},
+    "Дирекция по проведению спортивно-массовых мероприятий акимата города Астаны": {"first_seen":"2026-09-10T12:23:53Z","last_checked":"2026-09-10T12:23:53Z","event_ids":["e89ad2a3fb2a576eae54"]},
+    "Управление физической культуры и туризма города Караганды": {"first_seen":"2026-09-10T12:23:53Z","last_checked":"2026-09-10T12:23:53Z","event_ids":["a8dc9cd256752be0a77b"]}
+  }
+}
