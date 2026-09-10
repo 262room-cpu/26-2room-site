@@ -6,6 +6,7 @@ from html.parser import HTMLParser
 from urllib.parse import urljoin, urlparse, urlunparse
 
 from .core import EVENT_KEYWORDS, extract_jsonld_events, normalize
+from .telegram_public import is_public_channel_feed, parse_public_channel
 
 HUB_PATH_HINTS = {
     "calendar", "календарь", "events", "event-list", "competitions", "races",
@@ -73,12 +74,7 @@ def _host(url: str) -> str:
 
 
 def _same_site(a: str, b: str) -> bool:
-    """Treat organizer-owned subdomains as the same site family.
-
-    Large race organizers often use one subdomain per event (for example
-    `moscowmarathon.runc.run` linked from `runc.run`). The dotted suffix check
-    allows that relationship but does not accept lookalikes such as `evilrunc.run`.
-    """
+    """Treat organizer-owned subdomains as the same site family."""
     da, db = _host(a), _host(b)
     if not da or not db:
         return False
@@ -113,12 +109,46 @@ def _blocked(url: str) -> bool:
     return any(normalize(term) in n for term in BLOCKED_PATH_TERMS)
 
 
+def _telegram_feed_as_hub(base_url: str, raw_html: str, max_links: int) -> dict:
+    """Treat a public Telegram feed as a hub of message URLs, never as one giant event.
+
+    Each returned child URL points to one Telegram message. Only event-like posts are queued.
+    The feed remains a hub even when no current post is relevant, which prevents Frankenstein
+    candidates assembled from multiple unrelated messages.
+    """
+    messages = parse_public_channel(raw_html, max_messages=max(max_links * 2, 40))
+    rows = []
+    for message in messages:
+        text = str(message.get("text") or "")
+        if not _eventish(text):
+            continue
+        rows.append({
+            "url": str(message.get("url") or ""),
+            "text": text[:180],
+            "score": "5",
+        })
+        if len(rows) >= max_links:
+            break
+    return {
+        "is_hub": True,
+        "hub_url": base_url,
+        "hub_type": "TELEGRAM_PUBLIC_FEED",
+        "jsonld_event_count": 0,
+        "event_links": rows,
+        "messages_scanned": len(messages),
+    }
+
+
 def extract_hub_event_links(base_url: str, raw_html: str, max_links: int = 50) -> dict:
-    """Detect calendar/hub pages and return organizer-site links worth inspecting.
+    """Detect calendar/hub pages and return links worth inspecting.
 
     A detected hub is discovery evidence only. We never construct one Event Candidate from a
-    calendar because dates, distances and organizers from different cards must never be mixed.
+    calendar or social feed because dates, distances and organizers from different cards/posts
+    must never be mixed.
     """
+    if is_public_channel_feed(base_url):
+        return _telegram_feed_as_hub(base_url, raw_html, max_links)
+
     parser = _AnchorParser()
     try:
         parser.feed(raw_html)
@@ -171,6 +201,7 @@ def extract_hub_event_links(base_url: str, raw_html: str, max_links: int = 50) -
     return {
         "is_hub": detected,
         "hub_url": base_url,
+        "hub_type": "WEB_CALENDAR" if detected else "",
         "jsonld_event_count": len(jsonld_events),
         "event_links": rows if detected else [],
     }
