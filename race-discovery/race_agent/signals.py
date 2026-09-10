@@ -20,6 +20,11 @@ def _domain(url: str) -> str:
         return ""
 
 
+def _geo_terms(cfg: dict) -> list[str]:
+    aliases = list(cfg.get("country_aliases", [])) or [cfg.get("country", "")]
+    return list(dict.fromkeys([normalize(x) for x in aliases + list(cfg.get("cities", [])) if x]))
+
+
 def relevance_score(hit: SearchHit, cfg: dict, query: str = "") -> float:
     d = _domain(hit.url)
     if d in JUNK_DOMAINS:
@@ -37,13 +42,14 @@ def relevance_score(hit: SearchHit, cfg: dict, query: str = "") -> float:
     if not has_event:
         return 0.0
 
-    geo_terms = ["казахстан", "kazakhstan", "қазақстан"] + [normalize(c) for c in cfg.get("cities", [])]
+    geo_terms = _geo_terms(cfg)
     has_geo = any(g and g in text for g in geo_terms)
     query_has_geo = any(g and g in q for g in geo_terms)
     known_source = any(key in d or key in hit.url for key in cfg.get("source_hints", {}))
     social = d in SOCIAL_DOMAINS or d.endswith("instagram.com") or d.endswith("t.me")
     current_year = bool(re.search(r"\b20(?:26|27|28)\b", text))
-    kz_domain = d.endswith(".kz")
+    market_tld = str(cfg.get("tld") or "").lower()
+    local_domain = bool(market_tld and d.endswith(market_tld))
 
     score = 0.30
     if has_geo:
@@ -54,7 +60,7 @@ def relevance_score(hit: SearchHit, cfg: dict, query: str = "") -> float:
         score += 0.25
     if current_year:
         score += 0.15
-    if kz_domain:
+    if local_domain:
         score += 0.10
     if social:
         score += 0.10
@@ -84,6 +90,8 @@ def should_fetch_direct(url: str) -> bool:
 def signal_record(hit: SearchHit, query: str, observed_at: str, cfg: dict) -> dict:
     return {
         "observed_at": observed_at,
+        "market_code": cfg.get("market_code", ""),
+        "country": cfg.get("country", ""),
         "query": query,
         "title": hit.title,
         "snippet": hit.snippet,
@@ -100,27 +108,33 @@ def signal_as_html(hit: SearchHit) -> str:
     return f"<html><title>{title}</title><body>{snippet}</body></html>"
 
 
-def page_has_kazakhstan_evidence(raw_html: str, candidate: dict, url: str, source_type: str, cfg: dict) -> bool:
+def page_has_market_evidence(raw_html: str, candidate: dict, url: str, source_type: str, cfg: dict) -> bool:
     if source_type != "secondary":
         return True
     if candidate.get("city"):
         return True
     d = _domain(url)
-    if d.endswith(".kz"):
+    market_tld = str(cfg.get("tld") or "").lower()
+    if market_tld and d.endswith(market_tld):
         return True
     text = normalize(raw_html[:120000])
-    geo_terms = ["казахстан", "kazakhstan", "қазақстан"] + [normalize(c) for c in cfg.get("cities", [])]
-    return any(g and g in text for g in geo_terms)
+    return any(g and g in text for g in _geo_terms(cfg))
+
+
+# Backward compatibility for the v1 CLI import while semantics are now multi-market.
+page_has_kazakhstan_evidence = page_has_market_evidence
 
 
 def social_queries(cfg: dict) -> list[str]:
+    names = cfg.get("query_names") or cfg.get("country_aliases") or [cfg.get("country", "")]
+    country = names[0] if names else cfg.get("country", "")
     base = [
-        'site:instagram.com (марафон OR забег OR trail OR триатлон) Казахстан 2026',
-        'site:instagram.com (марафон OR забег OR trail OR триатлон) Казахстан 2027',
-        'site:t.me (марафон OR забег OR trail OR триатлон) Казахстан 2026',
-        'site:t.me (марафон OR забег OR trail OR триатлон) Казахстан 2027',
-        'site:facebook.com (марафон OR забег OR trail OR триатлон) Казахстан 2026',
-        '"регистрация" "забег" Казахстан 2026',
-        '"старт" "дистанция" Казахстан марафон 2026',
+        f'site:instagram.com (марафон OR забег OR trail OR триатлон) "{country}" 2026',
+        f'site:instagram.com (марафон OR забег OR trail OR триатлон) "{country}" 2027',
+        f'site:t.me (марафон OR забег OR trail OR триатлон) "{country}" 2026',
+        f'site:t.me (марафон OR забег OR trail OR триатлон) "{country}" 2027',
+        f'site:facebook.com (марафон OR забег OR trail OR триатлон) "{country}" 2026',
+        f'"регистрация" "забег" "{country}" 2026',
+        f'"старт" "дистанция" "{country}" марафон 2026',
     ]
     return list(dict.fromkeys(cfg.get("social_queries", []) + base))
