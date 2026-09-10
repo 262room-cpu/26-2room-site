@@ -1,0 +1,23 @@
+{
+  "queries": [
+    "site:triathlon.kg 2026 соревнования календарь",
+    "site:triathlon.kg 2026 триатлон дуатлон акватлон",
+    "Bishkek marathon 2026 registration",
+    "Kyrgyzstan trail 2026 registration",
+    "Иссык-Куль марафон 2026 регистрация",
+    "Кыргызстан забег 2026 регистрация"
+  ],
+  "social_queries": [
+    "site:instagram.com Кыргызстан марафон 2026",
+    "site:t.me Кыргызстан марафон 2026",
+    "site:instagram.com Kyrgyzstan trail 2026"
+  ],
+  "seed_urls": [
+    "https://triathlon.kg/news/kalendar-sorevnovanii-na-2026-god",
+    "https://triathlon.kg/events"
+  ],
+  "source_hints": {
+    "triathlon.kg": "federation"
+  },
+  "event_terms": ["акватлон", "кубок азии", "чкр", "snow leopard run"]
+}
