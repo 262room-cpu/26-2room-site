@@ -7,6 +7,7 @@ import pathlib
 import re
 from urllib.parse import urlparse
 
+from .edition_dedup import collapse_same_editions
 from .organizers import outreach_ready
 from .provenance import compact_record_provenance
 
@@ -174,12 +175,13 @@ def clean_market(code: str) -> dict:
     if not candidates:
         return {
             "market_code": code, "candidates_before": 0, "quarantined": 0,
-            "candidates_after": 0, "evidence_rows_compacted": 0,
+            "same_edition_duplicates_collapsed": 0, "candidates_after": 0,
+            "evidence_rows_compacted": 0,
         }
 
     observed = dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")
     kept = []
-    rejected = []
+    artifact_rejected = []
     evidence_removed = 0
     for original in candidates:
         row, removed = compact_record_provenance(original)
@@ -188,29 +190,47 @@ def clean_market(code: str) -> dict:
         if not reason:
             kept.append(row)
             continue
-        rejected.append({
+        artifact_rejected.append({
             **row,
             "quarantine_reason": reason,
             "quarantined_at": observed,
-            "hygiene_version": 5,
+            "hygiene_version": 6,
         })
 
-    if rejected or evidence_removed:
+    kept, duplicate_archived = collapse_same_editions(kept)
+    duplicate_archived = [{
+        **row,
+        "quarantine_reason": "SAME_EDITION_DUPLICATE_COLLAPSED",
+        "quarantined_at": observed,
+        "hygiene_version": 6,
+    } for row in duplicate_archived]
+
+    # The canonicalizer combines provenance from both records. Compact that union once more so
+    # repeated evidence does not regrow after historical duplicate cleanup.
+    compacted_kept = []
+    for original in kept:
+        row, removed = compact_record_provenance(original)
+        evidence_removed += removed
+        compacted_kept.append(row)
+    kept = compacted_kept
+
+    archived = artifact_rejected + duplicate_archived
+    if archived or evidence_removed:
         _write_jsonl(candidates_path, kept)
 
-    if rejected:
+    if archived:
         old_quarantine = _read_jsonl(root / "quarantine.jsonl")
         quarantine_by_key = {}
-        for row in old_quarantine + rejected:
+        for row in old_quarantine + archived:
             key = (row.get("candidate_id"), row.get("quarantine_reason"), tuple(row.get("source_urls", [])))
             quarantine_by_key[key] = row
         _write_jsonl(root / "quarantine.jsonl", list(quarantine_by_key.values())[-1000:])
 
     active_ids = {r.get("candidate_id") for r in kept if r.get("candidate_id")}
-    removed_queue = _filter_by_candidate_ids(root / "organizer_research_queue.jsonl", active_ids) if rejected else 0
-    removed_discovery = _filter_by_candidate_ids(root / "discovery_list.jsonl", active_ids) if rejected else 0
-    removed_existing = _filter_by_candidate_ids(root / "already_in_app.jsonl", active_ids) if rejected else 0
-    removed_model = _filter_by_candidate_ids(root / "model_queue.jsonl", active_ids) if rejected else 0
+    removed_queue = _filter_by_candidate_ids(root / "organizer_research_queue.jsonl", active_ids) if archived else 0
+    removed_discovery = _filter_by_candidate_ids(root / "discovery_list.jsonl", active_ids) if archived else 0
+    removed_existing = _filter_by_candidate_ids(root / "already_in_app.jsonl", active_ids) if archived else 0
+    removed_model = _filter_by_candidate_ids(root / "model_queue.jsonl", active_ids) if archived else 0
 
     organizers = _read_jsonl(root / "organizers.jsonl")
     organizers_kept = []
@@ -225,15 +245,16 @@ def clean_market(code: str) -> dict:
             continue
         row["event_ids"] = event_ids
         organizers_kept.append(row)
-    if organizers and (rejected or organizer_evidence_removed or organizer_removed):
+    if organizers and (archived or organizer_evidence_removed or organizer_removed):
         _write_jsonl(root / "organizers.jsonl", organizers_kept)
         _write_jsonl(root / "organizer_outreach_ready.jsonl", outreach_ready(organizers_kept))
 
     return {
         "market_code": code,
         "candidates_before": len(candidates),
-        "quarantined": len(rejected),
-        "quarantine_reasons": dict(_count(r.get("quarantine_reason") for r in rejected)),
+        "quarantined": len(artifact_rejected),
+        "quarantine_reasons": dict(_count(r.get("quarantine_reason") for r in artifact_rejected)),
+        "same_edition_duplicates_collapsed": len(duplicate_archived),
         "candidates_after": len(kept),
         "related_rows_removed": removed_queue + removed_discovery + removed_existing + removed_model,
         "organizers_removed": organizer_removed,
@@ -260,7 +281,10 @@ def main() -> int:
         codes = sorted(p.name for p in MARKETS.iterdir() if p.is_dir()) if MARKETS.exists() else []
     results = [clean_market(code) for code in codes]
 
-    if any(r.get("quarantined") or r.get("evidence_rows_compacted") for r in results):
+    if any(
+        r.get("quarantined") or r.get("same_edition_duplicates_collapsed") or r.get("evidence_rows_compacted")
+        for r in results
+    ):
         from .market_runner import aggregate_global
         aggregate_global()
 
@@ -268,6 +292,9 @@ def main() -> int:
         "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
         "markets": results,
         "quarantined_total": sum(int(r.get("quarantined", 0)) for r in results),
+        "same_edition_duplicates_collapsed_total": sum(
+            int(r.get("same_edition_duplicates_collapsed", 0)) for r in results
+        ),
         "evidence_rows_compacted_total": sum(int(r.get("evidence_rows_compacted", 0)) for r in results),
     }
     (RUNTIME / "global").mkdir(parents=True, exist_ok=True)
