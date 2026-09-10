@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-10T16:42:39+00:00",
+  "generated_at": "2026-09-10T16:57:31+00:00",
   "markets": [
     {
       "market_code": "am",
@@ -35,25 +35,27 @@
     {
       "market_code": "kg",
       "candidates_before": 5,
-      "quarantined": 0,
-      "quarantine_reasons": {},
-      "candidates_after": 5,
-      "related_rows_removed": 0,
-      "organizers_removed": 0,
+      "quarantined": 1,
+      "quarantine_reasons": {
+        "JSON_OR_SCHEMA_FRAGMENT_AS_EVENT_TITLE": 1
+      },
+      "candidates_after": 4,
+      "related_rows_removed": 2,
+      "organizers_removed": 1,
       "evidence_rows_compacted": 0
     },
     {
       "market_code": "kz",
-      "candidates_before": 24,
+      "candidates_before": 23,
       "quarantined": 2,
       "quarantine_reasons": {
-        "CALENDAR_PAGE_SERIALIZED_AS_EVENT": 1,
-        "CSS_OR_TEMPLATE_AS_EVENT_TITLE": 1
+        "CSS_OR_TEMPLATE_AS_EVENT_TITLE": 1,
+        "ANCILLARY_PROGRAM_ITEM_NOT_RACE": 1
       },
-      "candidates_after": 22,
+      "candidates_after": 21,
       "related_rows_removed": 4,
-      "organizers_removed": 2,
-      "evidence_rows_compacted": 1061
+      "organizers_removed": 1,
+      "evidence_rows_compacted": 175
     },
     {
       "market_code": "md",
@@ -63,7 +65,7 @@
       "candidates_after": 6,
       "related_rows_removed": 0,
       "organizers_removed": 0,
-      "evidence_rows_compacted": 113
+      "evidence_rows_compacted": 0
     },
     {
       "market_code": "mn",
@@ -78,11 +80,14 @@
     {
       "market_code": "ru",
       "candidates_before": 5,
-      "quarantined": 0,
-      "quarantine_reasons": {},
-      "candidates_after": 5,
-      "related_rows_removed": 0,
-      "organizers_removed": 0,
+      "quarantined": 2,
+      "quarantine_reasons": {
+        "ORGANIZER_HOMEPAGE_SERIALIZED_AS_EVENT": 1,
+        "SERIES_LANDING_PAGE_SERIALIZED_AS_SINGLE_EVENT": 1
+      },
+      "candidates_after": 3,
+      "related_rows_removed": 4,
+      "organizers_removed": 2,
       "evidence_rows_compacted": 0
     },
     {
@@ -110,6 +115,6 @@
       "evidence_rows_compacted": 0
     }
   ],
-  "quarantined_total": 2,
-  "evidence_rows_compacted_total": 1174
+  "quarantined_total": 5,
+  "evidence_rows_compacted_total": 175
 }
