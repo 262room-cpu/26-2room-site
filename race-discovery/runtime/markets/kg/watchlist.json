@@ -7,10 +7,11 @@
         "http://triathlon.kg/events/2026-visa-asia-triathlon-cup-cholpon-ata-ag-super-sprint",
         "http://triathlon.kg/events/2026-visa-asia-triathlon-cup-cholpon-ata-ag-relay",
         "http://triathlon.kg/events/2026-visa-asia-triathlon-cup-cholpon-ata-ag-standard",
-        "http://triathlon.kg/events/indoor-triathlon-series-5"
+        "http://triathlon.kg/events/indoor-triathlon-series-5",
+        "http://triathlon.kg/events/cempionat-respubliki-po-duatlonu-2026"
       ],
       "event_count": 5,
-      "last_checked": "2026-09-10T15:05:28+00:00"
+      "last_checked": "2026-09-10T15:22:56+00:00"
     }
   },
   "organizers": {
@@ -24,7 +25,7 @@
       ],
       "name": "triathlon.kg",
       "instagram": [],
-      "last_checked": "2026-09-10T15:05:28+00:00"
+      "last_checked": "2026-09-10T15:22:56+00:00"
     }
   },
   "social_sources": {}
