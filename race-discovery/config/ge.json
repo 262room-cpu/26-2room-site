@@ -1,0 +1,19 @@
+{
+  "queries": [
+    "site:tbilisimarathon.ge 2026 Tbilisi Marathon",
+    "Tbilisi Marathon 2026 registration",
+    "Georgia trail race 2026 registration",
+    "Georgia running events 2026"
+  ],
+  "social_queries": [
+    "site:instagram.com Tbilisi Marathon 2026",
+    "site:t.me Georgia trail marathon 2026"
+  ],
+  "seed_urls": [
+    "https://www.tbilisimarathon.ge/en/index"
+  ],
+  "source_hints": {
+    "tbilisimarathon.ge": "official_event"
+  },
+  "event_terms": ["tbilisi marathon", "half marathon"]
+}
