@@ -364,7 +364,7 @@ def match_score(a: dict[str, Any], b: dict[str, Any]) -> float:
     return round(0.55 * title + 0.25 * date_score + 0.10 * city_score + 0.10 * url_score, 4)
 
 
-def merge_candidates(base: dict[str, Any], incoming: dict[str, Any]) -> dict[str, Any]:
+def merge_candidates(base: dict[str, Any], incoming: dict[str, Any], historical: bool = False) -> dict[str, Any]:
     out = json.loads(json.dumps(base, ensure_ascii=False))
     changes = list(out.get("changes", []))
     conflicts = list(out.get("conflicts", []))
@@ -378,13 +378,18 @@ def merge_candidates(base: dict[str, Any], incoming: dict[str, Any]) -> dict[str
             out[field] = new
             changes.append({"field": field, "old": old, "new": new})
         elif old != new:
-            if field in {"date", "distances", "location", "registration_prices", "registration_status", "name"}:
-                conflicts.append({"field": field, "existing": old, "incoming": new, "incoming_sources": incoming.get("source_urls", [])})
             old_w = max((e.get("weight", 0) for e in out.get("evidence", []) if e.get("field") == field), default=0)
             new_w = max((e.get("weight", 0) for e in incoming.get("evidence", []) if e.get("field") == field), default=0)
-            if new_w > old_w:
-                out[field] = new
-                changes.append({"field": field, "old": old, "new": new})
+            if historical:
+                if new_w >= old_w or (new_w == 0 and old_w == 0):
+                    out[field] = new
+                    changes.append({"field": field, "old": old, "new": new, "observed_at": incoming.get("last_checked_at")})
+            else:
+                if field in {"date", "distances", "location", "registration_prices", "name"}:
+                    conflicts.append({"field": field, "existing": old, "incoming": new, "incoming_sources": incoming.get("source_urls", [])})
+                if new_w > old_w or (field == "registration_status" and new_w >= old_w):
+                    out[field] = new
+                    changes.append({"field": field, "old": old, "new": new})
     out["evidence"] = out.get("evidence", []) + incoming.get("evidence", [])
     out["source_urls"] = list(dict.fromkeys(out.get("source_urls", []) + incoming.get("source_urls", [])))
     out["last_checked_at"] = incoming.get("last_checked_at", out.get("last_checked_at"))
