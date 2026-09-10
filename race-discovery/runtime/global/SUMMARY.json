@@ -1,18 +1,18 @@
 {
-  "generated_at": "2026-09-10T16:07:23+00:00",
+  "generated_at": "2026-09-10T16:29:35+00:00",
   "markets": {
     "kz": {
       "country": "Kazakhstan",
       "events": 24,
       "organizers": 23,
-      "last_run_id": "20260910T160337Z",
+      "last_run_id": "20260910T162401Z",
       "status": "PASS_WITH_REVIEW_QUEUE"
     },
     "ru": {
       "country": "Russia",
       "events": 5,
       "organizers": 5,
-      "last_run_id": "20260910T160443Z",
+      "last_run_id": "20260910T162511Z",
       "status": "PASS_WITH_REVIEW_QUEUE"
     },
     "kg": {
@@ -60,22 +60,22 @@
     "md": {
       "country": "Moldova",
       "events": 6,
-      "organizers": 1,
-      "last_run_id": "20260910T153129Z",
+      "organizers": 6,
+      "last_run_id": "20260910T162646Z",
       "status": "PASS_WITH_REVIEW_QUEUE"
     },
     "tj": {
       "country": "Tajikistan",
       "events": 0,
       "organizers": 0,
-      "last_run_id": "20260910T153612Z",
+      "last_run_id": "20260910T162828Z",
       "status": "PASS"
     },
     "tm": {
       "country": "Turkmenistan",
       "events": 0,
       "organizers": 0,
-      "last_run_id": "20260910T153630Z",
+      "last_run_id": "20260910T162847Z",
       "status": "PASS"
     },
     "mn": {
@@ -87,6 +87,6 @@
     }
   },
   "global_events": 40,
-  "global_organizers": 29,
+  "global_organizers": 33,
   "outreach_ready": 0
 }

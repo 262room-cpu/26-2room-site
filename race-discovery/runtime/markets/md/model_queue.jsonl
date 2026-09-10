@@ -1,1 +1,1 @@
-{"task_id": "20260910T150148Z:05705e9b0695cc09c5f4:CONFLICT", "candidate_id": "05705e9b0695cc09c5f4", "reason": "CONFLICT", "status": "CHECKPOINTED_NO_MODEL_CREDENTIAL", "created_at": "2026-09-10T15:01:48+00:00", "attempts": 0, "last_error": "", "last_seen_at": "2026-09-10T15:31:29+00:00"}
+{"task_id": "20260910T150148Z:05705e9b0695cc09c5f4:CONFLICT", "candidate_id": "05705e9b0695cc09c5f4", "reason": "CONFLICT", "status": "CHECKPOINTED_NO_MODEL_CREDENTIAL", "created_at": "2026-09-10T15:01:48+00:00", "attempts": 0, "last_error": "", "last_seen_at": "2026-09-10T16:26:46+00:00"}

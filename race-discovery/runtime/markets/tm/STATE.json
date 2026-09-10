@@ -1,30 +1,30 @@
 {
   "status": "PASS",
-  "run_id": "20260910T153630Z",
-  "started_at": "2026-09-10T15:36:30+00:00",
+  "run_id": "20260910T162847Z",
+  "started_at": "2026-09-10T16:28:47+00:00",
   "phase": "DONE",
   "queries_completed": 16,
-  "urls_discovered": 9,
-  "signals_accepted": 6,
-  "urls_checked": 9,
+  "urls_discovered": 11,
+  "signals_accepted": 8,
+  "urls_checked": 8,
   "hubs_detected": 0,
   "hub_links_discovered": 0,
   "raw_candidates": 0,
-  "finished_at": "2026-09-10T15:36:49+00:00",
+  "finished_at": "2026-09-10T16:29:11+00:00",
   "last_summary": {
-    "run_id": "20260910T153630Z",
-    "started_at": "2026-09-10T15:36:30+00:00",
-    "finished_at": "2026-09-10T15:36:49+00:00",
+    "run_id": "20260910T162847Z",
+    "started_at": "2026-09-10T16:28:47+00:00",
+    "finished_at": "2026-09-10T16:29:11+00:00",
     "queries": 16,
-    "search_hits_seen": 105,
-    "search_hits_accepted": 6,
-    "search_hits_rejected": 99,
-    "page_geo_rejected": 0,
-    "signals": 6,
+    "search_hits_seen": 102,
+    "search_hits_accepted": 8,
+    "search_hits_rejected": 94,
+    "page_geo_rejected": 1,
+    "signals": 8,
     "private_signals": 0,
     "private_inbox_source": "NONE",
-    "urls_discovered": 9,
-    "urls_checked": 9,
+    "urls_discovered": 11,
+    "urls_checked": 8,
     "hubs_detected": 0,
     "hub_links_discovered": 0,
     "telegram_feeds": 0,
@@ -50,7 +50,23 @@
     "organizer_outreach_ready": 0,
     "organizer_research_queue": 0,
     "organizer_contact_status_counts": {},
-    "errors": []
+    "errors": [
+      {
+        "phase": "FETCH",
+        "url": "https://www.goldderby.com/p/2027-oscars/",
+        "error": "HTTPError: HTTP Error 403: Forbidden"
+      },
+      {
+        "phase": "FETCH",
+        "url": "https://sportcom.gov.tm/ru/",
+        "error": "URLError: <urlopen error [Errno 111] Connection refused>"
+      },
+      {
+        "phase": "FETCH",
+        "url": "https://sportcom.gov.tm/ru/federation/64",
+        "error": "URLError: <urlopen error [Errno 111] Connection refused>"
+      }
+    ]
   },
   "catalog_source": "NOT_CONNECTED",
   "telegram_feeds": 0,

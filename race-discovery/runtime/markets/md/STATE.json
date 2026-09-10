@@ -1,7 +1,7 @@
 {
   "status": "PASS_WITH_REVIEW_QUEUE",
-  "run_id": "20260910T153129Z",
-  "started_at": "2026-09-10T15:31:29+00:00",
+  "run_id": "20260910T162646Z",
+  "started_at": "2026-09-10T16:26:46+00:00",
   "phase": "DONE",
   "queries_completed": 16,
   "urls_discovered": 37,
@@ -10,15 +10,15 @@
   "hubs_detected": 1,
   "hub_links_discovered": 29,
   "raw_candidates": 29,
-  "finished_at": "2026-09-10T15:33:10+00:00",
+  "finished_at": "2026-09-10T16:28:27+00:00",
   "last_summary": {
-    "run_id": "20260910T153129Z",
-    "started_at": "2026-09-10T15:31:29+00:00",
-    "finished_at": "2026-09-10T15:33:10+00:00",
+    "run_id": "20260910T162646Z",
+    "started_at": "2026-09-10T16:26:46+00:00",
+    "finished_at": "2026-09-10T16:28:27+00:00",
     "queries": 16,
-    "search_hits_seen": 103,
+    "search_hits_seen": 102,
     "search_hits_accepted": 9,
-    "search_hits_rejected": 94,
+    "search_hits_rejected": 93,
     "page_geo_rejected": 0,
     "signals": 9,
     "private_signals": 0,
@@ -27,11 +27,15 @@
     "urls_checked": 37,
     "hubs_detected": 1,
     "hub_links_discovered": 29,
+    "telegram_feeds": 0,
+    "telegram_messages_seen": 0,
+    "telegram_messages_accepted": 0,
+    "telegram_external_links": 0,
     "raw_candidates": 29,
     "deduplicated_candidates": 5,
     "duplicates_discarded": 24,
     "quarantined_noise": 0,
-    "new": 3,
+    "new": 1,
     "updated": 1,
     "conflicts": 1,
     "catalog_source": "NOT_CONNECTED",
@@ -47,14 +51,18 @@
       "UPDATED": 1,
       "CONFLICT": 1
     },
-    "organizer_records": 1,
-    "organizer_new_leads": 0,
+    "organizer_records": 6,
+    "organizer_new_leads": 6,
     "organizer_outreach_ready": 0,
     "organizer_research_queue": 6,
     "organizer_contact_status_counts": {
-      "NEEDS_IDENTITY_CHECK": 1
+      "NEEDS_IDENTITY_CHECK": 6
     },
     "errors": []
   },
-  "catalog_source": "NOT_CONNECTED"
+  "catalog_source": "NOT_CONNECTED",
+  "telegram_feeds": 0,
+  "telegram_messages_seen": 0,
+  "telegram_messages_accepted": 0,
+  "telegram_external_links": 0
 }
