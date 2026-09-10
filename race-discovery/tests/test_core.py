@@ -31,6 +31,15 @@ class CoreTests(unittest.TestCase):
         self.assertEqual(out["pipeline_status"], "NEEDS_REVIEW")
         self.assertEqual(out["date"], "2026-10-02")
 
+    def test_historical_change_is_updated_not_conflict(self):
+        old = {"name":"Race","date":"2026-10-01","registration_status":"OPEN","source_urls":["https://official.kz/race"],"evidence":[{"field":"date","weight":1.0},{"field":"registration_status","weight":1.0}],"confidence":.95,"conflicts":[],"changes":[]}
+        new = {"name":"Race","date":"2026-10-08","registration_status":"CLOSED","source_urls":["https://official.kz/race"],"evidence":[{"field":"date","weight":1.0},{"field":"registration_status","weight":1.0}],"confidence":.95,"last_checked_at":"later"}
+        out = merge_candidates(old, new, historical=True)
+        self.assertEqual(out["date"], "2026-10-08")
+        self.assertEqual(out["registration_status"], "CLOSED")
+        self.assertEqual(out["status"], "UPDATED")
+        self.assertFalse(out["conflicts"])
+
     def test_update_match_survives_date_change(self):
         old = {"name":"Qaragandy Half Marathon","date":"2026-08-29","city":"Караганда","source_urls":["https://qhm26.athleticfamily.kz/ru"]}
         new = {"name":"Qaragandy Half Marathon","date":"2026-09-20","city":"Караганда","source_urls":["https://qhm26.athleticfamily.kz/ru"]}
