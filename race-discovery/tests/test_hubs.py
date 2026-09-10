@@ -71,10 +71,10 @@ class HubTests(unittest.TestCase):
         raw = '''
         <html><body>
           <div class="tgme_widget_message" data-post="athletex/100">
-            <div>Новый Tengri Ultra 2026. Trail race 50 km. Регистрация открыта.</div>
+            <div>Новый Tengri Ultra 2026.<br>Trail race 50 km.<img src="cover.jpg"> Регистрация открыта.</div>
           </div>
           <div class="tgme_widget_message" data-post="athletex/101">
-            <div>Сегодня просто хорошая погода и фото команды.</div>
+            <div>Сегодня просто хорошая погода и фото команды.<br></div>
           </div>
           <div class="tgme_widget_message" data-post="athletex/102">
             <div>Irbis Race 2026 — забег в Алматы.</div>
