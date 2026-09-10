@@ -6,6 +6,8 @@ import pathlib
 from .core import domain, stable_id
 
 SOCIAL_DOMAINS = {"instagram.com", "facebook.com", "t.me", "telegram.me", "wa.me", "whatsapp.com"}
+QUERY_BATCH_HINT = 2
+DEEP_RESEARCH_CYCLES = 3
 
 
 def _unique(values: list[str]) -> list[str]:
@@ -56,6 +58,21 @@ def _query_pack(event: dict, organizer: dict | None) -> list[str]:
     return _unique([" ".join(q.split()) for q in queries if q.strip()])
 
 
+def _rotate_queries(queries: list[str], round_index: int) -> tuple[list[str], int, int]:
+    """Put the next cheap query batch first while retaining the complete plan.
+
+    organizer_research currently executes the first N queries from each task. Rotating here keeps
+    that worker simple and makes successive cloud runs cover the whole plan instead of repeating
+    the same first two searches forever.
+    """
+    if not queries:
+        return [], 0, 0
+    offset = (max(0, round_index) * QUERY_BATCH_HINT) % len(queries)
+    rotated = queries[offset:] + queries[:offset]
+    completed_cycles = (max(0, round_index) * QUERY_BATCH_HINT) // len(queries)
+    return rotated, offset, completed_cycles
+
+
 def build_progressive_organizer_research_queue(
     events: list[dict],
     organizers: list[dict],
@@ -67,7 +84,7 @@ def build_progressive_organizer_research_queue(
 
     The old v2 queue was regenerated from scratch on every discovery pass. That erased research
     evidence/status and made the worker repeatedly rediscover the same first clues. The queue now
-    keeps one stable task per event and refreshes only the query plan/reason.
+    keeps one stable task per event, preserves history and rotates through the full query plan.
     """
     by_id = {p.get("organizer_id"): p for p in organizers if p.get("organizer_id")}
     previous_by_event = {q.get("candidate_id"): q for q in previous_queue if q.get("candidate_id")}
@@ -84,8 +101,23 @@ def build_progressive_organizer_research_queue(
         else:
             continue
 
-        queries = _query_pack(event, organizer)
+        base_queries = _query_pack(event, organizer)
+        plan_id = stable_id("organizer-query-plan", *base_queries)
         previous = previous_by_event.get(event.get("candidate_id"), {})
+        same_plan = previous.get("query_plan_id") == plan_id and previous.get("reason") == reason
+
+        if same_plan:
+            round_index = int(previous.get("research_round", 0) or 0)
+        elif previous and not previous.get("query_plan_id") and previous.get("reason") == reason and previous.get("last_researched_at"):
+            # Safe migration from the pre-rotation queue: assume its first batch already ran.
+            round_index = 1
+        else:
+            round_index = 0
+
+        queries, query_offset, completed_cycles = _rotate_queries(base_queries, round_index)
+        next_round = round_index + 1
+        exhausted = completed_cycles >= DEEP_RESEARCH_CYCLES
+
         task = {
             "task_id": previous.get("task_id") or stable_id("organizer-research", event.get("candidate_id") or run_id),
             "candidate_id": event.get("candidate_id"),
@@ -95,6 +127,13 @@ def build_progressive_organizer_research_queue(
             "created_at": previous.get("created_at") or observed_at,
             "last_seen_at": observed_at,
             "search_queries": queries,
+            "query_plan_id": plan_id,
+            "query_plan_size": len(base_queries),
+            "query_offset": query_offset,
+            "research_round": next_round,
+            "completed_query_cycles": completed_cycles,
+            "deep_research_exhausted": exhausted,
+            "escalation_recommended": "STRONG_MODEL_OR_MANUAL_REVIEW" if exhausted else "",
             "search_hits_checked": int(previous.get("search_hits_checked", 0) or 0),
             "discovered_contact_candidates": list(previous.get("discovered_contact_candidates", []))[:50],
             "contacts_promoted": int(previous.get("contacts_promoted", 0) or 0),
@@ -106,6 +145,8 @@ def build_progressive_organizer_research_queue(
         # stale status could suppress a real contact regression/change.
         if task["status"] in {"RESOLVED_READY_TO_CONTACT", "DISMISSED", "STALE_EVENT"}:
             task["status"] = "PENDING_RECHECK"
+        if exhausted and task["status"] in {"RESEARCHED_NO_CONTACT", "FOUND_CANDIDATES_NEEDS_VERIFICATION"}:
+            task["status"] = "DEEP_RESEARCH_EXHAUSTED_NEEDS_REVIEW"
         queue.append(task)
 
     return queue
