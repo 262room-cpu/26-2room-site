@@ -82,15 +82,33 @@ def source_family(url: str) -> str:
     return "WEB"
 
 
+def _safe_public_telegram_target(url: str) -> bool:
+    """Return True only when Telegram URL can be isolated deterministically.
+
+    `/s/channel` is a public feed handled by the Telegram hub splitter.
+    `/channel/123` is one public message. A bare `/channel` page may contain a feed/profile and
+    stays signal-only until a source-specific adapter isolates its messages.
+    """
+    try:
+        p = urlparse(url)
+        host = p.netloc.lower().removeprefix("www.")
+        if host not in {"t.me", "telegram.me"}:
+            return False
+        parts = [x for x in p.path.split("/") if x]
+        if len(parts) >= 2 and parts[0] == "s":
+            return True
+        return len(parts) >= 2 and parts[1].isdigit()
+    except Exception:
+        return False
+
+
 def should_fetch_direct(url: str) -> bool:
     d = _domain(url)
-    # Social search hits stay as signals until a source-specific adapter can isolate one post/profile.
-    # Fetching an entire Instagram/Facebook/Telegram page can mix many unrelated events/contacts.
-    return not (
-        "instagram.com" in d
-        or "facebook.com" in d
-        or d in {"t.me", "telegram.me"}
-    )
+    if d in {"t.me", "telegram.me"}:
+        return _safe_public_telegram_target(url)
+    # Instagram/Facebook search results remain signals until a source-specific adapter can
+    # isolate one post/profile. Fetching arbitrary social pages can mix events and partner links.
+    return not ("instagram.com" in d or "facebook.com" in d)
 
 
 def signal_record(hit: SearchHit, query: str, observed_at: str, cfg: dict) -> dict:
