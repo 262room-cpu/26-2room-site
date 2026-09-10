@@ -1,5 +1,31 @@
 {
-  "domains": {},
-  "organizers": {},
+  "domains": {
+    "triathlon.kg": {
+      "first_seen": "2026-09-10T15:05:28+00:00",
+      "source_urls": [
+        "http://triathlon.kg/events/etap-ckr-po-triatlonu-super-sprint",
+        "http://triathlon.kg/events/2026-visa-asia-triathlon-cup-cholpon-ata-ag-super-sprint",
+        "http://triathlon.kg/events/2026-visa-asia-triathlon-cup-cholpon-ata-ag-relay",
+        "http://triathlon.kg/events/2026-visa-asia-triathlon-cup-cholpon-ata-ag-standard",
+        "http://triathlon.kg/events/indoor-triathlon-series-5"
+      ],
+      "event_count": 5,
+      "last_checked": "2026-09-10T15:05:28+00:00"
+    }
+  },
+  "organizers": {
+    "da823a097ee21926ab54": {
+      "first_seen": "2026-09-10T15:05:28+00:00",
+      "event_ids": [
+        "bf71c6826d70d6e7980c",
+        "ea97c32fd42ae4d92ca1",
+        "72f9c891ca43fee6ddf3",
+        "ef7b2070358759b58823"
+      ],
+      "name": "triathlon.kg",
+      "instagram": [],
+      "last_checked": "2026-09-10T15:05:28+00:00"
+    }
+  },
   "social_sources": {}
 }
