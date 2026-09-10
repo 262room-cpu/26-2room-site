@@ -52,6 +52,9 @@ jobs:
           ORGANIZER_RESEARCH_RESULTS: '5'
         run: python -m race_agent.organizer_research --max-markets 5 --max-tasks 5 --queries-per-task 2 --results-per-query 5
 
+      - name: Build 26.2 ROOM action report
+        run: python -m race_agent.report --max-items 50
+
       - name: Persist checkpoints, evidence and global index
         shell: bash
         run: |
