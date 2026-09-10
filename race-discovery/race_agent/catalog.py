@@ -9,6 +9,8 @@ from difflib import SequenceMatcher
 from urllib.parse import urlparse
 
 from .core import normalize
+from .firebase_catalog import configured as firestore_configured
+from .firebase_catalog import load_from_env as load_firestore_catalog
 
 TRACKED_FIELDS = ("name", "date", "city", "location", "distances", "registration_status", "registration_url", "instagram")
 
@@ -116,6 +118,12 @@ def annotate_against_catalog(candidate: dict, catalog: list[dict]) -> dict:
 
 
 def load_catalog(runtime_dir: pathlib.Path) -> tuple[list[dict], str]:
+    """Load a comparison catalog without ever granting discovery code write authority.
+
+    Priority is explicit file/URL overrides, then the dedicated Firestore GET-only adapter, then an
+    optional local snapshot. Firestore failures degrade to an empty catalog instead of stopping race
+    discovery; the source string keeps the failure visible in run metrics.
+    """
     rows: list[dict] = []
     source = "NOT_CONNECTED"
     file_path = os.environ.get("APP_CATALOG_FILE")
@@ -127,11 +135,17 @@ def load_catalog(runtime_dir: pathlib.Path) -> tuple[list[dict], str]:
             text = path.read_text(encoding="utf-8")
             rows = _decode_rows(text)
     elif url:
-        req = urllib.request.Request(url, headers={"User-Agent": "262room-race-discovery/0.2"})
+        req = urllib.request.Request(url, headers={"User-Agent": "262room-race-discovery/0.4"}, method="GET")
         with urllib.request.urlopen(req, timeout=20) as resp:
             text = resp.read(5_000_000).decode("utf-8", errors="replace")
         rows = _decode_rows(text)
         source = "READ_ONLY_URL"
+    elif firestore_configured():
+        try:
+            rows, source = load_firestore_catalog()
+        except Exception as exc:
+            rows = []
+            source = f"FIRESTORE_UNAVAILABLE:{type(exc).__name__}"
     else:
         snapshot = runtime_dir / "app_catalog_snapshot.jsonl"
         if snapshot.exists():
