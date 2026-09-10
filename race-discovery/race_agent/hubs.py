@@ -65,13 +65,24 @@ def _clean_url(base_url: str, href: str) -> str:
         return ""
 
 
-def _same_site(a: str, b: str) -> bool:
+def _host(url: str) -> str:
     try:
-        da = urlparse(a).netloc.lower().removeprefix("www.")
-        db = urlparse(b).netloc.lower().removeprefix("www.")
-        return da == db
+        return urlparse(url).netloc.lower().split(":", 1)[0].removeprefix("www.")
     except Exception:
+        return ""
+
+
+def _same_site(a: str, b: str) -> bool:
+    """Treat organizer-owned subdomains as the same site family.
+
+    Large race organizers often use one subdomain per event (for example
+    `moscowmarathon.runc.run` linked from `runc.run`). The dotted suffix check
+    allows that relationship but does not accept lookalikes such as `evilrunc.run`.
+    """
+    da, db = _host(a), _host(b)
+    if not da or not db:
         return False
+    return da == db or db.endswith("." + da) or da.endswith("." + db)
 
 
 def _path(url: str) -> str:
@@ -89,8 +100,6 @@ def _explicit_hub_url(url: str) -> bool:
     segments = _segments(url)
     if not segments:
         return False
-    # Only the terminal route identifies a hub. `/events/yerevan-marathon` is an event page,
-    # while `/events` is a hub. This prevents child pages from being swallowed as calendars.
     return segments[-1] in {normalize(x) for x in HUB_PATH_HINTS}
 
 
@@ -105,7 +114,7 @@ def _blocked(url: str) -> bool:
 
 
 def extract_hub_event_links(base_url: str, raw_html: str, max_links: int = 50) -> dict:
-    """Detect calendar/hub pages and return internal links worth inspecting as event pages.
+    """Detect calendar/hub pages and return organizer-site links worth inspecting.
 
     A detected hub is discovery evidence only. We never construct one Event Candidate from a
     calendar because dates, distances and organizers from different cards must never be mixed.
@@ -126,7 +135,7 @@ def extract_hub_event_links(base_url: str, raw_html: str, max_links: int = 50) -
         url = _clean_url(base_url, item.get("href", ""))
         if not url or url in seen or not _same_site(base_url, url) or _blocked(url):
             continue
-        if _path(url) in {"", base_path}:
+        if _path(url) in {"", base_path} and _host(url) == _host(base_url):
             continue
         text = item.get("text", "").strip()
         path = _path(url)
@@ -142,6 +151,8 @@ def extract_hub_event_links(base_url: str, raw_html: str, max_links: int = 50) -
         if explicit and path.startswith(base_path.rstrip("/") + "/"):
             score += 2
         if explicit and len(path.split("/")) > len(base_path.split("/")):
+            score += 1
+        if _host(url) != _host(base_url) and _eventish(text):
             score += 1
         if score < (2 if explicit else 3):
             continue
