@@ -9,10 +9,7 @@ def _unique(values):
 
 def unresolved_organizer_id(event: dict) -> str:
     event_key = event.get("candidate_id") or stable_id(
-        event.get("name") or "",
-        event.get("date") or "",
-        event.get("city") or "",
-        event.get("country") or "",
+        event.get("name") or "", event.get("date") or "", event.get("city") or "", event.get("country") or ""
     )
     return stable_id("organizer-unresolved", event_key, event.get("country") or "")
 
@@ -26,16 +23,45 @@ def _merge_channels(module, rows: list[dict], field: str) -> dict:
     return merged
 
 
-def install(organizers_module) -> None:
-    """Install conservative identity guards over the v2 organizer extractor.
+def _sanitize_named_socials(module, lead: dict, raw_html: str, source_type: str) -> None:
+    """Do not trust every social logo on a primary page as the organizer account."""
+    contacts = lead.setdefault("contacts", module._empty_contacts())
+    candidates = lead.setdefault("contact_candidates", module._empty_contacts())
+    structured_name, structured_url = module._jsonld_organizer(raw_html)
 
-    Rules:
-    - an arbitrary Instagram/Telegram handle never becomes an organizer identity;
-    - unresolved organizers are scoped to one event until explicit identity evidence exists;
-    - unresolved profiles from different events never deduplicate because they share a sponsor;
-    - old PROVISIONAL_IDENTITY rows are not carried forward as organizer truth;
-    - safe event-scoped v3 research evidence survives future discovery runs.
-    """
+    # Keep all page social links as hypotheses, but only a structured organizer URL may become a
+    # confirmed social contact at extraction time. Search corroboration can later promote a social
+    # candidate from an organizer-owned page.
+    for kind in ("instagram", "telegram"):
+        candidates[kind] = _unique(list(candidates.get(kind, [])) + list(contacts.get(kind, [])))
+        contacts[kind] = []
+
+    if structured_name and structured_url:
+        ig = module._instagram_profile(structured_url)
+        tg = module._telegram_profile(structured_url)
+        if ig:
+            contacts["instagram"] = [ig]
+            candidates["instagram"] = _unique(candidates["instagram"] + [ig])
+        if tg:
+            contacts["telegram"] = [tg]
+            candidates["telegram"] = _unique(candidates["telegram"] + [tg])
+
+    # Rewrite social evidence so downstream promotion can distinguish explicit structured ties
+    # from arbitrary sponsor/partner links.
+    for row in lead.get("evidence", []):
+        field = str(row.get("field") or "")
+        if field in {"contact.instagram", "contact.telegram"}:
+            value = str(row.get("value") or "")
+            is_structured = bool(structured_url and value == structured_url)
+            if is_structured:
+                row["association"] = "STRUCTURED_ORGANIZER_URL"
+            else:
+                row["field"] = field.replace("contact.", "contact_candidate.")
+                row["association"] = "UNCONFIRMED_ORGANIZER_RELATION"
+
+
+def install(organizers_module) -> None:
+    """Install conservative identity guards over the v2 organizer extractor."""
     if getattr(organizers_module, "_identity_guard_installed", False):
         return
 
@@ -48,10 +74,9 @@ def install(organizers_module) -> None:
         if lead is None:
             return None
         if lead.get("identity_status") == "NAMED" and (lead.get("name") or "").strip():
+            _sanitize_named_socials(organizers_module, lead, raw_html, source_type)
             return lead
 
-        # Public social/contact URLs remain hypotheses. The organizer itself is unknown and gets
-        # an event-scoped ID, never the first Instagram handle found in the HTML.
         lead["schema_version"] = 3
         lead["organizer_id"] = unresolved_organizer_id(event)
         lead["name"] = ""
@@ -77,9 +102,6 @@ def install(organizers_module) -> None:
         return original_match(a, b)
 
     def guarded_build(events: list[dict], raw_leads: list[dict], previous_rows: list[dict], observed_at: str) -> list[dict]:
-        # Legacy PROVISIONAL_IDENTITY records may have social handles masquerading as names. Drop
-        # them. v3 UNRESOLVED rows are safe because identity is event-scoped; preserve their
-        # research evidence separately and re-attach it to the same event below.
         safe_unresolved_previous = [
             row for row in previous_rows
             if int(row.get("schema_version", 0) or 0) >= 3 and row.get("identity_status") == "UNRESOLVED"
@@ -99,9 +121,6 @@ def install(organizers_module) -> None:
                 if eid:
                     previous_by_event.setdefault(eid, []).append(row)
 
-        # If an event-scoped unknown has now been resolved to a named organizer, carry only CRM
-        # history across that transition. This keeps outreach notes without transferring a fake
-        # social identity.
         for profile in named:
             history = []
             for eid in profile.get("event_ids", []):
@@ -130,14 +149,11 @@ def install(organizers_module) -> None:
             if eid in named_event_ids:
                 continue
             if (event.get("organizer") or "").strip():
-                # original_build normally creates a named minimal lead for this case. Never
-                # downgrade an explicit organizer name into an invented unknown identity.
                 continue
 
             current_rows = raw_by_event.get(eid, [])
             historical_rows = previous_by_event.get(eid, [])
             candidates = _merge_channels(organizers_module, historical_rows + current_rows, "contact_candidates")
-            # Only schema-v3 event-scoped research may carry confirmed contact routes forward.
             contacts = _merge_channels(organizers_module, historical_rows, "contacts")
             evidence = []
             for row in historical_rows + current_rows:
