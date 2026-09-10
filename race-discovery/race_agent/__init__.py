@@ -9,10 +9,11 @@ from __future__ import annotations
 import html as html_lib
 import json
 import re
-from urllib.parse import unquote
+from urllib.parse import unquote, urlparse
 
 from . import core as _core
 from .locales import focused_event_text, parse_dates as _parse_dates, parse_prices as _parse_prices, primary_event_dates
+from .event_identity import event_heading, explicitly_labeled_event_dates
 
 # Upgrade v1 parser globals before candidate_from_document is called.
 _core.parse_dates = _parse_dates
@@ -59,12 +60,11 @@ _core.extract_jsonld_events = _enhanced_extract_jsonld_events
 _original_candidate_from_document = _core.candidate_from_document
 
 # Common market spellings which do not follow a simple Cyrillic -> Latin transliteration.
-# The generic transliterator below handles the rest. These aliases are identity hints only;
-# they never create a city unless that city already exists in the market's known-cities config.
+# These aliases are identity hints only; they never create a city outside the market config.
 _CITY_ALIASES = {
-    "алматы": ["almaty", "alma ata", "alma-ata"],
-    "астана": ["astana"],
-    "караганда": ["karaganda", "qaragandy"],
+    "алматы": ["almaty", "alma ata", "alma-ata", "алматинский", "алматинского"],
+    "астана": ["astana", "астанинский", "астанинского"],
+    "караганда": ["karaganda", "qaragandy", "карагандинский", "карагандинского"],
     "актау": ["aktau"],
     "туркестан": ["turkistan", "turkestan"],
     "костанай": ["kostanay", "qostanai"],
@@ -73,8 +73,10 @@ _CITY_ALIASES = {
     "шымкент": ["shymkent", "chimkent"],
     "конаев": ["konaev", "qonaev"],
     "қонаев": ["qonaev", "konaev"],
-    "москва": ["moscow", "moskva"],
-    "санкт петербург": ["saint petersburg", "st petersburg", "petersburg", "spb"],
+    "москва": ["moscow", "moskva", "московский", "московского", "московская", "московской"],
+    "санкт петербург": ["saint petersburg", "st petersburg", "petersburg", "spb", "петербургский", "петербургского"],
+    "чолпон ата": ["cholpon ata", "cholpon-ata"],
+    "чолпон-ата": ["cholpon ata", "cholpon-ata"],
     "бишкек": ["bishkek"],
     "ош": ["osh"],
     "ташкент": ["tashkent", "toshkent"],
@@ -111,15 +113,12 @@ def _city_aliases(city: str) -> list[str]:
 
 
 def _event_identity_city(name: str, url: str, known_cities: list[str] | None) -> str:
-    """Resolve city from the event identity before scanning a page full of neighboring races.
-
-    Event title and URL are much stronger identity signals than a random city mention in footer,
-    navigation or another card. We only choose among cities already allowed by the market config.
-    """
+    """Resolve city from event name or URL before scanning a page full of neighboring races."""
     if not known_cities:
         return ""
     name_text = _identity_text(name)
     url_text = _identity_text(url)
+    host_labels = [x for x in urlparse(url).netloc.casefold().removeprefix("www.").split(".") if x]
     best_city = ""
     best_score = 0
     for city in known_cities:
@@ -129,8 +128,12 @@ def _event_identity_city(name: str, url: str, known_cities: list[str] | None) ->
             score = 0
             if re.search(rf"(?:^|\s){re.escape(alias)}(?:$|\s)", name_text):
                 score = 100
-            elif re.search(rf"(?:^|\s){re.escape(alias)}(?:$|\s)", url_text):
-                score = 90
+            else:
+                compact = alias.replace(" ", "")
+                if compact.isascii() and len(compact) >= 5 and any(label.startswith(compact) for label in host_labels):
+                    score = 96
+                elif re.search(rf"(?:^|\s){re.escape(alias)}(?:$|\s)", url_text):
+                    score = 90
             if score > best_score:
                 best_city, best_score = city, score
     return best_city
@@ -156,9 +159,9 @@ def _refined_candidate_from_document(
         return None
 
     text, _ = _core.html_to_text(raw_html)
-    focused = focused_event_text(text, candidate.get("name") or "")
     structured_events = _core.extract_jsonld_events(raw_html)
     has_structured_event = bool(structured_events)
+    better_name = event_heading(raw_html, candidate.get("name") or "", url)
 
     evidence = list(candidate.get("evidence", []))
     template = evidence[0] if evidence else {
@@ -185,8 +188,12 @@ def _refined_candidate_from_document(
                 "scope": scope,
             })
 
-    # A city explicitly encoded by the event title/URL outranks any city merely mentioned in the
-    # page body. This fixes pages that cross-promote a second race in another city.
+    if better_name and _core.normalize(better_name) != _core.normalize(candidate.get("name") or ""):
+        replace_field("name", better_name, "EVENT_HEADING")
+
+    focused = focused_event_text(text, candidate.get("name") or "")
+
+    # Event title/URL are much stronger city identity than a random city mention in another card.
     identity_city = _event_identity_city(candidate.get("name") or "", url, known_cities)
     if identity_city and identity_city != candidate.get("city"):
         replace_field("city", identity_city, "EVENT_IDENTITY")
@@ -195,16 +202,17 @@ def _refined_candidate_from_document(
         if not current_location or _identity_text(current_location) in normalized_known:
             replace_field("location", identity_city, "EVENT_IDENTITY")
 
-    if focused != text:
-        # Structured startDate always wins. Unstructured pages need a semantic date ranker because
-        # race sites often place registration/packet/expo dates closer to repeated event titles.
-        if not has_structured_event:
-            dates = primary_event_dates(text, candidate.get("name") or "") or _parse_dates(focused)
-            if dates and dates[0] != candidate.get("date"):
-                replace_field("date", dates[0], "PRIMARY_EVENT_DATE")
+    if not has_structured_event:
+        # Explicit labels such as `Дата — 27 сентября` or `День и время проведения: 27 сентября`
+        # outrank all proximity heuristics. This prevents packet-pickup / registration dates from
+        # replacing the actual race day on pages such as Almaty Marathon.
+        dates = explicitly_labeled_event_dates(text) or primary_event_dates(text, candidate.get("name") or "")
+        if not dates and focused != text:
+            dates = _parse_dates(focused)
+        if dates and dates[0] != candidate.get("date"):
+            replace_field("date", dates[0], "EXPLICIT_EVENT_DATE" if explicitly_labeled_event_dates(text) else "PRIMARY_EVENT_DATE")
 
-        # If title/URL did not identify the city, focused text may fill a missing city but must not
-        # overwrite an already established one.
+    if focused != text:
         if not candidate.get("city"):
             focused_city = _core._guess_city(focused, known_cities)
             if focused_city:
