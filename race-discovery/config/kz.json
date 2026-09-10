@@ -5,6 +5,8 @@
     "забег Казахстан сентябрь 2026 регистрация",
     "забег Казахстан октябрь 2026 регистрация",
     "забег Казахстан ноябрь 2026 регистрация",
+    "забег Казахстан декабрь 2026 регистрация",
+    "марафон Казахстан 2027 регистрация",
     "trail Kazakhstan 2026 race registration",
     "трейл Казахстан 2026 регистрация",
     "полумарафон Казахстан 2026 регистрация",
@@ -19,6 +21,10 @@
     "site:qazathletics.kz марафон 2026",
     "site:gov.kz марафон забег 2026 Казахстан",
     "site:reg.elordasport.kz забег 2026",
+    "site:rwsrun.kz 2026 забег",
+    "site:elsport.org 2026 trail забег",
+    "site:t-sport.run 2026 забег триатлон",
+    "site:universalbicycle.team Казахстан 2026 триатлон",
     "site:inform.kz марафон забег Казахстан 2026",
     "site:tengrinews.kz марафон забег Казахстан 2026",
     "site:zakon.kz марафон забег Казахстан 2026"
@@ -30,6 +36,8 @@
     "site:t.me марафон Казахстан 2026 регистрация",
     "site:t.me забег Алматы Астана 2026",
     "site:t.me trail Kazakhstan 2026",
+    "site:t.me/s/athletex 2026 забег trail марафон",
+    "site:telegram.me/s/athletex 2026 забег trail марафон",
     "site:facebook.com марафон Казахстан 2026"
   ],
   "event_terms": [
@@ -44,13 +52,17 @@
     "https://qhm26.athleticfamily.kz/ru",
     "https://www.caspian-marathon.kz/ru/calendar",
     "https://reg.elordasport.kz/ru/",
-    "https://www.gov.kz/memleket/entities/astana/press/news?lang=ru"
+    "https://www.gov.kz/memleket/entities/astana/press/news?lang=ru",
+    "https://rwsrun.kz/ru/"
   ],
   "source_hints": {
     "almaty-marathon.kz": "official_organizer",
     "caspian-marathon.kz": "official_event",
     "aktau-marathon.kz": "official_event",
     "qhm26.athleticfamily.kz": "official_event",
+    "rwsrun.kz": "official_event",
+    "t-sport.run": "official_organizer",
+    "elsport.org": "official_organizer",
     "athletex.kz": "registration",
     "qazathletics.kz": "federation",
     "gov.kz": "government",
@@ -60,6 +72,7 @@
     "Алматы", "Астана", "Караганда", "Актау", "Туркестан", "Зеренда", "Костанай",
     "Өскемен", "Усть-Каменогорск", "Шымкент", "Актобе", "Атырау", "Бурабай",
     "Павлодар", "Семей", "Тараз", "Кокшетау", "Талдыкорган", "Балхаш", "Темиртау",
-    "Жезказган", "Конаев", "Қонаев", "Петропавловск", "Кызылорда", "Уральск"
+    "Жезказган", "Конаев", "Қонаев", "Петропавловск", "Кызылорда", "Уральск",
+    "Экибастуз", "Житикара"
   ]
 }
