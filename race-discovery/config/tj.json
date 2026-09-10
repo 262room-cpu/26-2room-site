@@ -1,0 +1,32 @@
+{
+  "queries": [
+    "site:marathon.tj 2026 забег марафон Душанбе",
+    "site:marathon.tj 2027 забег марафон Душанбе",
+    "site:onerunglobal.com tajikistan 2026 run",
+    "Душанбе полумарафон 2026 регистрация",
+    "Таджикистан марафон 2026 регистрация",
+    "Таджикистан трейл 2026 регистрация",
+    "site:khovar.tj забег марафон Душанбе 2026"
+  ],
+  "social_queries": [
+    "site:instagram.com Таджикистан марафон Душанбе 2026",
+    "site:t.me Таджикистан забег марафон 2026",
+    "site:instagram.com marathon.tj Душанбе"
+  ],
+  "seed_urls": [
+    "https://marathon.tj/",
+    "https://marathon.tj/contact",
+    "https://onerunglobal.com/tajikistan"
+  ],
+  "source_hints": {
+    "marathon.tj": "official_organizer",
+    "onerunglobal.com/tajikistan": "official_event",
+    "khovar.tj": "government"
+  },
+  "event_terms": [
+    "Dushanbe International Half Marathon",
+    "Душанбинский международный полумарафон",
+    "One Run Tajikistan",
+    "Victory Day Run"
+  ]
+}
