@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-10T16:57:31+00:00",
+  "generated_at": "2026-09-10T17:09:32+00:00",
   "markets": [
     {
       "market_code": "am",
@@ -30,18 +30,18 @@
       "candidates_after": 1,
       "related_rows_removed": 0,
       "organizers_removed": 0,
-      "evidence_rows_compacted": 0
+      "evidence_rows_compacted": 7
     },
     {
       "market_code": "kg",
-      "candidates_before": 5,
-      "quarantined": 1,
+      "candidates_before": 4,
+      "quarantined": 3,
       "quarantine_reasons": {
-        "JSON_OR_SCHEMA_FRAGMENT_AS_EVENT_TITLE": 1
+        "GENERIC_ORGANIZATION_MULTI_EVENT_MERGE": 3
       },
-      "candidates_after": 4,
-      "related_rows_removed": 2,
-      "organizers_removed": 1,
+      "candidates_after": 1,
+      "related_rows_removed": 5,
+      "organizers_removed": 2,
       "evidence_rows_compacted": 0
     },
     {
@@ -54,8 +54,8 @@
       },
       "candidates_after": 21,
       "related_rows_removed": 4,
-      "organizers_removed": 1,
-      "evidence_rows_compacted": 175
+      "organizers_removed": 2,
+      "evidence_rows_compacted": 165
     },
     {
       "market_code": "md",
@@ -65,7 +65,7 @@
       "candidates_after": 6,
       "related_rows_removed": 0,
       "organizers_removed": 0,
-      "evidence_rows_compacted": 0
+      "evidence_rows_compacted": 357
     },
     {
       "market_code": "mn",
@@ -79,15 +79,14 @@
     },
     {
       "market_code": "ru",
-      "candidates_before": 5,
-      "quarantined": 2,
+      "candidates_before": 4,
+      "quarantined": 1,
       "quarantine_reasons": {
-        "ORGANIZER_HOMEPAGE_SERIALIZED_AS_EVENT": 1,
         "SERIES_LANDING_PAGE_SERIALIZED_AS_SINGLE_EVENT": 1
       },
       "candidates_after": 3,
-      "related_rows_removed": 4,
-      "organizers_removed": 2,
+      "related_rows_removed": 2,
+      "organizers_removed": 1,
       "evidence_rows_compacted": 0
     },
     {
@@ -115,6 +114,6 @@
       "evidence_rows_compacted": 0
     }
   ],
-  "quarantined_total": 5,
-  "evidence_rows_compacted_total": 175
+  "quarantined_total": 6,
+  "evidence_rows_compacted_total": 529
 }
