@@ -1,0 +1,24 @@
+{
+  "queries": [
+    "site:runin.by 2026 забег полумарафон регистрация",
+    "site:runin.by 2027 забег марафон регистрация",
+    "site:t.me/s/mst_gov_by забег марафон 2026",
+    "Минский полумарафон 2026 регистрация",
+    "Беларусь трейл 2026 регистрация",
+    "Беларусь триатлон 2026 регистрация"
+  ],
+  "social_queries": [
+    "site:instagram.com Беларусь марафон забег 2026",
+    "site:t.me Беларусь марафон забег 2026",
+    "site:t.me/s/mst_gov_by марафон забег"
+  ],
+  "seed_urls": [
+    "https://runin.by/",
+    "https://t.me/s/mst_gov_by"
+  ],
+  "source_hints": {
+    "runin.by": "official_event",
+    "t.me": "government"
+  },
+  "event_terms": ["минский полумарафон", "Minsk Half Marathon", "забег беларусь"]
+}
