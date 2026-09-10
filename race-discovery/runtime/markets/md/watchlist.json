@@ -1,0 +1,31 @@
+{
+  "domains": {
+    "marathon.md": {
+      "first_seen": "2026-09-10T15:01:48+00:00",
+      "source_urls": [
+        "https://marathon.md/ru/marathonkids",
+        "https://marathon.md/ru/marathonforall",
+        "https://marathon.md/ru/marathon42km",
+        "https://marathon.md/ru/halfmarathon21km",
+        "https://marathon.md/ru/marathon10km",
+        "https://marathon.md/ru/marathon5km"
+      ],
+      "event_count": 3,
+      "last_checked": "2026-09-10T15:01:48+00:00"
+    }
+  },
+  "organizers": {
+    "d166d9f199eb413b8641": {
+      "first_seen": "2026-09-10T15:01:48+00:00",
+      "event_ids": [
+        "05705e9b0695cc09c5f4",
+        "3d106acab8c194371c6b",
+        "731ecfff9bb92819f219"
+      ],
+      "name": "chisinaumarathon",
+      "instagram": [],
+      "last_checked": "2026-09-10T15:01:48+00:00"
+    }
+  },
+  "social_sources": {}
+}
