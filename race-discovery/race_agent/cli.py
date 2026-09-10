@@ -11,6 +11,7 @@ from collections import Counter
 from .catalog import annotate_against_catalog, load_catalog
 from .core import candidate_from_document, classify_source, deduplicate, domain, match_score, merge_candidates
 from .inbox import load_private_signals
+from .organizers import build_organizer_database, build_organizer_research_queue, organizer_lead_from_document, outreach_ready
 from .providers import BingRssSearchProvider, SearchHit, fetch_url
 from .signals import accept_hit, page_has_kazakhstan_evidence, should_fetch_direct, signal_as_html, signal_record, social_queries
 
@@ -75,6 +76,7 @@ def run(country: str = "kz") -> int:
     source_hints = cfg.get("source_hints", {})
     urls: dict[str, dict] = {}
     search_signal_candidates: list[dict] = []
+    raw_organizer_leads: list[dict] = []
     signals: list[dict] = []
     errors: list[dict] = []
     query_count = 0
@@ -100,11 +102,15 @@ def run(country: str = "kz") -> int:
                         if query not in existing["found_by"]:
                             existing["found_by"].append(query)
                     else:
-                        candidate = candidate_from_document(hit.url, signal_as_html(hit), "search_result", observed, known_cities=cfg.get("cities", []), country=cfg.get("country", "Kazakhstan"))
+                        signal_html = signal_as_html(hit)
+                        candidate = candidate_from_document(hit.url, signal_html, "search_result", observed, known_cities=cfg.get("cities", []), country=cfg.get("country", "Kazakhstan"))
                         if candidate:
                             candidate["discovery"] = meta
                             candidate["signal_only"] = True
                             search_signal_candidates.append(candidate)
+                            lead = organizer_lead_from_document(candidate, signal_html, hit.url, "search_result", observed)
+                            if lead:
+                                raw_organizer_leads.append(lead)
             except Exception as exc:
                 errors.append({"phase": "SEARCH", "query": query, "error": type(exc).__name__ + ": " + str(exc)[:240]})
 
@@ -130,11 +136,15 @@ def run(country: str = "kz") -> int:
             "relevance": 1.0,
             "private": True,
         })
-        candidate = candidate_from_document(link or "https://private.signal.local/", signal_as_html(hit), "search_result", observed, known_cities=cfg.get("cities", []), country=cfg.get("country", "Kazakhstan"))
+        signal_html = signal_as_html(hit)
+        candidate = candidate_from_document(link or "https://private.signal.local/", signal_html, "search_result", observed, known_cities=cfg.get("cities", []), country=cfg.get("country", "Kazakhstan"))
         if candidate:
             candidate["discovery"] = {"found_by": ["AUTHORIZED_PRIVATE_INBOX"], "title": title, "snippet": text[:1200]}
             candidate["signal_only"] = True
             search_signal_candidates.append(candidate)
+            lead = organizer_lead_from_document(candidate, signal_html, link or "https://private.signal.local/", "search_result", observed)
+            if lead:
+                raw_organizer_leads.append(lead)
         if link.startswith("http") and should_fetch_direct(link):
             urls.setdefault(link, {"found_by": ["PRIVATE_SIGNAL_LINK"], "title": title, "snippet": text[:800]})
 
@@ -159,6 +169,9 @@ def run(country: str = "kz") -> int:
                     continue
                 candidate["discovery"] = meta
                 raw_candidates.append(candidate)
+                lead = organizer_lead_from_document(candidate, raw, url, source_type, observed)
+                if lead:
+                    raw_organizer_leads.append(lead)
         except Exception as exc:
             errors.append({"phase": "FETCH", "url": url, "error": type(exc).__name__ + ": " + str(exc)[:240]})
 
@@ -207,8 +220,19 @@ def run(country: str = "kz") -> int:
 
     app_catalog, catalog_source = load_catalog(RUNTIME)
     final = [annotate_against_catalog(c, app_catalog) for c in final]
+
+    previous_organizers = load_jsonl(RUNTIME / "organizers.jsonl")
+    organizers = build_organizer_database(final, raw_organizer_leads, previous_organizers, observed)
+    organizer_ready = outreach_ready(organizers)
+    organizer_queue = build_organizer_research_queue(final, organizers, run_id, observed)
+    new_organizer_leads = [o for o in organizers if o.get("first_seen_at") == observed]
+
     final.sort(key=lambda r: (r.get("date") or "9999", r.get("name") or ""))
     save_jsonl(RUNTIME / "candidates.jsonl", final)
+    save_jsonl(RUNTIME / "organizers.jsonl", organizers)
+    save_jsonl(RUNTIME / "organizer_outreach_ready.jsonl", organizer_ready)
+    save_jsonl(RUNTIME / "organizer_research_queue.jsonl", organizer_queue)
+    save_jsonl(RUNTIME / "organizer_new_leads.jsonl", new_organizer_leads)
 
     already_in_app = [c for c in final if c.get("catalog_relation") == "ALREADY_IN_APP"]
     discovery_list = [c for c in final if c.get("catalog_relation") != "ALREADY_IN_APP"] if app_catalog else list(final)
@@ -230,13 +254,15 @@ def run(country: str = "kz") -> int:
                     rec["last_checked"] = observed
     for d, rec in watchlist["domains"].items():
         rec["event_count"] = sum(1 for c in final if any(domain(u) == d for u in c.get("source_urls", [])))
-    for candidate in final:
-        org = (candidate.get("organizer") or "").strip()
-        if org and candidate.get("confidence", 0) >= 0.80:
-            rec = watchlist["organizers"].setdefault(org, {"first_seen": observed, "event_ids": []})
-            if candidate.get("candidate_id") not in rec["event_ids"]:
-                rec["event_ids"].append(candidate.get("candidate_id"))
-            rec["last_checked"] = observed
+    for organizer in organizers:
+        oid = organizer.get("organizer_id") or organizer.get("name")
+        if not oid:
+            continue
+        rec = watchlist["organizers"].setdefault(oid, {"first_seen": organizer.get("first_seen_at") or observed, "event_ids": []})
+        rec["name"] = organizer.get("name") or ""
+        rec["event_ids"] = list(dict.fromkeys(rec.get("event_ids", []) + organizer.get("event_ids", [])))
+        rec["instagram"] = (organizer.get("contacts") or {}).get("instagram", [])
+        rec["last_checked"] = observed
     for signal in signals:
         if signal.get("source_family") in {"INSTAGRAM", "TELEGRAM", "FACEBOOK"} and signal.get("url"):
             rec = watchlist["social_sources"].setdefault(signal["url"], {"first_seen": observed, "family": signal["source_family"]})
@@ -274,6 +300,7 @@ def run(country: str = "kz") -> int:
 
     status_counts = Counter(c.get("status", "UNKNOWN") for c in final)
     relation_counts = Counter(c.get("catalog_relation", "UNKNOWN") for c in final)
+    organizer_status_counts = Counter(o.get("contact_status", "UNKNOWN") for o in organizers)
     summary = {
         "run_id": run_id,
         "started_at": observed,
@@ -302,10 +329,15 @@ def run(country: str = "kz") -> int:
         "suppressed_already_in_app": len(already_in_app),
         "needs_manual_review": len(model_queue),
         "status_counts": dict(status_counts),
+        "organizer_records": len(organizers),
+        "organizer_new_leads": len(new_organizer_leads),
+        "organizer_outreach_ready": len(organizer_ready),
+        "organizer_research_queue": len(organizer_queue),
+        "organizer_contact_status_counts": dict(organizer_status_counts),
         "errors": errors[:50],
     }
     append_jsonl(RUNTIME / "runs.jsonl", summary)
-    state.update({"status": "PASS_WITH_REVIEW_QUEUE" if model_queue else "PASS", "phase": "DONE", "finished_at": summary["finished_at"], "last_summary": summary, "catalog_source": catalog_source})
+    state.update({"status": "PASS_WITH_REVIEW_QUEUE" if model_queue or organizer_queue else "PASS", "phase": "DONE", "finished_at": summary["finished_at"], "last_summary": summary, "catalog_source": catalog_source})
     write_json(state_path, state)
     print(json.dumps(summary, ensure_ascii=False, indent=2))
     return 0
