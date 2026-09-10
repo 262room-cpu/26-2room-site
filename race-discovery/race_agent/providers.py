@@ -7,7 +7,7 @@ import urllib.request
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 
-UA = "262room-race-discovery/0.2 (+https://26-2room.com)"
+UA = "262room-race-discovery/0.3 (+https://26-2room.com)"
 
 @dataclass
 class SearchHit:
@@ -42,8 +42,6 @@ def _rss_hits(raw: str, limit: int) -> list[SearchHit]:
 
 
 class _BingRssSearchProvider:
-    """Zero-secret broad discovery source. It is intentionally not trusted as evidence."""
-
     name = "BING_RSS"
 
     def search(self, query: str, limit: int = 10) -> list[SearchHit]:
@@ -52,16 +50,21 @@ class _BingRssSearchProvider:
 
 
 class GoogleNewsRssSearchProvider:
-    """Zero-secret news/newspaper discovery for Kazakhstan. Discovery only, not verification."""
+    """Zero-secret news/newspaper discovery. Search output is discovery evidence only."""
 
     name = "GOOGLE_NEWS_RSS"
+
+    def __init__(self, gl: str = "KZ", language: str = "ru", ceid: str | None = None) -> None:
+        self.gl = gl or "KZ"
+        self.language = language or "ru"
+        self.ceid = ceid or f"{self.gl}:{self.language}"
 
     def search(self, query: str, limit: int = 10) -> list[SearchHit]:
         url = "https://news.google.com/rss/search?" + urllib.parse.urlencode({
             "q": query,
-            "hl": "ru",
-            "gl": "KZ",
-            "ceid": "KZ:ru",
+            "hl": self.language,
+            "gl": self.gl,
+            "ceid": self.ceid,
         })
         return _rss_hits(fetch_url(url), limit)
 
@@ -69,8 +72,8 @@ class GoogleNewsRssSearchProvider:
 class CombinedSearchProvider:
     """Fan out to cheap independent discovery providers and deduplicate URLs."""
 
-    def __init__(self) -> None:
-        self.providers = [_BingRssSearchProvider(), GoogleNewsRssSearchProvider()]
+    def __init__(self, gl: str = "KZ", language: str = "ru", ceid: str | None = None) -> None:
+        self.providers = [_BingRssSearchProvider(), GoogleNewsRssSearchProvider(gl=gl, language=language, ceid=ceid)]
 
     def search(self, query: str, limit: int = 12) -> list[SearchHit]:
         per_provider = max(4, limit // len(self.providers) + 2)
@@ -91,5 +94,5 @@ class CombinedSearchProvider:
         return out
 
 
-# Backward-compatible default: existing CLI now automatically uses both sources.
+# Backward-compatible name used by the CLI.
 BingRssSearchProvider = CombinedSearchProvider
