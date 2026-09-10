@@ -43,6 +43,26 @@ class CandidateHygieneTests(unittest.TestCase):
         }
         self.assertEqual(artifact_reason(row), "ORGANIZER_HOMEPAGE_SERIALIZED_AS_EVENT")
 
+    def test_old_federation_record_merging_multiple_event_pages_is_quarantined(self):
+        row = {
+            "name": "Федерация Триатлона Кыргызской Республики",
+            "source_urls": [
+                "https://triathlon.kg/events/cempionat-respubliki-po-duatlonu-2026",
+                "https://triathlon.kg/events/2026-visa-asia-triathlon-cup-cholpon-ata-ag-super-sprint",
+                "https://triathlon.kg/events/2026-visa-asia-triathlon-cup-cholpon-ata-ag-relay",
+            ],
+            "distances": ["10 км", "2 км"],
+        }
+        self.assertEqual(artifact_reason(row), "GENERIC_ORGANIZATION_MULTI_EVENT_MERGE")
+
+    def test_specific_federation_event_is_never_quarantined_by_that_rule(self):
+        row = {
+            "name": "2026 VISA Asia Triathlon Cup Cholpon-Ata AG Super Sprint",
+            "source_urls": ["https://triathlon.kg/events/2026-visa-asia-triathlon-cup-cholpon-ata-ag-super-sprint"],
+            "distances": ["10 км", "2 км"],
+        }
+        self.assertEqual(artifact_reason(row), "")
+
     def test_kids_series_parent_is_quarantined_but_specific_kids_event_is_kept(self):
         parent = {
             "name": "Детские забеги",
