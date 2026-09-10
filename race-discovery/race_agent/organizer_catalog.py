@@ -266,6 +266,8 @@ def annotate_organizer_against_crm(profile: dict, catalog: list[dict]) -> dict:
         out["crm_contact_additions"] = []
         return out
 
+    named_identity = bool(str(profile.get("name") or "").strip()) and profile.get("identity_status") != "UNRESOLVED"
+
     scored = []
     for row in catalog:
         score, reasons = crm_match_score(profile, row)
@@ -273,7 +275,7 @@ def annotate_organizer_against_crm(profile: dict, catalog: list[dict]) -> dict:
             scored.append((score, row, reasons))
     scored.sort(key=lambda item: item[0], reverse=True)
     if not scored:
-        out["crm_relation"] = "NEW_ORGANIZER_LEAD"
+        out["crm_relation"] = "NEW_ORGANIZER_LEAD" if named_identity else "CRM_IDENTITY_INSUFFICIENT"
         out["crm_match_id"] = ""
         out["crm_match_score"] = 0.0
         out["crm_contact_additions"] = []
@@ -292,7 +294,7 @@ def annotate_organizer_against_crm(profile: dict, catalog: list[dict]) -> dict:
     elif best_score >= 0.72:
         relation = "POSSIBLE_CRM_MATCH"
     else:
-        relation = "NEW_ORGANIZER_LEAD"
+        relation = "NEW_ORGANIZER_LEAD" if named_identity else "CRM_IDENTITY_INSUFFICIENT"
 
     additions = []
     if relation == "EXISTING_ORGANIZER":
@@ -304,10 +306,11 @@ def annotate_organizer_against_crm(profile: dict, catalog: list[dict]) -> dict:
         if additions:
             relation = "EXISTING_ORGANIZER_CONTACT_UPDATE"
 
+    matched_relations = {"EXISTING_ORGANIZER", "EXISTING_ORGANIZER_CONTACT_UPDATE", "POSSIBLE_CRM_MATCH"}
     out["crm_relation"] = relation
-    out["crm_match_id"] = best.get("crm_id", "") if relation != "NEW_ORGANIZER_LEAD" else ""
-    out["crm_match_name"] = best.get("name", "") if relation != "NEW_ORGANIZER_LEAD" else ""
-    out["crm_match_section"] = best.get("section", "") if relation != "NEW_ORGANIZER_LEAD" else ""
+    out["crm_match_id"] = best.get("crm_id", "") if relation in matched_relations else ""
+    out["crm_match_name"] = best.get("name", "") if relation in matched_relations else ""
+    out["crm_match_section"] = best.get("section", "") if relation in matched_relations else ""
     out["crm_match_score"] = best_score
     out["crm_match_reasons"] = reasons
     out["crm_second_score"] = second_score
