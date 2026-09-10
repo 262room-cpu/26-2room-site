@@ -1,0 +1,25 @@
+{
+  "queries": [
+    "site:sportcom.gov.tm бег марафон Ашхабад 2026",
+    "site:sportcom.gov.tm athletics run Ashgabat 2026",
+    "site:turkmenistan.gov.tm спорт забег Ашхабад 2026",
+    "Ашхабад марафон 2026",
+    "Туркменистан забег 2026",
+    "Turkmenistan marathon 2026",
+    "Ashgabat run 2026"
+  ],
+  "social_queries": [
+    "site:instagram.com Turkmenistan run marathon 2026",
+    "site:t.me Туркменистан марафон забег 2026"
+  ],
+  "seed_urls": [
+    "https://sportcom.gov.tm/ru/",
+    "https://sportcom.gov.tm/ru/federation/64",
+    "https://turkmenistan.gov.tm/ru/razdel/sport/13"
+  ],
+  "source_hints": {
+    "sportcom.gov.tm": "government",
+    "turkmenistan.gov.tm": "government"
+  },
+  "event_terms": ["Ashgabat Run", "Ашхабад забег", "inclusive run", "инклюзивный забег"]
+}
