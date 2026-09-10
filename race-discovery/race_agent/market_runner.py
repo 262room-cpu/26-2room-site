@@ -25,7 +25,8 @@ STATE_FILES = [
     "STATE.json", "candidates.jsonl", "organizers.jsonl", "watchlist.json",
     "model_queue.jsonl", "runs.jsonl", "signals.jsonl", "discovery_list.jsonl",
     "already_in_app.jsonl", "organizer_outreach_ready.jsonl",
-    "organizer_research_queue.jsonl", "organizer_new_leads.jsonl", "quarantine.jsonl"
+    "organizer_research_queue.jsonl", "organizer_new_leads.jsonl", "quarantine.jsonl",
+    "hubs.jsonl", "organizer_research_evidence.jsonl", "ORGANIZER_RESEARCH_STATE.json",
 ]
 
 
@@ -153,9 +154,12 @@ def _merge_global_organizer(base: dict, incoming: dict) -> dict:
     out["source_urls"] = _unique(list(out.get("source_urls", [])) + list(incoming.get("source_urls", [])))
     out["market_organizer_ids"] = _unique(list(out.get("market_organizer_ids", [])) + [out.get("organizer_id", ""), incoming.get("organizer_id", "")])
     contacts = dict(out.get("contacts") or {})
+    candidates = dict(out.get("contact_candidates") or {})
     for key in ("instagram", "telegram", "whatsapp", "email", "phone", "website"):
         contacts[key] = _unique(list(contacts.get(key, [])) + list((incoming.get("contacts") or {}).get(key, [])))
+        candidates[key] = _unique(list(candidates.get(key, [])) + list((incoming.get("contact_candidates") or {}).get(key, [])))
     out["contacts"] = contacts
+    out["contact_candidates"] = candidates
     out["evidence"] = (list(out.get("evidence", [])) + list(incoming.get("evidence", [])))[-300:]
     out["confidence"] = max(float(out.get("confidence", 0)), float(incoming.get("confidence", 0)))
     if incoming.get("identity_status") == "NAMED":
@@ -163,6 +167,28 @@ def _merge_global_organizer(base: dict, incoming: dict) -> dict:
     if float(incoming.get("confidence", 0)) > float(base.get("confidence", 0)) and incoming.get("name"):
         out["name"] = incoming["name"]
     return out
+
+
+def _global_organizer_identity(org: dict) -> str:
+    """Build stable global identity without collapsing anonymous organizers by country."""
+    contacts = org.get("contacts") or {}
+    if org.get("identity_status") == "NAMED":
+        for key in ("instagram", "email", "telegram", "whatsapp", "phone"):
+            if contacts.get(key):
+                return f"{key}:{contacts[key][0]}"
+        if contacts.get("website"):
+            return f"website:{domain(contacts['website'][0])}"
+        if org.get("name"):
+            return f"named:{org.get('name')}|{'|'.join(org.get('countries', []) or [org.get('country', '')])}"
+
+    # Unknown organizer identity must remain scoped to its race(s), never merely to a country.
+    event_ids = _unique(list(org.get("event_ids", [])))
+    market_ids = _unique(list(org.get("market_organizer_ids", [])) + [org.get("organizer_id", "")])
+    if event_ids:
+        return "unresolved-events:" + "|".join(sorted(event_ids))
+    if market_ids:
+        return "unresolved-market-ids:" + "|".join(sorted(market_ids))
+    return f"unresolved:{org.get('display_name','')}|{org.get('country','')}"
 
 
 def aggregate_global() -> dict:
@@ -191,10 +217,10 @@ def aggregate_global() -> dict:
             "status": state.get("status", "NOT_RUN"),
         }
 
-    # Event ids already include country; exact id duplication is enough at global aggregation stage.
     event_by_id = {}
     for event in all_events:
-        event_by_id[event.get("candidate_id") or stable_id(event.get("name", ""), event.get("date", ""), event.get("country", ""))] = event
+        key = event.get("candidate_id") or stable_id(event.get("name", ""), event.get("date", ""), event.get("country", ""))
+        event_by_id[key] = event
     global_events = sorted(event_by_id.values(), key=lambda e: (e.get("date") or "9999", e.get("country") or "", e.get("name") or ""))
 
     global_organizers: list[dict] = []
@@ -210,19 +236,13 @@ def aggregate_global() -> dict:
             global_organizers.append(organizer)
 
     for org in global_organizers:
-        identity = ""
-        contacts = org.get("contacts") or {}
-        for key in ("instagram", "email", "telegram", "whatsapp", "phone"):
-            if contacts.get(key):
-                identity = contacts[key][0]
-                break
-        if not identity and contacts.get("website"):
-            identity = domain(contacts["website"][0])
-        if not identity:
-            identity = f"{org.get('name','')}|{'|'.join(org.get('countries', []))}"
-        org["global_organizer_id"] = stable_id("global-organizer", identity)
+        org["global_organizer_id"] = stable_id("global-organizer", _global_organizer_identity(org))
 
-    outreach = [o for o in global_organizers if o.get("identity_status") == "NAMED" and any((o.get("contacts") or {}).get(k) for k in ("instagram", "email", "telegram", "whatsapp", "phone"))]
+    outreach = [
+        o for o in global_organizers
+        if o.get("identity_status") == "NAMED"
+        and any((o.get("contacts") or {}).get(k) for k in ("instagram", "email", "telegram", "whatsapp", "phone"))
+    ]
     _write_jsonl(GLOBAL_ROOT / "candidates.jsonl", global_events)
     _write_jsonl(GLOBAL_ROOT / "organizers.jsonl", global_organizers)
     _write_jsonl(GLOBAL_ROOT / "organizer_outreach_ready.jsonl", outreach)
