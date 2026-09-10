@@ -1,0 +1,31 @@
+{
+  "queries": [
+    "site:runc.run 2026 забег марафон",
+    "site:russiarunning.com 2026 марафон забег trail triathlon",
+    "site:probeg.org/races 2026 марафон забег",
+    "site:live.russiarunning.com 2026 марафон триатлон",
+    "site:iron-star.com 2026 Россия триатлон бег",
+    "site:heroleague.ru 2026 забег trail гонка",
+    "календарь забегов Россия 2026 регистрация",
+    "календарь трейлов Россия 2026 регистрация"
+  ],
+  "social_queries": [
+    "site:instagram.com марафон Россия 2026 организатор",
+    "site:t.me марафон Россия 2026 регистрация",
+    "site:t.me trail Россия 2026 регистрация"
+  ],
+  "seed_urls": [
+    "https://runc.run/",
+    "https://russiarunning.com/Series",
+    "https://probeg.org/races/",
+    "https://live.russiarunning.com/"
+  ],
+  "source_hints": {
+    "runc.run": "official_organizer",
+    "russiarunning.com": "registration",
+    "probeg.org": "secondary",
+    "iron-star.com": "official_organizer",
+    "heroleague.ru": "official_organizer"
+  },
+  "event_terms": ["кросс", "эстафета", "акватлон", "swimrun", "забег.рф"]
+}
