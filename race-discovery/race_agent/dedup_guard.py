@@ -50,17 +50,21 @@ def incompatible_event_variants(a: dict, b: dict) -> bool:
 
 
 def purge_incompatible_variant_evidence(row: dict) -> tuple[dict, int, list[str]]:
-    """Remove evidence leaked into a record by an older cross-format fuzzy merge.
+    """Remove provenance/conflicts leaked into a record by an older cross-format fuzzy merge.
 
-    We only remove a URL when that exact URL has its own `name` evidence and that name explicitly
-    identifies a different variant from the canonical record. Generic/shared evidence is retained.
+    A URL is quarantined only when its own `name` evidence explicitly identifies another variant.
+    Previously quarantined URLs remain available through `sanitized_variant_sources` so a later
+    hygiene pass can also remove stale conflict objects left behind after evidence cleanup.
+
+    The returned URL list contains only sources that caused an actual mutation in this pass. This
+    keeps hygiene idempotent and prevents rewriting runtime forever after the record is clean.
     """
     canonical_variants = event_variants(str(row.get("name") or ""))
     if not canonical_variants:
         return row, 0, []
 
     evidence = list(row.get("evidence") or [])
-    blocked_urls: set[str] = set()
+    detected_blocked_urls: set[str] = set()
     for item in evidence:
         if item.get("field") != "name":
             continue
@@ -69,26 +73,77 @@ def purge_incompatible_variant_evidence(row: dict) -> tuple[dict, int, list[str]
             continue
         evidence_variants = event_variants(str(item.get("value") or ""))
         if evidence_variants and evidence_variants != canonical_variants:
-            blocked_urls.add(url)
+            detected_blocked_urls.add(url)
 
+    historical_blocked_urls = {
+        str(url) for url in list(row.get("sanitized_variant_sources") or []) if str(url)
+    }
+    blocked_urls = detected_blocked_urls | historical_blocked_urls
     if not blocked_urls:
         return row, 0, []
 
     out = copy.deepcopy(row)
+    mutated_urls: set[str] = set()
+
     old_evidence = list(out.get("evidence") or [])
-    out["evidence"] = [item for item in old_evidence if str(item.get("url") or "") not in blocked_urls]
-    out["source_urls"] = [url for url in list(out.get("source_urls") or []) if str(url) not in blocked_urls]
+    new_evidence = [item for item in old_evidence if str(item.get("url") or "") not in blocked_urls]
+    if len(new_evidence) != len(old_evidence):
+        removed_evidence_urls = {
+            str(item.get("url") or "")
+            for item in old_evidence
+            if str(item.get("url") or "") in blocked_urls
+        }
+        mutated_urls.update(removed_evidence_urls)
+    out["evidence"] = new_evidence
+
+    old_source_urls = list(out.get("source_urls") or [])
+    new_source_urls = [url for url in old_source_urls if str(url) not in blocked_urls]
+    if new_source_urls != old_source_urls:
+        mutated_urls.update(str(url) for url in old_source_urls if str(url) in blocked_urls)
+    out["source_urls"] = new_source_urls
 
     for field in ("official_site", "registration_url"):
         if str(out.get(field) or "") in blocked_urls:
+            mutated_urls.add(str(out.get(field)))
             out[field] = ""
 
+    old_conflicts = list(out.get("conflicts") or [])
+    kept_conflicts = []
+    for conflict in old_conflicts:
+        incoming_sources = {
+            str(url) for url in list(conflict.get("incoming_sources") or []) if str(url)
+        }
+        if incoming_sources & blocked_urls:
+            mutated_urls.update(incoming_sources & blocked_urls)
+            continue
+        kept_conflicts.append(conflict)
+    out["conflicts"] = kept_conflicts
+
+    # If CONFLICT existed only because older code merged another explicit race format into this
+    # record, return it to the normal pipeline once those false conflicts are gone.
+    if old_conflicts and not kept_conflicts and str(out.get("status") or "") == "CONFLICT":
+        if list(out.get("changes") or []):
+            out["status"] = "UPDATED"
+            out["pipeline_status"] = "READY_FOR_REVIEW"
+        elif float(out.get("confidence", 0) or 0) >= 0.9:
+            out["status"] = "VERIFIED"
+            out["pipeline_status"] = "READY_FOR_REVIEW"
+        else:
+            out["status"] = "NEW"
+            out["pipeline_status"] = "DISCOVERED"
+
     audit = list(out.get("sanitized_variant_sources") or [])
-    for url in sorted(blocked_urls):
+    for url in sorted(detected_blocked_urls):
         if url not in audit:
             audit.append(url)
-    out["sanitized_variant_sources"] = audit[-50:]
-    return out, len(old_evidence) - len(out["evidence"]), sorted(blocked_urls)
+    if audit != list(out.get("sanitized_variant_sources") or []):
+        mutated_urls.update(detected_blocked_urls)
+    if audit:
+        out["sanitized_variant_sources"] = audit[-50:]
+
+    if not mutated_urls:
+        return row, 0, []
+    return out, len(old_evidence) - len(new_evidence), sorted(mutated_urls)
 
 
 def install(core_module) -> None:
