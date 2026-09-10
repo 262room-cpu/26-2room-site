@@ -8,10 +8,33 @@
         "https://marathon.md/ru/marathon42km",
         "https://marathon.md/ru/halfmarathon21km",
         "https://marathon.md/ru/marathon10km",
-        "https://marathon.md/ru/marathon5km"
+        "https://marathon.md/ru/marathon5km",
+        "https://marathon.md/en/reg",
+        "https://marathon.md/en/marathon42km",
+        "https://marathon.md/en/halfmarathon21km",
+        "https://marathon.md/en/marathon10km",
+        "https://marathon.md/en/marathon5km",
+        "https://marathon.md/en/marathonkids",
+        "https://marathon.md/en/about-run",
+        "https://marathon.md/en/about",
+        "https://marathon.md/ro/marathon42km",
+        "https://marathon.md/ro/halfmarathon21km",
+        "https://marathon.md/ro/marathon10km",
+        "https://marathon.md/ro/marathon5km",
+        "https://marathon.md/ro/marathonkids",
+        "https://marathon.md/ro/about",
+        "https://marathon.md/ru/marathonfunrun",
+        "https://marathon.md/en/marathonfunrun",
+        "https://marathon.md/en/marathonforall",
+        "https://marathon.md/ro/marathonforall",
+        "https://marathon.md/en/run-2026",
+        "https://marathon.md/ru/about",
+        "https://marathon.md/ru/run-2026",
+        "https://marathon.md/ro/run-2026",
+        "https://marathon.md/ro/marathonfunrun"
       ],
-      "event_count": 3,
-      "last_checked": "2026-09-10T15:12:06+00:00"
+      "event_count": 6,
+      "last_checked": "2026-09-10T15:31:29+00:00"
     }
   },
   "organizers": {
@@ -20,11 +43,15 @@
       "event_ids": [
         "05705e9b0695cc09c5f4",
         "3d106acab8c194371c6b",
-        "731ecfff9bb92819f219"
+        "731ecfff9bb92819f219",
+        "e09a0f24f90879d71f5f",
+        "6614072108fd985e6a5f",
+        "0fe8a2640a1ca289d3fa",
+        "51db3d2f3c3be7b5bdce"
       ],
       "name": "chisinaumarathon",
       "instagram": [],
-      "last_checked": "2026-09-10T15:12:06+00:00"
+      "last_checked": "2026-09-10T15:31:29+00:00"
     }
   },
   "social_sources": {}

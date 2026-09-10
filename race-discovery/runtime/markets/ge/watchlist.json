@@ -1,5 +1,24 @@
 {
-  "domains": {},
-  "organizers": {},
+  "domains": {
+    "tbilisimarathon.ge": {
+      "first_seen": "2026-09-10T15:31:10+00:00",
+      "source_urls": [
+        "https://www.tbilisimarathon.ge/en/index"
+      ],
+      "event_count": 1,
+      "last_checked": "2026-09-10T15:31:10+00:00"
+    }
+  },
+  "organizers": {
+    "0c38ead7c514102564f0": {
+      "first_seen": "2026-09-10T15:31:10+00:00",
+      "event_ids": [
+        "3cda59c0079f4491e5b7"
+      ],
+      "name": "jaka.sports",
+      "instagram": [],
+      "last_checked": "2026-09-10T15:31:10+00:00"
+    }
+  },
   "social_sources": {}
 }
