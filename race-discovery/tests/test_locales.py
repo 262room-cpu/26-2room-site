@@ -24,6 +24,12 @@ class LocaleParsingTests(unittest.TestCase):
         for expected in ("5500 rubles", "7 500 rub", "12000 ₸", "9000 kgs", "15000 amd", "350 mdl", "80 gel"):
             self.assertIn(expected.lower(), joined)
 
+    def test_symbol_currencies(self):
+        prices = parse_prices("Стартовый взнос: 6500 ₽, 40 ₾, 25 ₼, 12000 ₸, 10000 ֏, 50000 ₮")
+        joined = " | ".join(prices)
+        for expected in ("6500 ₽", "40 ₾", "25 ₼", "12000 ₸", "10000 ֏", "50000 ₮"):
+            self.assertIn(expected, joined)
+
     def test_focus_ignores_other_races_in_navigation(self):
         text = (
             "21-22 February Speed Race 5 April April Run 11 April Fast Dog "
