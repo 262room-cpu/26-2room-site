@@ -5,11 +5,17 @@ import re
 from urllib.parse import urlparse
 
 from .core import eventish, normalize
-from .locales import parse_dates
+from .locales import parse_dates, primary_event_dates
 
 _ORGANIZATION_MARKERS = (
     "федерац", "federation", "association", "ассоциац", "сообщество", "community",
     "running club", "беговой клуб", "triathlon club", "sports club", "sport club",
+)
+_NAV_EVENT_MARKERS = (
+    r"следующ(?:ий|его|ая)\s+(?:старт|забег|марафон|событи[ея])",
+    r"другие\s+(?:старты|забеги|события|мероприятия)",
+    r"(?:next|upcoming)\s+(?:race|event|marathon|run)s?",
+    r"other\s+(?:races|events|runs)",
 )
 
 
@@ -26,7 +32,6 @@ def organization_like_title(value: str) -> bool:
 
 def _heading_candidates(raw_html: str) -> list[tuple[int, str]]:
     rows: list[tuple[int, str]] = []
-    # H1 is strongest. H2 is only a fallback because many pages use it for section headings.
     for tag, base_score in (("h1", 100), ("h2", 70)):
         for match in re.finditer(rf"<{tag}\b[^>]*>(.*?)</{tag}>", raw_html or "", flags=re.I | re.S):
             text = _clean_fragment(match.group(1))
@@ -43,13 +48,7 @@ def _heading_candidates(raw_html: str) -> list[tuple[int, str]]:
 
 
 def event_heading(raw_html: str, current_title: str, url: str = "") -> str:
-    """Return an event-specific heading when the browser title is an organization/site name.
-
-    Example: triathlon.kg uses the same `<title>Федерация Триатлона Кыргызской Республики</title>`
-    on many event pages while the actual event name lives in H1. We only override when the current
-    title looks organizational/generic, or when a specific `/events/...` page supplies a clearly
-    event-like H1.
-    """
+    """Return an event-specific heading when the browser title is an organization/site name."""
     current = " ".join(str(current_title or "").split()).strip()
     path = urlparse(url).path.casefold()
     specific_event_path = "/event/" in path or "/events/" in path or "/competition/" in path or "/competitions/" in path
@@ -88,16 +87,11 @@ _LABEL_PATTERNS = (
 
 
 def explicitly_labeled_event_dates(text: str, year_min: int = 2026, year_max: int = 2028) -> list[str]:
-    """Extract dates explicitly labelled as the event/race date.
-
-    This outranks proximity heuristics. Registration deadlines, packet pickup and expo dates are
-    intentionally excluded by the label patterns.
-    """
+    """Extract dates explicitly labelled as the event/race date."""
     source = " ".join(str(text or "").split())
     for pattern in _LABEL_PATTERNS:
         for match in re.finditer(pattern, source, flags=re.I):
             tail = source[match.end():match.end() + 180]
-            # Stop before another administrative label if one follows shortly.
             tail = re.split(
                 r"\b(?:место\s+(?:старта|проведения)|location|registration|регистрац|выдача|packet\s+pickup|expo|экспо)\b",
                 tail,
@@ -108,3 +102,21 @@ def explicitly_labeled_event_dates(text: str, year_min: int = 2026, year_max: in
             if dates:
                 return dates
     return []
+
+
+def _without_neighbor_event_navigation(text: str) -> str:
+    """Remove short navigation/promotional clauses about a different upcoming event.
+
+    The event page body is kept intact. Only clauses explicitly introduced as another/next event
+    are removed before proximity-based date ranking.
+    """
+    source = str(text or "")
+    marker = "|".join(f"(?:{x})" for x in _NAV_EVENT_MARKERS)
+    # HTML-to-text output is mostly one line, so stop at punctuation or after a bounded clause.
+    return re.sub(rf"(?:{marker})[^.!?;]{{0,260}}[.!?;]?", " ", source, flags=re.I)
+
+
+def contextual_event_dates(text: str, event_name: str, year_min: int = 2026, year_max: int = 2028) -> list[str]:
+    """Rank event dates after removing explicitly labeled neighboring-event navigation."""
+    cleaned = _without_neighbor_event_navigation(text)
+    return primary_event_dates(cleaned, event_name, year_min=year_min, year_max=year_max)
