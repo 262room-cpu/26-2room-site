@@ -2,7 +2,7 @@
   "domains": {
     "almaty-marathon.kz": {
       "first_seen": "2026-09-10T12:23:53Z",
-      "last_checked": "2026-09-10T12:50:11+00:00",
+      "last_checked": "2026-09-10T12:50:43+00:00",
       "source_urls": [
         "https://almaty-marathon.kz/ru/events/almaty_marathon_2026/",
         "https://almaty-marathon.kz/ru/events/almaty_marathon_2026/regulation?page=text",
@@ -13,7 +13,7 @@
     },
     "athletex.kz": {
       "first_seen": "2026-09-10T12:23:53Z",
-      "last_checked": "2026-09-10T12:50:11+00:00",
+      "last_checked": "2026-09-10T12:50:43+00:00",
       "source_urls": [
         "https://athletex.kz/competitions/rrautumn26",
         "https://athletex.kz/competitions/zhm5",
@@ -23,7 +23,7 @@
     },
     "caspian-marathon.kz": {
       "first_seen": "2026-09-10T12:23:53Z",
-      "last_checked": "2026-09-10T12:50:11+00:00",
+      "last_checked": "2026-09-10T12:50:43+00:00",
       "source_urls": [
         "https://www.caspian-marathon.kz/ru/calendar/?title=CASPIAN_MARATHON_2026_%E2%80%94_bolshe%2C_chem_prosto_zabeg_252",
         "https://caspian-marathon.kz/ru/users_list?distance=5",
@@ -33,7 +33,7 @@
     },
     "qhm26.athleticfamily.kz": {
       "first_seen": "2026-09-10T12:23:53Z",
-      "last_checked": "2026-09-10T12:50:11+00:00",
+      "last_checked": "2026-09-10T12:50:43+00:00",
       "source_urls": [
         "https://qhm26.athleticfamily.kz/ru"
       ],
@@ -41,7 +41,7 @@
     },
     "reg.elordasport.kz": {
       "first_seen": "2026-09-10T12:23:53Z",
-      "last_checked": "2026-09-10T12:50:11+00:00",
+      "last_checked": "2026-09-10T12:50:43+00:00",
       "source_urls": [
         "https://reg.elordasport.kz/ru/events/12sep-jana-men-kuz-run/",
         "https://reg.elordasport.kz/ru/"
@@ -50,7 +50,7 @@
     },
     "gov.kz": {
       "first_seen": "2026-09-10T12:23:53Z",
-      "last_checked": "2026-09-10T12:50:11+00:00",
+      "last_checked": "2026-09-10T12:50:43+00:00",
       "source_urls": [
         "https://www.gov.kz/memleket/entities/astana/press/news/details/1286800"
       ],
@@ -60,7 +60,7 @@
   "organizers": {
     "Корпоративный фонд «Смелость быть первым»": {
       "first_seen": "2026-09-10T12:23:53Z",
-      "last_checked": "2026-09-10T12:50:11+00:00",
+      "last_checked": "2026-09-10T12:50:43+00:00",
       "event_ids": [
         "00317196b5ee669a0850",
         "05850758ebc06baf087f",
@@ -69,14 +69,14 @@
     },
     "Дирекция по проведению спортивно-массовых мероприятий акимата города Астаны": {
       "first_seen": "2026-09-10T12:23:53Z",
-      "last_checked": "2026-09-10T12:50:11+00:00",
+      "last_checked": "2026-09-10T12:50:43+00:00",
       "event_ids": [
         "e89ad2a3fb2a576eae54"
       ]
     },
     "Управление физической культуры и туризма города Караганды": {
       "first_seen": "2026-09-10T12:23:53Z",
-      "last_checked": "2026-09-10T12:50:11+00:00",
+      "last_checked": "2026-09-10T12:50:43+00:00",
       "event_ids": [
         "a8dc9cd256752be0a77b"
       ]
