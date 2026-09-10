@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 from typing import Any
 
 from .core import domain, stable_id
@@ -86,8 +87,25 @@ def _prepare_sandbox(code: str, cfg: dict, sandbox: pathlib.Path) -> None:
         (sandbox / "runtime").mkdir(parents=True, exist_ok=True)
 
 
-def run_market(code: str, cfg: dict) -> dict:
+def _tail_text(value: Any, limit: int = 2000) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, bytes):
+        value = value.decode("utf-8", errors="replace")
+    return str(value)[-limit:]
+
+
+def run_market(code: str, cfg: dict, timeout_seconds: int | None = None) -> dict:
+    """Run one market in an isolated sandbox and always preserve its checkpoint.
+
+    A slow/broken source must not abort the whole multi-market rotation. On timeout the child is
+    stopped by subprocess.run, whatever runtime it managed to write is copied back, and STATE.json
+    is explicitly marked TIMEOUT_CHECKPOINTED so a stale PASS can never masquerade as the result of
+    the interrupted attempt.
+    """
     started = dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")
+    timeout_seconds = max(1, int(timeout_seconds or os.environ.get("MARKET_TIMEOUT_SECONDS", "420")))
+
     with tempfile.TemporaryDirectory(prefix=f"262room-{code}-") as td:
         sandbox = pathlib.Path(td)
         _prepare_sandbox(code, cfg, sandbox)
@@ -100,29 +118,60 @@ def run_market(code: str, cfg: dict) -> dict:
         env.setdefault("RESULTS_PER_QUERY", os.environ.get("MARKET_RESULTS_PER_QUERY", "7"))
         env.setdefault("MAX_URLS", os.environ.get("MARKET_MAX_URLS", "45"))
 
-        proc = subprocess.run(
-            [sys.executable, "-m", "race_agent.cli", "run", "--country", code],
-            cwd=sandbox,
-            env=env,
-            text=True,
-            capture_output=True,
-            timeout=int(os.environ.get("MARKET_TIMEOUT_SECONDS", "420")),
-        )
+        timed_out = False
+        stdout = ""
+        stderr = ""
+        returncode = 0
+        try:
+            proc = subprocess.run(
+                [sys.executable, "-m", "race_agent.cli", "run", "--country", code],
+                cwd=sandbox,
+                env=env,
+                text=True,
+                capture_output=True,
+                timeout=timeout_seconds,
+            )
+            returncode = proc.returncode
+            stdout = proc.stdout or ""
+            stderr = proc.stderr or ""
+        except subprocess.TimeoutExpired as exc:
+            timed_out = True
+            returncode = 124
+            stdout = _tail_text(exc.stdout)
+            stderr = _tail_text(exc.stderr)
+
         target = MARKET_ROOT / code
         target.mkdir(parents=True, exist_ok=True)
         if (sandbox / "runtime").exists():
             shutil.copytree(sandbox / "runtime", target, dirs_exist_ok=True)
+
+        finished = dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")
         state = _read_json(target / "STATE.json", {})
+        if timed_out:
+            previous_status = str(state.get("status") or "")
+            state["status"] = "TIMEOUT_CHECKPOINTED"
+            state["last_timeout"] = {
+                "at": finished,
+                "timeout_seconds": timeout_seconds,
+                "previous_status": previous_status,
+                "reason": "MARKET_TIMEOUT",
+            }
+            _write_json(target / "STATE.json", state)
+
+        checkpointed = (target / "STATE.json").exists() or any(target.iterdir())
         return {
             "market_code": code,
             "country": cfg.get("country"),
             "started_at": started,
-            "finished_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
-            "returncode": proc.returncode,
-            "status": state.get("status", "FAILED" if proc.returncode else "UNKNOWN"),
+            "finished_at": finished,
+            "returncode": returncode,
+            "status": "TIMEOUT_CHECKPOINTED" if timed_out else state.get("status", "FAILED" if returncode else "UNKNOWN"),
             "summary": state.get("last_summary", {}),
-            "stdout_tail": proc.stdout[-2000:],
-            "stderr_tail": proc.stderr[-2000:],
+            "timed_out": timed_out,
+            "timeout_seconds": timeout_seconds,
+            "checkpointed": checkpointed,
+            "stdout_tail": _tail_text(stdout),
+            "stderr_tail": _tail_text(stderr),
         }
 
 
@@ -139,6 +188,54 @@ def choose_markets(limit: int) -> list[str]:
     remaining.sort(key=lambda item: (last.get(item[0], ""), -int(item[1].get("priority", 0)), item[0]))
     slots = max(0, limit - len(forced))
     return forced + [code for code, _ in remaining[:slots]]
+
+
+def run_rotation(
+    selected: list[str],
+    manifest: dict[str, dict],
+    total_budget_seconds: int,
+    per_market_timeout_seconds: int,
+    *,
+    now_fn=None,
+    config_loader=None,
+    market_runner=None,
+) -> list[dict]:
+    """Run selected markets sequentially within one hard wall-clock budget.
+
+    Sequential execution is deliberate: it avoids making every market hit the same free search/news
+    providers simultaneously. Markets deferred by the global budget do not receive last_success, so
+    choose_markets naturally prioritizes them on the next rotation.
+    """
+    now_fn = now_fn or time.monotonic
+    config_loader = config_loader or (lambda code: load_market_config(CONFIG, code))
+    market_runner = market_runner or run_market
+    total_budget_seconds = max(1, int(total_budget_seconds))
+    per_market_timeout_seconds = max(1, int(per_market_timeout_seconds))
+    deadline = now_fn() + total_budget_seconds
+    results: list[dict] = []
+
+    for code in selected:
+        if code not in manifest:
+            results.append({"market_code": code, "status": "UNKNOWN_MARKET", "returncode": None})
+            continue
+
+        remaining = int(deadline - now_fn())
+        if remaining <= 0:
+            results.append({
+                "market_code": code,
+                "country": manifest.get(code, {}).get("country"),
+                "status": "DEFERRED_GLOBAL_BUDGET",
+                "returncode": None,
+                "timed_out": False,
+                "checkpointed": False,
+            })
+            continue
+
+        timeout = max(1, min(per_market_timeout_seconds, remaining))
+        cfg = config_loader(code)
+        results.append(market_runner(code, cfg, timeout_seconds=timeout))
+
+    return results
 
 
 def _unique(values: list[str]) -> list[str]:
@@ -267,26 +364,38 @@ def main() -> int:
     manifest = dict(enabled_markets(CONFIG))
     GLOBAL_ROOT.mkdir(parents=True, exist_ok=True)
     schedule = _read_json(GLOBAL_ROOT / "market_schedule.json", {"last_success": {}, "history": []})
-    results = []
-    for code in selected:
-        if code not in manifest:
-            results.append({"market_code": code, "status": "UNKNOWN_MARKET"})
-            continue
-        cfg = load_market_config(CONFIG, code)
-        result = run_market(code, cfg)
-        results.append(result)
+    total_budget_seconds = int(os.environ.get("MULTI_MARKET_BUDGET_SECONDS", "1200"))
+    per_market_timeout_seconds = int(os.environ.get("MARKET_TIMEOUT_SECONDS", "300"))
+
+    results = run_rotation(
+        selected,
+        manifest,
+        total_budget_seconds=total_budget_seconds,
+        per_market_timeout_seconds=per_market_timeout_seconds,
+    )
+    for result in results:
         if result.get("returncode") == 0 and str(result.get("status", "")).startswith("PASS"):
-            schedule.setdefault("last_success", {})[code] = result.get("finished_at")
+            schedule.setdefault("last_success", {})[result.get("market_code")] = result.get("finished_at")
+
     schedule.setdefault("history", []).append({
         "at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
         "selected": selected,
-        "results": [{"market_code": r.get("market_code"), "status": r.get("status"), "returncode": r.get("returncode")} for r in results],
+        "budget_seconds": total_budget_seconds,
+        "per_market_timeout_seconds": per_market_timeout_seconds,
+        "results": [{
+            "market_code": r.get("market_code"),
+            "status": r.get("status"),
+            "returncode": r.get("returncode"),
+        } for r in results],
     })
     schedule["history"] = schedule["history"][-60:]
     _write_json(GLOBAL_ROOT / "market_schedule.json", schedule)
     summary = aggregate_global()
     print(json.dumps({"selected": selected, "results": results, "global": summary}, ensure_ascii=False, indent=2))
-    return 1 if any(r.get("returncode", 0) not in (0, None) for r in results) else 0
+
+    # Timeout/deferred are recoverable checkpoint states, not reasons to skip hygiene/report/persist.
+    # Hard child failures still fail the discovery step and stop publication-like follow-up work.
+    return 1 if any(r.get("returncode") not in (0, None, 124) for r in results) else 0
 
 
 if __name__ == "__main__":
