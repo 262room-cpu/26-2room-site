@@ -15,6 +15,7 @@ from .inbox import load_private_signals
 from .organizers import build_organizer_database, build_organizer_research_queue, organizer_lead_from_document, outreach_ready
 from .providers import BingRssSearchProvider, SearchHit, fetch_url
 from .signals import accept_hit, page_has_kazakhstan_evidence, should_fetch_direct, signal_as_html, signal_record, social_queries
+from .telegram_public import external_message_links, is_public_channel_feed, message_as_html, parse_public_channel
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 RUNTIME = ROOT / "runtime"
@@ -63,6 +64,12 @@ def _previous_still_relevant(row: dict, cfg: dict) -> bool:
     meta = row.get("discovery") or {}
     hit = SearchHit(title=str(meta.get("title") or row.get("name") or ""), url=(row.get("source_urls") or [""])[0], snippet=str(meta.get("snippet") or ""))
     return accept_hit(hit, cfg)
+
+
+def _trusted_social_source(source_type: str) -> str:
+    if source_type in {"official_event", "official_organizer", "registration", "federation", "government"}:
+        return source_type
+    return "search_result"
 
 
 def run(country: str = "kz") -> int:
@@ -149,7 +156,6 @@ def run(country: str = "kz") -> int:
         if link.startswith("http") and should_fetch_direct(link):
             urls.setdefault(link, {"found_by": ["PRIVATE_SIGNAL_LINK"], "title": title, "snippet": text[:800]})
 
-    save_jsonl(RUNTIME / "signals.jsonl", signals[-1000:])
     state.update({"phase": "EXTRACT", "queries_completed": query_count, "urls_discovered": len(urls), "signals_accepted": len(signals)})
     write_json(state_path, state)
 
@@ -162,6 +168,10 @@ def run(country: str = "kz") -> int:
     queued = set(urls)
     hubs: list[dict] = []
     hub_links_discovered = 0
+    telegram_feeds = 0
+    telegram_messages_seen = 0
+    telegram_messages_accepted = 0
+    telegram_external_links = 0
     cursor = 0
 
     while cursor < len(fetch_queue) and checked < max_urls:
@@ -173,6 +183,59 @@ def run(country: str = "kz") -> int:
             if not raw:
                 continue
             source_type = classify_source(url, source_hints)
+
+            if is_public_channel_feed(url):
+                telegram_feeds += 1
+                message_source_type = _trusted_social_source(source_type)
+                for message in parse_public_channel(raw, max_messages=int(os.environ.get("TELEGRAM_MESSAGES_PER_FEED", "80"))):
+                    telegram_messages_seen += 1
+                    message_hit = SearchHit(
+                        title=str(message.get("post") or meta.get("title") or "Telegram post"),
+                        url=str(message.get("url") or url),
+                        snippet=str(message.get("text") or "")[:8000],
+                    )
+                    if not accept_hit(message_hit, cfg, query="TELEGRAM_MESSAGE", threshold=0.40):
+                        continue
+                    telegram_messages_accepted += 1
+                    sig = signal_record(message_hit, "TELEGRAM_MESSAGE", observed, cfg)
+                    sig["source_family"] = "TELEGRAM_MESSAGE"
+                    sig["feed_url"] = url
+                    sig["published_at"] = message.get("datetime") or ""
+                    signals.append(sig)
+
+                    message_html = message_as_html(message)
+                    candidate = candidate_from_document(
+                        message_hit.url,
+                        message_html,
+                        message_source_type,
+                        observed,
+                        known_cities=cfg.get("cities", []),
+                        country=cfg.get("country", "Kazakhstan"),
+                    )
+                    if candidate:
+                        candidate["discovery"] = {
+                            "found_by": list(dict.fromkeys(list(meta.get("found_by", [])) + [f"TELEGRAM:{url}"])),
+                            "title": message_hit.title,
+                            "snippet": message_hit.snippet[:1200],
+                        }
+                        candidate["signal_only"] = message_source_type == "search_result"
+                        raw_candidates.append(candidate)
+                        lead = organizer_lead_from_document(candidate, message_html, message_hit.url, message_source_type, observed)
+                        if lead:
+                            raw_organizer_leads.append(lead)
+
+                    for child_url in external_message_links(message):
+                        if child_url in queued or len(fetch_queue) >= max_queue:
+                            continue
+                        queued.add(child_url)
+                        telegram_external_links += 1
+                        fetch_queue.append((child_url, {
+                            "found_by": list(dict.fromkeys(list(meta.get("found_by", [])) + [f"TELEGRAM_POST:{message_hit.url}"])),
+                            "title": message_hit.title,
+                            "snippet": message_hit.snippet[:800],
+                        }))
+                # A Telegram feed contains many posts. It must never be parsed as one event page.
+                continue
 
             hub = extract_hub_event_links(url, raw, max_links=max_hub_links)
             if hub.get("is_hub"):
@@ -196,7 +259,6 @@ def run(country: str = "kz") -> int:
                     "child_links": child_count,
                     "jsonld_event_count": hub.get("jsonld_event_count", 0),
                 })
-                # Never parse a hub as one event. Facts from multiple race cards must not mix.
                 continue
 
             candidate = candidate_from_document(url, raw, source_type, observed, known_cities=cfg.get("cities", []), country=cfg.get("country", "Kazakhstan"))
@@ -212,6 +274,7 @@ def run(country: str = "kz") -> int:
         except Exception as exc:
             errors.append({"phase": "FETCH", "url": url, "error": type(exc).__name__ + ": " + str(exc)[:240]})
 
+    save_jsonl(RUNTIME / "signals.jsonl", signals[-1500:])
     save_jsonl(RUNTIME / "hubs.jsonl", hubs[-500:])
     state.update({
         "phase": "DEDUPLICATE",
@@ -219,6 +282,10 @@ def run(country: str = "kz") -> int:
         "urls_discovered": len(queued),
         "hubs_detected": len(hubs),
         "hub_links_discovered": hub_links_discovered,
+        "telegram_feeds": telegram_feeds,
+        "telegram_messages_seen": telegram_messages_seen,
+        "telegram_messages_accepted": telegram_messages_accepted,
+        "telegram_external_links": telegram_external_links,
         "raw_candidates": len(raw_candidates),
     })
     write_json(state_path, state)
@@ -309,7 +376,7 @@ def run(country: str = "kz") -> int:
         rec["instagram"] = (organizer.get("contacts") or {}).get("instagram", [])
         rec["last_checked"] = observed
     for signal in signals:
-        if signal.get("source_family") in {"INSTAGRAM", "TELEGRAM", "FACEBOOK"} and signal.get("url"):
+        if signal.get("source_family") in {"INSTAGRAM", "TELEGRAM", "TELEGRAM_MESSAGE", "FACEBOOK"} and signal.get("url"):
             rec = watchlist["social_sources"].setdefault(signal["url"], {"first_seen": observed, "family": signal["source_family"]})
             rec["last_seen"] = observed
     write_json(RUNTIME / "watchlist.json", watchlist)
@@ -362,6 +429,10 @@ def run(country: str = "kz") -> int:
         "urls_checked": checked,
         "hubs_detected": len(hubs),
         "hub_links_discovered": hub_links_discovered,
+        "telegram_feeds": telegram_feeds,
+        "telegram_messages_seen": telegram_messages_seen,
+        "telegram_messages_accepted": telegram_messages_accepted,
+        "telegram_external_links": telegram_external_links,
         "raw_candidates": len(raw_candidates),
         "deduplicated_candidates": len(candidates),
         "duplicates_discarded": dup_count,
