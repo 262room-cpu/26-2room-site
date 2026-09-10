@@ -4,7 +4,7 @@ import copy
 import re
 from typing import Any
 
-from .dedup_guard import incompatible_event_variants
+from .dedup_guard import incompatible_event_variants, purge_incompatible_variant_evidence
 
 
 def _known(value: Any) -> bool:
@@ -116,10 +116,15 @@ def merge_same_edition(canonical: dict, duplicate: dict) -> dict:
 
 
 def collapse_same_editions(rows: list[dict]) -> tuple[list[dict], list[dict]]:
-    """Collapse exact historical edition duplicates and return archived duplicate rows."""
+    """Sanitize historical cross-format leaks, then collapse exact edition duplicates."""
+    sanitized_rows: list[dict] = []
+    for row in rows:
+        sanitized, _, _ = purge_incompatible_variant_evidence(row)
+        sanitized_rows.append(sanitized)
+
     groups: dict[tuple[str, str], list[dict]] = {}
     passthrough: list[dict] = []
-    for row in rows:
+    for row in sanitized_rows:
         lineage = str(row.get("lineage_id") or "")
         date = str(row.get("date") or "")
         if not lineage or not date:
