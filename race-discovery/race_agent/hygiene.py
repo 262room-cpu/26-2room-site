@@ -8,6 +8,7 @@ import re
 from urllib.parse import urlparse
 
 from .organizers import outreach_ready
+from .provenance import compact_record_provenance
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 RUNTIME = ROOT / "runtime"
@@ -114,12 +115,18 @@ def clean_market(code: str) -> dict:
     candidates_path = root / "candidates.jsonl"
     candidates = _read_jsonl(candidates_path)
     if not candidates:
-        return {"market_code": code, "candidates_before": 0, "quarantined": 0, "candidates_after": 0}
+        return {
+            "market_code": code, "candidates_before": 0, "quarantined": 0,
+            "candidates_after": 0, "evidence_rows_compacted": 0,
+        }
 
     observed = dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")
     kept = []
     rejected = []
-    for row in candidates:
+    evidence_removed = 0
+    for original in candidates:
+        row, removed = compact_record_provenance(original)
+        evidence_removed += removed
         reason = artifact_reason(row)
         if not reason:
             kept.append(row)
@@ -128,46 +135,43 @@ def clean_market(code: str) -> dict:
             **row,
             "quarantine_reason": reason,
             "quarantined_at": observed,
-            "hygiene_version": 2,
+            "hygiene_version": 3,
         })
 
-    if not rejected:
-        return {
-            "market_code": code,
-            "candidates_before": len(candidates),
-            "quarantined": 0,
-            "candidates_after": len(candidates),
-        }
+    if rejected or evidence_removed:
+        _write_jsonl(candidates_path, kept)
 
-    _write_jsonl(candidates_path, kept)
-    old_quarantine = _read_jsonl(root / "quarantine.jsonl")
-    # Avoid appending the same artifact forever if an old parser recreates it unexpectedly.
-    quarantine_by_key = {}
-    for row in old_quarantine + rejected:
-        key = (row.get("candidate_id"), row.get("quarantine_reason"), tuple(row.get("source_urls", [])))
-        quarantine_by_key[key] = row
-    _write_jsonl(root / "quarantine.jsonl", list(quarantine_by_key.values())[-1000:])
+    if rejected:
+        old_quarantine = _read_jsonl(root / "quarantine.jsonl")
+        # Avoid appending the same artifact forever if an old parser recreates it unexpectedly.
+        quarantine_by_key = {}
+        for row in old_quarantine + rejected:
+            key = (row.get("candidate_id"), row.get("quarantine_reason"), tuple(row.get("source_urls", [])))
+            quarantine_by_key[key] = row
+        _write_jsonl(root / "quarantine.jsonl", list(quarantine_by_key.values())[-1000:])
 
     active_ids = {r.get("candidate_id") for r in kept if r.get("candidate_id")}
-    removed_queue = _filter_by_candidate_ids(root / "organizer_research_queue.jsonl", active_ids)
-    removed_discovery = _filter_by_candidate_ids(root / "discovery_list.jsonl", active_ids)
-    removed_existing = _filter_by_candidate_ids(root / "already_in_app.jsonl", active_ids)
-    removed_model = _filter_by_candidate_ids(root / "model_queue.jsonl", active_ids)
+    removed_queue = _filter_by_candidate_ids(root / "organizer_research_queue.jsonl", active_ids) if rejected else 0
+    removed_discovery = _filter_by_candidate_ids(root / "discovery_list.jsonl", active_ids) if rejected else 0
+    removed_existing = _filter_by_candidate_ids(root / "already_in_app.jsonl", active_ids) if rejected else 0
+    removed_model = _filter_by_candidate_ids(root / "model_queue.jsonl", active_ids) if rejected else 0
 
     # Organizer rows may refer to several events. Keep the profile if at least one real event
-    # survives and trim only the quarantined event links.
+    # survives, trim quarantined event links and compact repeated evidence on every hygiene pass.
     organizers = _read_jsonl(root / "organizers.jsonl")
     organizers_kept = []
     organizer_removed = 0
-    for row in organizers:
+    organizer_evidence_removed = 0
+    for original in organizers:
+        row, removed = compact_record_provenance(original)
+        organizer_evidence_removed += removed
         event_ids = [eid for eid in row.get("event_ids", []) if eid in active_ids]
         if not event_ids:
             organizer_removed += 1
             continue
-        row = dict(row)
         row["event_ids"] = event_ids
         organizers_kept.append(row)
-    if organizers:
+    if organizers and (rejected or organizer_evidence_removed or organizer_removed):
         _write_jsonl(root / "organizers.jsonl", organizers_kept)
         _write_jsonl(root / "organizer_outreach_ready.jsonl", outreach_ready(organizers_kept))
 
@@ -179,6 +183,7 @@ def clean_market(code: str) -> dict:
         "candidates_after": len(kept),
         "related_rows_removed": removed_queue + removed_discovery + removed_existing + removed_model,
         "organizers_removed": organizer_removed,
+        "evidence_rows_compacted": evidence_removed + organizer_evidence_removed,
     }
 
 
@@ -201,8 +206,8 @@ def main() -> int:
         codes = sorted(p.name for p in MARKETS.iterdir() if p.is_dir()) if MARKETS.exists() else []
     results = [clean_market(code) for code in codes]
 
-    # Rebuild global state only after per-market artifacts are gone.
-    if any(r.get("quarantined") for r in results):
+    # Rebuild global state after artifacts or provenance compaction so the report sees clean rows.
+    if any(r.get("quarantined") or r.get("evidence_rows_compacted") for r in results):
         from .market_runner import aggregate_global
         aggregate_global()
 
@@ -210,6 +215,7 @@ def main() -> int:
         "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
         "markets": results,
         "quarantined_total": sum(int(r.get("quarantined", 0)) for r in results),
+        "evidence_rows_compacted_total": sum(int(r.get("evidence_rows_compacted", 0)) for r in results),
     }
     (RUNTIME / "global").mkdir(parents=True, exist_ok=True)
     (RUNTIME / "global" / "HYGIENE_REPORT.json").write_text(
