@@ -32,7 +32,8 @@ CURRENCY_PATTERN = "|".join([
     r"KGS", r"сом(?:ов|а)?",
     r"UZS", r"сум(?:ов|а)?", r"so['’]?m",
     r"AMD", r"֏", r"drams?", r"драм(?:ов|а)?",
-    r"BYN", r"бел\.?\s*руб\.?","r"AZN", r"₼", r"манат(?:ов|а)?",
+    r"BYN", r"бел\.?\s*руб\.?","
+    " r"AZN", r"₼", r"манат(?:ов|а)?",
     r"MDL", r"lei", r"leu",
     r"TJS", r"сомони",
     r"TMT", r"манат",
@@ -112,7 +113,6 @@ def parse_prices(text: str) -> list[str]:
     """Extract publicly listed prices in currencies used by enabled markets."""
     out: list[str] = []
     number = r"(?:\d{1,3}(?:[\s\u00a0]\d{3})+|\d{1,9})(?:[.,]\d{1,2})?"
-    # `(?!\w)` works for both alphabetic codes and non-word currency symbols like ₸/₽/₾.
     for amount, currency in re.findall(rf"(?<!\d)({number})\s*({CURRENCY_PATTERN})(?!\w)", text or "", flags=re.I):
         clean_amount = " ".join(amount.replace("\u00a0", " ").split())
         value = f"{clean_amount} {currency.strip()}"
