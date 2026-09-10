@@ -18,7 +18,7 @@ concurrency:
 jobs:
   discover:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     defaults:
       run:
         working-directory: race-discovery
@@ -35,11 +35,11 @@ jobs:
       - name: Deterministic tests first
         run: python -m unittest discover -s tests -v
 
-      - name: Kazakhstan discovery loop
+      - name: Kazakhstan multi-source discovery loop
         env:
-          MAX_QUERIES: '10'
-          RESULTS_PER_QUERY: '6'
-          MAX_URLS: '40'
+          MAX_QUERIES: '28'
+          RESULTS_PER_QUERY: '8'
+          MAX_URLS: '60'
         run: python -m race_agent.cli run --country kz
 
       - name: Persist checkpoint and evidence
