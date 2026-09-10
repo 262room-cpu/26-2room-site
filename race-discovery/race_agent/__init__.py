@@ -93,7 +93,12 @@ _core.candidate_from_document = _refined_candidate_from_document
 # event page is never allowed to become the organizer's identity without explicit evidence.
 from . import organizers as _organizers
 from .organizer_identity_guard import install as _install_organizer_identity_guard
+from .organizer_queue import build_runtime_progressive_organizer_research_queue
 
 _install_organizer_identity_guard(_organizers)
+
+# Keep organizer research history and put primary-domain identity queries first without changing
+# the public cli.py call signature.
+_organizers.build_organizer_research_queue = build_runtime_progressive_organizer_research_queue
 
 __all__ = []
