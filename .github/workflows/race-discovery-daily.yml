@@ -1,0 +1,89 @@
+name: 26.2 ROOM Race Discovery Daily
+
+on:
+  schedule:
+    # 04:30 UTC = 10:30 Kazakhstan time (UTC+6)
+    - cron: '30 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: race-discovery-v1-daily
+  cancel-in-progress: false
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: race-discovery
+
+    steps:
+      - name: Checkout autonomous agent branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/race-discovery-v1
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Deterministic tests first
+        run: python -m unittest discover -s tests -v
+
+      - name: Multi-market discovery rotation
+        env:
+          MARKETS_PER_RUN: '5'
+          MARKET_MAX_QUERIES: '16'
+          MARKET_RESULTS_PER_QUERY: '7'
+          MARKET_MAX_URLS: '45'
+          MARKET_TIMEOUT_SECONDS: '300'
+          MULTI_MARKET_BUDGET_SECONDS: '1200'
+        run: python -m race_agent.market_runner --limit 5
+
+      - name: Quarantine historical parser artifacts
+        run: python -m race_agent.hygiene --all
+
+      - name: Organizer contact discovery
+        env:
+          ORGANIZER_RESEARCH_MARKETS: '5'
+          ORGANIZER_RESEARCH_TASKS: '5'
+          ORGANIZER_RESEARCH_QUERIES: '2'
+          ORGANIZER_RESEARCH_RESULTS: '5'
+        run: python -m race_agent.organizer_research --max-markets 5 --max-tasks 5 --queries-per-task 2 --results-per-query 5
+
+      - name: Build 26.2 ROOM action report
+        run: python -m race_agent.report --max-items 50
+
+      - name: Persist checkpoints to agent branch only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "262room-race-agent"
+          git config user.email "actions@users.noreply.github.com"
+          git add runtime/
+          if git diff --cached --quiet; then
+            echo "No runtime changes"
+            exit 0
+          fi
+          git commit -m "[skip ci] agent: persist scheduled discovery checkpoint"
+
+          for attempt in 1 2 3; do
+            git fetch origin agent/race-discovery-v1
+            if git rebase origin/agent/race-discovery-v1; then
+              if git push origin HEAD:agent/race-discovery-v1; then
+                echo "Scheduled checkpoint persisted on attempt ${attempt}"
+                exit 0
+              fi
+            else
+              git rebase --abort || true
+            fi
+            sleep $((attempt * 2))
+          done
+
+          echo "Scheduled checkpoint could not be persisted after 3 attempts"
+          exit 1
