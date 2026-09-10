@@ -1,29 +1,29 @@
 {
   "status": "PASS_WITH_REVIEW_QUEUE",
-  "run_id": "20260910T171857Z",
-  "started_at": "2026-09-10T17:18:57+00:00",
+  "run_id": "20260910T175000Z",
+  "started_at": "2026-09-10T17:50:00+00:00",
   "phase": "DONE",
   "queries_completed": 16,
-  "urls_discovered": 1,
-  "signals_accepted": 0,
+  "urls_discovered": 3,
+  "signals_accepted": 2,
   "urls_checked": 1,
   "hubs_detected": 0,
   "hub_links_discovered": 0,
   "raw_candidates": 1,
-  "finished_at": "2026-09-10T17:19:07+00:00",
+  "finished_at": "2026-09-10T17:50:11+00:00",
   "last_summary": {
-    "run_id": "20260910T171857Z",
-    "started_at": "2026-09-10T17:18:57+00:00",
-    "finished_at": "2026-09-10T17:19:07+00:00",
+    "run_id": "20260910T175000Z",
+    "started_at": "2026-09-10T17:50:00+00:00",
+    "finished_at": "2026-09-10T17:50:11+00:00",
     "queries": 16,
     "search_hits_seen": 84,
-    "search_hits_accepted": 0,
-    "search_hits_rejected": 84,
+    "search_hits_accepted": 2,
+    "search_hits_rejected": 82,
     "page_geo_rejected": 0,
-    "signals": 0,
+    "signals": 2,
     "private_signals": 0,
     "private_inbox_source": "NONE",
-    "urls_discovered": 1,
+    "urls_discovered": 3,
     "urls_checked": 1,
     "hubs_detected": 0,
     "hub_links_discovered": 0,
@@ -56,7 +56,18 @@
     "organizer_contact_status_counts": {
       "CONTACTS_MISSING": 1
     },
-    "errors": []
+    "errors": [
+      {
+        "phase": "FETCH",
+        "url": "https://www.parkrun.org.uk/southnorwood/news/2026/08/29/a-real-gem-by-mike/",
+        "error": "HTTPError: HTTP Error 405: Not Allowed"
+      },
+      {
+        "phase": "FETCH",
+        "url": "https://www.parkrun.org.uk/southnorwood/news/2026/08/24/south-norwood-parkrun-event-415-the-one-that-wasnt-thames-path-let-me-explain/",
+        "error": "HTTPError: HTTP Error 405: Not Allowed"
+      }
+    ]
   },
   "catalog_source": "NOT_CONNECTED",
   "telegram_feeds": 0,

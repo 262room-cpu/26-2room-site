@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-10T17:39:22+00:00",
+  "generated_at": "2026-09-10T17:50:11+00:00",
   "markets": [
     {
       "market_code": "am",
@@ -42,7 +42,7 @@
       "candidates_after": 1,
       "related_rows_removed": 0,
       "organizers_removed": 0,
-      "evidence_rows_compacted": 7
+      "evidence_rows_compacted": 0
     },
     {
       "market_code": "kg",
@@ -50,7 +50,7 @@
       "quarantined": 0,
       "quarantine_reasons": {},
       "same_edition_duplicates_collapsed": 0,
-      "variant_evidence_rows_removed": 16,
+      "variant_evidence_rows_removed": 0,
       "variant_sources_sanitized": 2,
       "candidates_after": 5,
       "related_rows_removed": 0,
@@ -71,20 +71,20 @@
       "candidates_after": 20,
       "related_rows_removed": 4,
       "organizers_removed": 2,
-      "evidence_rows_compacted": 165
+      "evidence_rows_compacted": 168
     },
     {
       "market_code": "md",
-      "candidates_before": 6,
+      "candidates_before": 5,
       "quarantined": 0,
       "quarantine_reasons": {},
-      "same_edition_duplicates_collapsed": 1,
+      "same_edition_duplicates_collapsed": 0,
       "variant_evidence_rows_removed": 0,
       "variant_sources_sanitized": 0,
       "candidates_after": 5,
       "related_rows_removed": 0,
       "organizers_removed": 0,
-      "evidence_rows_compacted": 407
+      "evidence_rows_compacted": 0
     },
     {
       "market_code": "mn",
@@ -97,7 +97,7 @@
       "candidates_after": 1,
       "related_rows_removed": 0,
       "organizers_removed": 0,
-      "evidence_rows_compacted": 0
+      "evidence_rows_compacted": 5
     },
     {
       "market_code": "ru",
@@ -149,8 +149,8 @@
     }
   ],
   "quarantined_total": 3,
-  "same_edition_duplicates_collapsed_total": 1,
-  "variant_evidence_rows_removed_total": 16,
+  "same_edition_duplicates_collapsed_total": 0,
+  "variant_evidence_rows_removed_total": 0,
   "variant_sources_sanitized_total": 2,
-  "evidence_rows_compacted_total": 579
+  "evidence_rows_compacted_total": 173
 }

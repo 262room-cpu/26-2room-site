@@ -14,7 +14,7 @@
         "https://aprilrun5km.runc.run/"
       ],
       "event_count": 1,
-      "last_checked": "2026-09-10T17:35:44+00:00"
+      "last_checked": "2026-09-10T17:48:05+00:00"
     },
     "spbhalf.runc.run": {
       "first_seen": "2026-09-10T15:07:26+00:00",
@@ -22,7 +22,7 @@
         "https://spbhalf.runc.run/"
       ],
       "event_count": 1,
-      "last_checked": "2026-09-10T17:35:44+00:00"
+      "last_checked": "2026-09-10T17:48:05+00:00"
     },
     "moscowmarathon.runc.run": {
       "first_seen": "2026-09-10T15:07:26+00:00",
@@ -30,7 +30,7 @@
         "https://moscowmarathon.runc.run/"
       ],
       "event_count": 1,
-      "last_checked": "2026-09-10T17:35:44+00:00"
+      "last_checked": "2026-09-10T17:48:05+00:00"
     },
     "kids.runc.run": {
       "first_seen": "2026-09-10T15:07:26+00:00",
@@ -38,7 +38,7 @@
         "https://kids.runc.run/"
       ],
       "event_count": 1,
-      "last_checked": "2026-09-10T17:35:44+00:00"
+      "last_checked": "2026-09-10T17:48:05+00:00"
     }
   },
   "organizers": {
@@ -58,7 +58,7 @@
       ],
       "name": "",
       "instagram": [],
-      "last_checked": "2026-09-10T17:35:44+00:00"
+      "last_checked": "2026-09-10T17:48:05+00:00"
     },
     "367d4a9677b6edf7227c": {
       "first_seen": "2026-09-10T16:04:43+00:00",
@@ -67,7 +67,7 @@
       ],
       "name": "",
       "instagram": [],
-      "last_checked": "2026-09-10T17:35:44+00:00"
+      "last_checked": "2026-09-10T17:48:05+00:00"
     },
     "8534f2c99de9c1a8f5a6": {
       "first_seen": "2026-09-10T16:04:43+00:00",
@@ -76,7 +76,7 @@
       ],
       "name": "",
       "instagram": [],
-      "last_checked": "2026-09-10T17:35:44+00:00"
+      "last_checked": "2026-09-10T17:48:05+00:00"
     },
     "a05c16a86ad915b9fef1": {
       "first_seen": "2026-09-10T16:04:43+00:00",
@@ -85,7 +85,7 @@
       ],
       "name": "",
       "instagram": [],
-      "last_checked": "2026-09-10T17:35:44+00:00"
+      "last_checked": "2026-09-10T17:48:05+00:00"
     }
   },
   "social_sources": {}
