@@ -65,9 +65,9 @@ def _all_calendar_sources(row: dict) -> bool:
 def artifact_reason(row: dict) -> str:
     """Return a reason only for high-precision machine-detectable garbage.
 
-    Ambiguous or low-quality real events belong in review, not here. This function intentionally
-    targets artifacts that can never be a legitimate race record: CSS-as-title and a calendar page
-    serialized as one event.
+    A calendar entry can be a legitimate *lead* even before we find its event page, so calendar
+    provenance alone is not enough to delete it. We quarantine only impossible/template titles or
+    obvious whole-calendar aggregates.
     """
     name = str(row.get("name") or "").strip()
     low = name.casefold()
@@ -77,7 +77,13 @@ def artifact_reason(row: dict) -> str:
         return "EMPTY_EVENT_NAME"
     if any(marker in low for marker in _CSS_MARKERS) or ("{" in name and "}" in name):
         return "CSS_OR_TEMPLATE_AS_EVENT_TITLE"
-    if _all_calendar_sources(row):
+
+    calendar_only = _all_calendar_sources(row)
+    if calendar_only and normalized in _GENERIC_HUB_TITLES:
+        return "CALENDAR_PAGE_SERIALIZED_AS_EVENT"
+    if calendar_only and len(row.get("distances") or []) >= 10:
+        # A single race rarely exposes ten+ distinct race distances. On a calendar URL this is a
+        # strong signature that the old parser concatenated several cards into one candidate.
         return "CALENDAR_PAGE_SERIALIZED_AS_EVENT"
     if normalized in _GENERIC_HUB_TITLES:
         urls = row.get("source_urls", [])
@@ -122,7 +128,7 @@ def clean_market(code: str) -> dict:
             **row,
             "quarantine_reason": reason,
             "quarantined_at": observed,
-            "hygiene_version": 1,
+            "hygiene_version": 2,
         })
 
     if not rejected:
