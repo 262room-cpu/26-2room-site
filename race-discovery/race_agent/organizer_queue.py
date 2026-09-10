@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import json
+import pathlib
+
 from .core import domain, stable_id
 
 SOCIAL_DOMAINS = {"instagram.com", "facebook.com", "t.me", "telegram.me", "wa.me", "whatsapp.com"}
@@ -106,3 +109,33 @@ def build_progressive_organizer_research_queue(
         queue.append(task)
 
     return queue
+
+
+def _read_runtime_queue() -> list[dict]:
+    path = pathlib.Path(__file__).resolve().parents[1] / "runtime" / "organizer_research_queue.jsonl"
+    if not path.exists():
+        return []
+    out: list[dict] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        try:
+            row = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(row, dict):
+            out.append(row)
+    return out
+
+
+def build_runtime_progressive_organizer_research_queue(
+    events: list[dict], organizers: list[dict], run_id: str, observed_at: str
+) -> list[dict]:
+    """Drop-in replacement for the legacy four-argument queue builder used by cli.py."""
+    return build_progressive_organizer_research_queue(
+        events,
+        organizers,
+        _read_runtime_queue(),
+        run_id,
+        observed_at,
+    )
