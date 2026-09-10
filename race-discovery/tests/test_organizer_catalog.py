@@ -46,6 +46,22 @@ class OrganizerCatalogTests(unittest.TestCase):
         out = annotate_organizer_against_crm(self.profile("Беготня Федора"), crm)
         self.assertEqual(out["crm_relation"], "NEW_ORGANIZER_LEAD")
 
+    def test_unresolved_website_only_identity_is_not_called_new_lead(self):
+        crm = [normalize_crm_row({"CRM ID": 1, "Название": "Old Marathon Team", "Сайт": "https://athletex.kz/"})]
+        profile = self.profile("", website="https://athletex.kz/")
+        profile["identity_status"] = "UNRESOLVED"
+        out = annotate_organizer_against_crm(profile, crm)
+        self.assertEqual(out["crm_relation"], "CRM_IDENTITY_INSUFFICIENT")
+        self.assertEqual(out["crm_match_id"], "")
+
+    def test_unresolved_exact_email_can_match_existing_crm(self):
+        crm = [normalize_crm_row({"CRM ID": 7, "Название": "Федор Run Team", "E-mail": "hello@fedor.run"})]
+        profile = self.profile("", email="hello@fedor.run")
+        profile["identity_status"] = "UNRESOLVED"
+        out = annotate_organizer_against_crm(profile, crm)
+        self.assertEqual(out["crm_relation"], "EXISTING_ORGANIZER")
+        self.assertEqual(out["crm_match_id"], "7")
+
     def test_existing_organizer_with_new_confirmed_email_is_contact_update(self):
         crm = [normalize_crm_row({"CRM ID": 1, "Название": "Беготня", "E-mail": "old@begotnya.ru"})]
         out = annotate_organizer_against_crm(self.profile("Беготня", email="new@begotnya.ru"), crm)
