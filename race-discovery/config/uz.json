@@ -1,0 +1,26 @@
+{
+  "queries": [
+    "site:gov.uz марафон 2026 Ташкент",
+    "site:t.me/s/prorunuz календарь стартов 2026",
+    "site:prorun.uz 2026 марафон забег",
+    "Tashkent Marathon 2026 registration",
+    "Samarkand Marathon 2026 registration",
+    "Uzbekistan trail 2026 registration",
+    "Узбекистан полумарафон 2026 регистрация"
+  ],
+  "social_queries": [
+    "site:instagram.com prorun uzbekistan 2026",
+    "site:t.me/s/prorunuz 2026 марафон trail run",
+    "site:instagram.com Uzbekistan marathon 2026"
+  ],
+  "seed_urls": [
+    "https://t.me/s/prorunuz",
+    "https://gov.uz/ru/yoshlar/news/view/143031"
+  ],
+  "source_hints": {
+    "gov.uz": "government",
+    "prorun.uz": "official_organizer",
+    "t.me": "official_organizer"
+  },
+  "event_terms": ["park run", "lady run", "chimgan sky", "aral sea marathon", "barsa kelmes", "xiva 10k"]
+}
