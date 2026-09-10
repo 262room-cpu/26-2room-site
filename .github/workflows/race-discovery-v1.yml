@@ -44,6 +44,9 @@ jobs:
           MARKET_TIMEOUT_SECONDS: '420'
         run: python -m race_agent.market_runner --limit 5
 
+      - name: Quarantine historical parser artifacts
+        run: python -m race_agent.hygiene --all
+
       - name: Organizer contact discovery
         env:
           ORGANIZER_RESEARCH_MARKETS: '5'
