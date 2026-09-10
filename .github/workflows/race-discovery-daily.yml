@@ -13,6 +13,13 @@ concurrency:
   group: race-discovery-v1-daily
   cancel-in-progress: false
 
+env:
+  # Public Firebase project id is safe here. Collection/auth are external GitHub config.
+  FIRESTORE_CATALOG_PROJECT: room26-2app
+  FIRESTORE_CATALOG_COLLECTION: ${{ vars.FIRESTORE_CATALOG_COLLECTION }}
+  FIRESTORE_CATALOG_BEARER_TOKEN: ${{ secrets.FIRESTORE_CATALOG_BEARER_TOKEN }}
+  FIRESTORE_CATALOG_API_KEY: ${{ secrets.FIRESTORE_CATALOG_API_KEY }}
+
 jobs:
   discover:
     runs-on: ubuntu-latest
