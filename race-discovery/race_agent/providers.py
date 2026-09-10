@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import html
+import os
 import ssl
 import urllib.parse
 import urllib.request
@@ -54,10 +55,10 @@ class GoogleNewsRssSearchProvider:
 
     name = "GOOGLE_NEWS_RSS"
 
-    def __init__(self, gl: str = "KZ", language: str = "ru", ceid: str | None = None) -> None:
-        self.gl = gl or "KZ"
-        self.language = language or "ru"
-        self.ceid = ceid or f"{self.gl}:{self.language}"
+    def __init__(self, gl: str | None = None, language: str | None = None, ceid: str | None = None) -> None:
+        self.gl = gl or os.environ.get("RACE_NEWS_GL", "KZ")
+        self.language = language or os.environ.get("RACE_NEWS_LANGUAGE", "ru")
+        self.ceid = ceid or os.environ.get("RACE_NEWS_CEID") or f"{self.gl}:{self.language}"
 
     def search(self, query: str, limit: int = 10) -> list[SearchHit]:
         url = "https://news.google.com/rss/search?" + urllib.parse.urlencode({
@@ -72,7 +73,7 @@ class GoogleNewsRssSearchProvider:
 class CombinedSearchProvider:
     """Fan out to cheap independent discovery providers and deduplicate URLs."""
 
-    def __init__(self, gl: str = "KZ", language: str = "ru", ceid: str | None = None) -> None:
+    def __init__(self, gl: str | None = None, language: str | None = None, ceid: str | None = None) -> None:
         self.providers = [_BingRssSearchProvider(), GoogleNewsRssSearchProvider(gl=gl, language=language, ceid=ceid)]
 
     def search(self, query: str, limit: int = 12) -> list[SearchHit]:
@@ -94,5 +95,4 @@ class CombinedSearchProvider:
         return out
 
 
-# Backward-compatible name used by the CLI.
 BingRssSearchProvider = CombinedSearchProvider
