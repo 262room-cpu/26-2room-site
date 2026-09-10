@@ -6,6 +6,8 @@ import json
 import pathlib
 from collections import Counter
 
+from .organizer_catalog import annotate_organizer_against_crm, load_organizer_crm
+
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 RUNTIME = ROOT / "runtime"
 GLOBAL = RUNTIME / "global"
@@ -79,6 +81,12 @@ def _organizer_card(row: dict) -> dict:
         "contact_candidates": {k: list(candidates.get(k, []))[:5] for k in ("instagram", "telegram", "whatsapp", "email", "phone", "website")},
         "event_ids": row.get("event_ids", [])[:20],
         "crm_status": row.get("crm_status", "NEW_LEAD"),
+        "crm_relation": row.get("crm_relation", ""),
+        "crm_match_id": row.get("crm_match_id", ""),
+        "crm_match_name": row.get("crm_match_name", ""),
+        "crm_match_score": row.get("crm_match_score", 0),
+        "crm_match_reasons": row.get("crm_match_reasons", []),
+        "crm_contact_additions": row.get("crm_contact_additions", []),
         "last_contacted_at": row.get("last_contacted_at", ""),
         "source_urls": row.get("source_urls", [])[:5],
     }
@@ -87,13 +95,18 @@ def _organizer_card(row: dict) -> dict:
 def build_action_report(max_items: int = 50) -> dict:
     generated_at = dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")
     events = _read_jsonl(GLOBAL / "candidates.jsonl")
-    organizers = _read_jsonl(GLOBAL / "organizers.jsonl")
+    organizers_raw = _read_jsonl(GLOBAL / "organizers.jsonl")
     summary = _read_json(GLOBAL / "SUMMARY.json", {})
+
+    organizer_crm, organizer_crm_source = load_organizer_crm(RUNTIME)
+    organizer_crm_connected = bool(organizer_crm)
+    organizers = [annotate_organizer_against_crm(o, organizer_crm) for o in organizers_raw]
 
     relations = Counter(e.get("catalog_relation") or "UNKNOWN" for e in events)
     statuses = Counter(e.get("status") or "UNKNOWN" for e in events)
     identity_statuses = Counter(o.get("identity_status") or "UNKNOWN" for o in organizers)
     contact_statuses = Counter(o.get("contact_status") or "UNKNOWN" for o in organizers)
+    crm_relations = Counter(o.get("crm_relation") or "UNKNOWN" for o in organizers)
 
     catalog_connected_events = sum(v for k, v in relations.items() if k not in {"CATALOG_NOT_CONNECTED", "UNKNOWN", ""})
     catalog_connected = catalog_connected_events > 0
@@ -113,6 +126,18 @@ def build_action_report(max_items: int = 50) -> dict:
     ]
     identity_missing = [o for o in organizers if o.get("identity_status") != "NAMED"]
 
+    crm_existing = [o for o in organizers if o.get("crm_relation") == "EXISTING_ORGANIZER"]
+    crm_updates = [o for o in organizers if o.get("crm_relation") == "EXISTING_ORGANIZER_CONTACT_UPDATE"]
+    crm_possible = [o for o in organizers if o.get("crm_relation") == "POSSIBLE_CRM_MATCH"]
+    crm_new = [o for o in organizers if o.get("crm_relation") == "NEW_ORGANIZER_LEAD"]
+    crm_identity_insufficient = [o for o in organizers if o.get("crm_relation") == "CRM_IDENTITY_INSUFFICIENT"]
+    crm_identity_resolution = [
+        o for o in organizers
+        if o.get("identity_status") != "NAMED"
+        and o.get("crm_relation") in {"EXISTING_ORGANIZER", "EXISTING_ORGANIZER_CONTACT_UPDATE"}
+        and o.get("crm_match_name")
+    ]
+
     market_activity = {}
     for code, market in (summary.get("markets") or {}).items():
         research = _read_json(MARKETS / code / "ORGANIZER_RESEARCH_STATE.json", {})
@@ -122,10 +147,13 @@ def build_action_report(max_items: int = 50) -> dict:
         }
 
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "generated_at": generated_at,
         "catalog_connected": catalog_connected,
         "catalog_note": "READ_ONLY_COMPARISON_ACTIVE" if catalog_connected else "APP_CATALOG_NOT_CONNECTED_YET",
+        "organizer_crm_connected": organizer_crm_connected,
+        "organizer_crm_source": organizer_crm_source,
+        "organizer_crm_note": "READ_ONLY_ORGANIZER_CRM_ACTIVE" if organizer_crm_connected else organizer_crm_source,
         "counts": {
             "events_total": len(events),
             "event_statuses": dict(statuses),
@@ -140,6 +168,13 @@ def build_action_report(max_items: int = 50) -> dict:
             "organizer_contact_statuses": dict(contact_statuses),
             "outreach_ready": len(outreach),
             "unknown_organizers_with_contact_route": len(unknown_with_route),
+            "organizer_crm_relations": dict(crm_relations),
+            "organizers_existing_in_crm": len(crm_existing) if organizer_crm_connected else None,
+            "organizer_contact_updates_for_crm": len(crm_updates) if organizer_crm_connected else None,
+            "possible_organizer_crm_matches": len(crm_possible) if organizer_crm_connected else None,
+            "new_organizer_leads": len(crm_new) if organizer_crm_connected else None,
+            "organizer_crm_identity_insufficient": len(crm_identity_insufficient) if organizer_crm_connected else None,
+            "crm_can_help_resolve_identity": len(crm_identity_resolution) if organizer_crm_connected else None,
         },
         "queues": {
             "new_events_not_in_app": [_event_card(e) for e in not_in_app[:max_items]] if catalog_connected else [],
@@ -150,6 +185,11 @@ def build_action_report(max_items: int = 50) -> dict:
             "organizers_ready_to_contact": [_organizer_card(o) for o in outreach[:max_items]],
             "organizer_identity_research": [_organizer_card(o) for o in identity_missing[:max_items]],
             "contact_route_identity_pending": [_organizer_card(o) for o in unknown_with_route[:max_items]],
+            "organizers_existing_in_crm": [_organizer_card(o) for o in crm_existing[:max_items]] if organizer_crm_connected else [],
+            "organizer_crm_contact_updates": [_organizer_card(o) for o in crm_updates[:max_items]] if organizer_crm_connected else [],
+            "possible_organizer_crm_matches": [_organizer_card(o) for o in crm_possible[:max_items]] if organizer_crm_connected else [],
+            "new_organizer_leads": [_organizer_card(o) for o in crm_new[:max_items]] if organizer_crm_connected else [],
+            "crm_identity_resolution_candidates": [_organizer_card(o) for o in crm_identity_resolution[:max_items]] if organizer_crm_connected else [],
         },
         "market_activity": market_activity,
     }
@@ -169,7 +209,9 @@ def _label_organizer(row: dict) -> str:
         if contacts.get(key):
             route = contacts[key][0]
             break
-    return f"{name}" + (f" — {route}" if route else "")
+    crm = row.get("crm_match_name") or ""
+    suffix = f" — CRM: {crm}" if crm and crm != name else ""
+    return f"{name}" + (f" — {route}" if route else "") + suffix
 
 
 def render_markdown(report: dict) -> str:
@@ -196,12 +238,27 @@ def render_markdown(report: dict) -> str:
     else:
         lines.append("- ⚠️ Каталог мобильного 26.2 ROOM ещё не подключён; считать события `новыми для приложения` пока нельзя.")
 
+    if report.get("organizer_crm_connected"):
+        lines.extend([
+            f"- Уже есть в CRM организаторов: **{c.get('organizers_existing_in_crm', 0)}**",
+            f"- Новые подтверждённые лиды организаторов: **{c.get('new_organizer_leads', 0)}**",
+            f"- Возможные совпадения с CRM: **{c.get('possible_organizer_crm_matches', 0)}**",
+            f"- Новые контакты для существующих CRM-карточек: **{c.get('organizer_contact_updates_for_crm', 0)}**",
+            f"- CRM может помочь установить личность: **{c.get('crm_can_help_resolve_identity', 0)}**",
+        ])
+    else:
+        lines.append("- ℹ️ Приватная CRM организаторов не подключена к этому runtime; публичный prototype её не читает.")
+
     sections = [
         ("Новые старты для приложения", "new_events_not_in_app", _label_event),
         ("Изменения существующих стартов", "app_changes", _label_event),
         ("Конфликты и ручная проверка", "conflicts_and_review", _label_event),
         ("Организаторы — можно писать", "organizers_ready_to_contact", _label_organizer),
         ("Организаторы — нужно установить личность", "organizer_identity_research", _label_organizer),
+        ("CRM — новые организаторы", "new_organizer_leads", _label_organizer),
+        ("CRM — возможные совпадения", "possible_organizer_crm_matches", _label_organizer),
+        ("CRM — новые контакты существующим", "organizer_crm_contact_updates", _label_organizer),
+        ("CRM — может разрешить неизвестную личность", "crm_identity_resolution_candidates", _label_organizer),
     ]
     for title, key, formatter in sections:
         rows = report["queues"].get(key, [])
