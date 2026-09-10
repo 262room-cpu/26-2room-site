@@ -1,7 +1,7 @@
 import unittest
 
 from race_agent.core import candidate_from_document, parse_dates, parse_prices
-from race_agent.locales import focused_event_text
+from race_agent.locales import focused_event_text, primary_event_dates
 
 
 class LocaleParsingTests(unittest.TestCase):
@@ -55,6 +55,37 @@ class LocaleParsingTests(unittest.TestCase):
         self.assertIn("42.2 km", candidate["distances"])
         self.assertNotIn("5 km", candidate["distances"])
         self.assertTrue(any("6500" in x for x in candidate["registration_prices"]))
+
+    def test_april_run_race_date_beats_registration_opening_date(self):
+        text = (
+            "Забег «Апрель» 5 апреля 2026 Москва 5 км. "
+            "Регистрация: при регистрации с 10 марта 2026 по 20 марта 2026 стоимость 2500 рублей. "
+            "Забег «Апрель» — старт в 10:00."
+        )
+        self.assertEqual(primary_event_dates(text, "Забег «Апрель»")[0], "2026-04-05")
+        html = f"<html><head><title>Забег «Апрель»</title></head><body>{text}</body></html>"
+        candidate = candidate_from_document(
+            "https://aprilrun5km.runc.run/", html, "official_organizer", "2026-09-10T00:00:00Z",
+            known_cities=["Москва"], country="Russia",
+        )
+        self.assertEqual(candidate["date"], "2026-04-05")
+
+    def test_spb_half_race_date_beats_registration_period(self):
+        text = (
+            "9 августа 2026 СПБ полумарафон «Северная столица» Санкт-Петербург 21,1 км. "
+            "Регистрация с 20 марта 2026 по 31 июля 2026. Стоимость участия 4500 рублей. "
+            "СПБ полумарафон «Северная столица» старт 09:00."
+        )
+        self.assertEqual(primary_event_dates(text, "СПБ полумарафон «Северная столица»")[0], "2026-08-09")
+
+    def test_moscow_marathon_range_beats_expo_and_packet_dates(self):
+        text = (
+            "26 сентября - 27 сентября 2026 СберПрайм Московский Марафон Москва 42,2 км. "
+            "24 сентября 2026 экспо. 25 сентября 2026 выдача стартовых пакетов. "
+            "Регистрация до 14 сентября 2026. СберПрайм Московский Марафон старт 09:00."
+        )
+        dates = primary_event_dates(text, "СберПрайм Московский Марафон")
+        self.assertEqual(dates[:2], ["2026-09-26", "2026-09-27"])
 
     def test_structured_almaty_event_is_not_overwritten_by_neighbor_turkistan_event(self):
         html = '''
