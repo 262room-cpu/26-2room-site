@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "status": "BOOTSTRAPPED_REAL_SEARCH",
+  "phase": "READY_FOR_CLOUD_RUN",
+  "country": "kz",
+  "production_write_allowed": false,
+  "strong_model": {
+    "policy": "ESCALATION_ONLY",
+    "state": "DISABLED_UNTIL_CREDENTIAL_OR_CODEX_CLOUD_STRATEGY_APPROVED",
+    "checkpoint_on_limit": true
+  },
+  "last_bootstrap_at": "2026-09-10T12:23:53Z",
+  "candidate_count": 9,
+  "review_queue_count": 3
+}
