@@ -12,16 +12,12 @@ import re
 from urllib.parse import unquote, urlparse
 
 from . import core as _core
-from .locales import focused_event_text, parse_dates as _parse_dates, parse_prices as _parse_prices, primary_event_dates
-from .event_identity import event_heading, explicitly_labeled_event_dates
+from .locales import focused_event_text, parse_dates as _parse_dates, parse_prices as _parse_prices
+from .event_identity import contextual_event_dates, event_heading, explicitly_labeled_event_dates
 
-# Upgrade v1 parser globals before candidate_from_document is called.
 _core.parse_dates = _parse_dates
 _core.parse_prices = _parse_prices
 
-# v1 recognized only literal schema.org @type="Event". Race sites commonly publish SportsEvent,
-# BusinessEvent or arrays of event types. Treat any schema type ending in "Event" as structured
-# evidence; the later eventish gate still ensures we only keep endurance/race content.
 _original_extract_jsonld_events = _core.extract_jsonld_events
 
 
@@ -59,8 +55,6 @@ def _enhanced_extract_jsonld_events(raw_html: str) -> list[dict]:
 _core.extract_jsonld_events = _enhanced_extract_jsonld_events
 _original_candidate_from_document = _core.candidate_from_document
 
-# Common market spellings which do not follow a simple Cyrillic -> Latin transliteration.
-# These aliases are identity hints only; they never create a city outside the market config.
 _CITY_ALIASES = {
     "алматы": ["almaty", "alma ata", "alma-ata", "алматинский", "алматинского"],
     "астана": ["astana", "астанинский", "астанинского"],
@@ -113,7 +107,6 @@ def _city_aliases(city: str) -> list[str]:
 
 
 def _event_identity_city(name: str, url: str, known_cities: list[str] | None) -> str:
-    """Resolve city from event name or URL before scanning a page full of neighboring races."""
     if not known_cities:
         return ""
     name_text = _identity_text(name)
@@ -193,7 +186,6 @@ def _refined_candidate_from_document(
 
     focused = focused_event_text(text, candidate.get("name") or "")
 
-    # Event title/URL are much stronger city identity than a random city mention in another card.
     identity_city = _event_identity_city(candidate.get("name") or "", url, known_cities)
     if identity_city and identity_city != candidate.get("city"):
         replace_field("city", identity_city, "EVENT_IDENTITY")
@@ -203,14 +195,12 @@ def _refined_candidate_from_document(
             replace_field("location", identity_city, "EVENT_IDENTITY")
 
     if not has_structured_event:
-        # Explicit labels such as `Дата — 27 сентября` or `День и время проведения: 27 сентября`
-        # outrank all proximity heuristics. This prevents packet-pickup / registration dates from
-        # replacing the actual race day on pages such as Almaty Marathon.
-        dates = explicitly_labeled_event_dates(text) or primary_event_dates(text, candidate.get("name") or "")
+        explicit_dates = explicitly_labeled_event_dates(text)
+        dates = explicit_dates or contextual_event_dates(text, candidate.get("name") or "")
         if not dates and focused != text:
             dates = _parse_dates(focused)
         if dates and dates[0] != candidate.get("date"):
-            replace_field("date", dates[0], "EXPLICIT_EVENT_DATE" if explicitly_labeled_event_dates(text) else "PRIMARY_EVENT_DATE")
+            replace_field("date", dates[0], "EXPLICIT_EVENT_DATE" if explicit_dates else "PRIMARY_EVENT_DATE")
 
     if focused != text:
         if not candidate.get("city"):
@@ -245,8 +235,6 @@ def _refined_candidate_from_document(
 
 _core.candidate_from_document = _refined_candidate_from_document
 
-# Organizer identity is stricter than social discovery: an arbitrary Instagram handle from an
-# event page is never allowed to become the organizer's identity without explicit evidence.
 from . import organizers as _organizers
 from .organizer_identity_guard import install as _install_organizer_identity_guard
 from .organizer_queue import build_runtime_progressive_organizer_research_queue
