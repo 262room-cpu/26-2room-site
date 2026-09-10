@@ -58,10 +58,9 @@ class OrganizerQueueTests(unittest.TestCase):
         self.assertEqual(row["search_hits_checked"], 12)
         self.assertEqual(row["contacts_promoted"], 1)
         self.assertIn("https://instagram.com/fedor_run/", row["discovered_contact_candidates"])
-        # Legacy researched queues migrate to the second batch instead of repeating batch one.
         self.assertEqual(row["query_offset"], 2)
 
-    def test_successive_runs_rotate_first_query(self):
+    def test_successive_runs_rotate_first_query_after_real_worker_pass(self):
         first = build_progressive_organizer_research_queue(
             [self.event()], [self.unresolved()], [], "run-1", "2026-09-10T00:00:00Z"
         )[0]
@@ -74,27 +73,41 @@ class OrganizerQueueTests(unittest.TestCase):
         self.assertNotEqual(second["search_queries"][0], first_query)
         self.assertEqual(second["query_offset"], 2)
         self.assertEqual(second["research_round"], 2)
+        self.assertEqual(second["status"], "PENDING_RECHECK")
+
+    def test_unprocessed_pending_batch_does_not_advance(self):
+        first = build_progressive_organizer_research_queue(
+            [self.event()], [self.unresolved()], [], "run-1", "2026-09-10T00:00:00Z"
+        )[0]
+        second = build_progressive_organizer_research_queue(
+            [self.event()], [self.unresolved()], [first], "run-2", "2026-09-11T00:00:00Z"
+        )[0]
+        self.assertEqual(second["research_round"], first["research_round"])
+        self.assertEqual(second["query_offset"], first["query_offset"])
+        self.assertEqual(second["search_queries"][0], first["search_queries"][0])
 
     def test_deep_research_eventually_checkpoints_for_review(self):
         previous = []
         row = None
-        for i in range(12):
+        for i in range(20):
             row = build_progressive_organizer_research_queue(
-                [self.event()], [self.unresolved()], previous, f"run-{i}", f"2026-09-{10+i:02d}T00:00:00Z"
+                [self.event()], [self.unresolved()], previous, f"run-{i}", f"2026-09-{10 + (i % 18):02d}T00:00:00Z"
             )[0]
+            if row.get("deep_research_exhausted"):
+                break
             row["status"] = "RESEARCHED_NO_CONTACT"
             row["last_researched_at"] = "2026-09-10T00:01:00Z"
             previous = [row]
-            if row.get("deep_research_exhausted"):
-                break
         self.assertIsNotNone(row)
         self.assertTrue(row["deep_research_exhausted"])
+        self.assertEqual(row["status"], "DEEP_RESEARCH_EXHAUSTED_NEEDS_REVIEW")
         self.assertEqual(row["escalation_recommended"], "STRONG_MODEL_OR_MANUAL_REVIEW")
-        # A rebuilt exhausted task carries a machine-readable review checkpoint.
+        self.assertEqual(row["search_queries"], [])
         final = build_progressive_organizer_research_queue(
             [self.event()], [self.unresolved()], [row], "final", "2026-09-30T00:00:00Z"
         )[0]
         self.assertEqual(final["status"], "DEEP_RESEARCH_EXHAUSTED_NEEDS_REVIEW")
+        self.assertEqual(final["search_queries"], [])
 
     def test_ready_organizer_does_not_enter_research_queue(self):
         ready = {
