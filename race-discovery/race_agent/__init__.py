@@ -6,6 +6,8 @@ identity guards are installed here so every importer gets the same behavior.
 
 from __future__ import annotations
 
+import html as html_lib
+import json
 import re
 from urllib.parse import unquote
 
@@ -16,6 +18,44 @@ from .locales import focused_event_text, parse_dates as _parse_dates, parse_pric
 _core.parse_dates = _parse_dates
 _core.parse_prices = _parse_prices
 
+# v1 recognized only literal schema.org @type="Event". Race sites commonly publish SportsEvent,
+# BusinessEvent or arrays of event types. Treat any schema type ending in "Event" as structured
+# evidence; the later eventish gate still ensures we only keep endurance/race content.
+_original_extract_jsonld_events = _core.extract_jsonld_events
+
+
+def _enhanced_extract_jsonld_events(raw_html: str) -> list[dict]:
+    events = list(_original_extract_jsonld_events(raw_html))
+    signatures = {json.dumps(x, ensure_ascii=False, sort_keys=True, default=str) for x in events}
+    blocks = re.findall(
+        r'<script[^>]+type=["\']application/ld\+json["\'][^>]*>(.*?)</script>',
+        raw_html,
+        flags=re.I | re.S,
+    )
+    for block in blocks:
+        try:
+            payload = json.loads(html_lib.unescape(block.strip()))
+        except Exception:
+            continue
+        stack = payload if isinstance(payload, list) else [payload]
+        while stack:
+            item = stack.pop()
+            if not isinstance(item, dict):
+                continue
+            typ = item.get("@type")
+            types = typ if isinstance(typ, list) else [typ]
+            if any(isinstance(t, str) and (t == "Event" or t.endswith("Event")) for t in types):
+                sig = json.dumps(item, ensure_ascii=False, sort_keys=True, default=str)
+                if sig not in signatures:
+                    signatures.add(sig)
+                    events.append(item)
+            graph = item.get("@graph")
+            if isinstance(graph, list):
+                stack.extend(graph)
+    return events
+
+
+_core.extract_jsonld_events = _enhanced_extract_jsonld_events
 _original_candidate_from_document = _core.candidate_from_document
 
 # Common market spellings which do not follow a simple Cyrillic -> Latin transliteration.
