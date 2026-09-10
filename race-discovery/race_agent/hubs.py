@@ -7,10 +7,10 @@ from urllib.parse import urljoin, urlparse, urlunparse
 
 from .core import EVENT_KEYWORDS, extract_jsonld_events, normalize
 
-HUB_PATH_HINTS = (
-    "calendar", "календар", "events", "event-list", "competitions", "races",
-    "race-calendar", "afisha", "афиша", "start-list", "starts",
-)
+HUB_PATH_HINTS = {
+    "calendar", "календарь", "events", "event-list", "competitions", "races",
+    "race-calendar", "afisha", "афиша", "start-list", "starts", "series",
+}
 
 BLOCKED_PATH_TERMS = (
     "login", "signin", "signup", "account", "profile", "privacy", "policy", "terms",
@@ -81,9 +81,17 @@ def _path(url: str) -> str:
         return ""
 
 
+def _segments(url: str) -> list[str]:
+    return [normalize(x) for x in _path(url).split("/") if x]
+
+
 def _explicit_hub_url(url: str) -> bool:
-    p = normalize(_path(url))
-    return any(normalize(term) in p for term in HUB_PATH_HINTS)
+    segments = _segments(url)
+    if not segments:
+        return False
+    # Only the terminal route identifies a hub. `/events/yerevan-marathon` is an event page,
+    # while `/events` is a hub. This prevents child pages from being swallowed as calendars.
+    return segments[-1] in {normalize(x) for x in HUB_PATH_HINTS}
 
 
 def _eventish(value: str) -> bool:
@@ -99,8 +107,8 @@ def _blocked(url: str) -> bool:
 def extract_hub_event_links(base_url: str, raw_html: str, max_links: int = 50) -> dict:
     """Detect calendar/hub pages and return internal links worth inspecting as event pages.
 
-    A hub is evidence-discovery only. We never construct an Event Candidate from a detected hub,
-    because a calendar page can contain dates/distances for many different races.
+    A detected hub is discovery evidence only. We never construct one Event Candidate from a
+    calendar because dates, distances and organizers from different cards must never be mixed.
     """
     parser = _AnchorParser()
     try:
@@ -148,7 +156,6 @@ def extract_hub_event_links(base_url: str, raw_html: str, max_links: int = 50) -
         (explicit and len(rows) >= 1)
         or len(jsonld_events) >= 2
         or (rootish and event_like_count >= 3)
-        or event_like_count >= 5
     )
     return {
         "is_hub": detected,
