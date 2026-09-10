@@ -1,6 +1,6 @@
 # 26.2 ROOM — Race Discovery Action Report
 
-Generated: 2026-09-10T17:32:31+00:00
+Generated: 2026-09-10T17:39:39+00:00
 
 ## Сводка
 
@@ -18,7 +18,7 @@ Generated: 2026-09-10T17:32:31+00:00
 - Кишиневский марафон 2026 — 2026-09-13 — Кишинёв, Moldova
 - Qaragandy Half Marathon 2026 — 2026-09-20 — Караганда, Kazakhstan
 - ALMATY MARATHON 2026 — 2026-09-27 — Алматы, Kazakhstan
-- Caspian Marathon 2026 — 2026-10-11 — Актау, Kazakhstan
+- CASPIAN MARATHON — 2026-10-11 — Актау, Kazakhstan
 
 ## Организаторы — нужно установить личность
 
@@ -28,7 +28,7 @@ Generated: 2026-09-10T17:32:31+00:00
 - Неустановленный организатор — Astana Trail
 - Неустановленный организатор — Backyard Ultra KZ 2026
 - Неустановленный организатор — Basqaru Race Nation Kazakhstan 2026
-- Неустановленный организатор — Caspian Marathon 2026
+- Неустановленный организатор — CASPIAN MARATHON
 - Неустановленный организатор — Karkyra Ultra 2026
 - Неустановленный организатор — KAZ MINERALS HALF MARATHON OSKEMEN 2026
 - Неустановленный организатор — Road Race

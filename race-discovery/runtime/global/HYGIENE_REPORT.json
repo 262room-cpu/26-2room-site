@@ -1,11 +1,13 @@
 {
-  "generated_at": "2026-09-10T17:32:07+00:00",
+  "generated_at": "2026-09-10T17:39:22+00:00",
   "markets": [
     {
       "market_code": "am",
       "candidates_before": 0,
       "quarantined": 0,
       "same_edition_duplicates_collapsed": 0,
+      "variant_evidence_rows_removed": 0,
+      "variant_sources_sanitized": 0,
       "candidates_after": 0,
       "evidence_rows_compacted": 0
     },
@@ -14,6 +16,8 @@
       "candidates_before": 0,
       "quarantined": 0,
       "same_edition_duplicates_collapsed": 0,
+      "variant_evidence_rows_removed": 0,
+      "variant_sources_sanitized": 0,
       "candidates_after": 0,
       "evidence_rows_compacted": 0
     },
@@ -22,6 +26,8 @@
       "candidates_before": 0,
       "quarantined": 0,
       "same_edition_duplicates_collapsed": 0,
+      "variant_evidence_rows_removed": 0,
+      "variant_sources_sanitized": 0,
       "candidates_after": 0,
       "evidence_rows_compacted": 0
     },
@@ -31,10 +37,12 @@
       "quarantined": 0,
       "quarantine_reasons": {},
       "same_edition_duplicates_collapsed": 0,
+      "variant_evidence_rows_removed": 0,
+      "variant_sources_sanitized": 0,
       "candidates_after": 1,
       "related_rows_removed": 0,
       "organizers_removed": 0,
-      "evidence_rows_compacted": 0
+      "evidence_rows_compacted": 7
     },
     {
       "market_code": "kg",
@@ -42,6 +50,8 @@
       "quarantined": 0,
       "quarantine_reasons": {},
       "same_edition_duplicates_collapsed": 0,
+      "variant_evidence_rows_removed": 16,
+      "variant_sources_sanitized": 2,
       "candidates_after": 5,
       "related_rows_removed": 0,
       "organizers_removed": 0,
@@ -49,17 +59,19 @@
     },
     {
       "market_code": "kz",
-      "candidates_before": 23,
+      "candidates_before": 22,
       "quarantined": 2,
       "quarantine_reasons": {
         "CSS_OR_TEMPLATE_AS_EVENT_TITLE": 1,
         "ANCILLARY_PROGRAM_ITEM_NOT_RACE": 1
       },
-      "same_edition_duplicates_collapsed": 1,
+      "same_edition_duplicates_collapsed": 0,
+      "variant_evidence_rows_removed": 0,
+      "variant_sources_sanitized": 0,
       "candidates_after": 20,
-      "related_rows_removed": 6,
-      "organizers_removed": 3,
-      "evidence_rows_compacted": 168
+      "related_rows_removed": 4,
+      "organizers_removed": 2,
+      "evidence_rows_compacted": 165
     },
     {
       "market_code": "md",
@@ -67,10 +79,12 @@
       "quarantined": 0,
       "quarantine_reasons": {},
       "same_edition_duplicates_collapsed": 1,
+      "variant_evidence_rows_removed": 0,
+      "variant_sources_sanitized": 0,
       "candidates_after": 5,
       "related_rows_removed": 0,
       "organizers_removed": 0,
-      "evidence_rows_compacted": 9
+      "evidence_rows_compacted": 407
     },
     {
       "market_code": "mn",
@@ -78,6 +92,8 @@
       "quarantined": 0,
       "quarantine_reasons": {},
       "same_edition_duplicates_collapsed": 0,
+      "variant_evidence_rows_removed": 0,
+      "variant_sources_sanitized": 0,
       "candidates_after": 1,
       "related_rows_removed": 0,
       "organizers_removed": 0,
@@ -91,6 +107,8 @@
         "SERIES_LANDING_PAGE_SERIALIZED_AS_SINGLE_EVENT": 1
       },
       "same_edition_duplicates_collapsed": 0,
+      "variant_evidence_rows_removed": 0,
+      "variant_sources_sanitized": 0,
       "candidates_after": 3,
       "related_rows_removed": 2,
       "organizers_removed": 1,
@@ -101,6 +119,8 @@
       "candidates_before": 0,
       "quarantined": 0,
       "same_edition_duplicates_collapsed": 0,
+      "variant_evidence_rows_removed": 0,
+      "variant_sources_sanitized": 0,
       "candidates_after": 0,
       "evidence_rows_compacted": 0
     },
@@ -109,6 +129,8 @@
       "candidates_before": 0,
       "quarantined": 0,
       "same_edition_duplicates_collapsed": 0,
+      "variant_evidence_rows_removed": 0,
+      "variant_sources_sanitized": 0,
       "candidates_after": 0,
       "evidence_rows_compacted": 0
     },
@@ -118,6 +140,8 @@
       "quarantined": 0,
       "quarantine_reasons": {},
       "same_edition_duplicates_collapsed": 0,
+      "variant_evidence_rows_removed": 0,
+      "variant_sources_sanitized": 0,
       "candidates_after": 1,
       "related_rows_removed": 0,
       "organizers_removed": 0,
@@ -125,6 +149,8 @@
     }
   ],
   "quarantined_total": 3,
-  "same_edition_duplicates_collapsed_total": 2,
-  "evidence_rows_compacted_total": 177
+  "same_edition_duplicates_collapsed_total": 1,
+  "variant_evidence_rows_removed_total": 16,
+  "variant_sources_sanitized_total": 2,
+  "evidence_rows_compacted_total": 579
 }
