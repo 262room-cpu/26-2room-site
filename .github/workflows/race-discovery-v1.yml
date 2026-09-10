@@ -18,7 +18,7 @@ concurrency:
 jobs:
   discover:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     defaults:
       run:
         working-directory: race-discovery
@@ -35,14 +35,16 @@ jobs:
       - name: Deterministic tests first
         run: python -m unittest discover -s tests -v
 
-      - name: Kazakhstan multi-source discovery loop
+      - name: Multi-market discovery rotation
         env:
-          MAX_QUERIES: '28'
-          RESULTS_PER_QUERY: '8'
-          MAX_URLS: '60'
-        run: python -m race_agent.cli run --country kz
+          MARKETS_PER_RUN: '5'
+          MARKET_MAX_QUERIES: '16'
+          MARKET_RESULTS_PER_QUERY: '7'
+          MARKET_MAX_URLS: '45'
+          MARKET_TIMEOUT_SECONDS: '420'
+        run: python -m race_agent.market_runner --limit 5
 
-      - name: Persist checkpoint and evidence
+      - name: Persist checkpoints, evidence and global index
         shell: bash
         run: |
           set -euo pipefail
@@ -53,5 +55,5 @@ jobs:
             echo "No runtime changes"
             exit 0
           fi
-          git commit -m "[skip ci] agent: persist race discovery checkpoint"
+          git commit -m "[skip ci] agent: persist multi-market discovery checkpoint"
           git push origin HEAD:agent/race-discovery-v1
