@@ -67,6 +67,27 @@ class HubTests(unittest.TestCase):
         self.assertTrue(out["is_hub"])
         self.assertEqual([x["url"] for x in out["event_links"]], ["https://example.com/events/race-2026"])
 
+    def test_public_telegram_feed_is_split_by_message(self):
+        raw = '''
+        <html><body>
+          <div class="tgme_widget_message" data-post="athletex/100">
+            <div>Новый Tengri Ultra 2026. Trail race 50 km. Регистрация открыта.</div>
+          </div>
+          <div class="tgme_widget_message" data-post="athletex/101">
+            <div>Сегодня просто хорошая погода и фото команды.</div>
+          </div>
+          <div class="tgme_widget_message" data-post="athletex/102">
+            <div>Irbis Race 2026 — забег в Алматы.</div>
+          </div>
+        </body></html>
+        '''
+        out = extract_hub_event_links("https://t.me/s/athletex", raw)
+        self.assertTrue(out["is_hub"])
+        self.assertEqual(out["hub_type"], "TELEGRAM_PUBLIC_FEED")
+        urls = [x["url"] for x in out["event_links"]]
+        self.assertEqual(urls, ["https://t.me/athletex/100", "https://t.me/athletex/102"])
+        self.assertNotIn("https://t.me/athletex/101", urls)
+
 
 if __name__ == "__main__":
     unittest.main()
