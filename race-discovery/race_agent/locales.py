@@ -123,17 +123,24 @@ def focused_event_text(text:str,event_name:str,year_min:int=2026,year_max:int=20
     spans=_date_phrase_spans(text)
     best_pos=None
     best_span=None
-    best_score=-1
+    best_score=-1e9
     for pos in positions:
         nearby=[span for span in spans if span[0]>=max(0,pos-500) and span[0]<=pos+500]
         if not nearby:
             continue
         span=min(nearby,key=lambda s:min(abs(s[0]-pos),abs(s[1]-pos)))
+        immediate=text[max(0,pos-80):min(len(text),pos+260)]
         local=text[max(0,min(pos,span[0])-80):min(len(text),max(pos,span[1])+700)]
         dates=parse_dates(local,year_min=year_min,year_max=year_max)
-        score=10*len(dates)-abs(span[0]-pos)/200
-        if re.search(r'\b(?:start|старт|registration|регистрац|distance|дистанц|route|маршрут)\b',local,flags=re.I):
-            score+=2
+        score=10.0
+        if span[1]<=pos:
+            score+=6.0
+        score-=abs(span[0]-pos)/150.0
+        if re.search(r'\b(?:start|старт|registration|регистрац|distance|дистанц|route|маршрут)\b',immediate,flags=re.I):
+            score+=4.0
+        if re.search(r'\b\d{1,3}(?:[.,]\d+)?\s*(?:km|км|m|м)\b',immediate,flags=re.I):
+            score+=2.0
+        score-=max(0,len(dates)-2)*0.5
         if score>best_score or (score==best_score and best_pos is not None and pos>best_pos):
             best_pos,best_span,best_score=pos,span,score
     if best_pos is None or best_span is None:
