@@ -121,7 +121,7 @@ def run(country: str = "kz") -> int:
             prev = previous[prev_id]
             candidate["candidate_id"] = prev_id
             candidate["lineage_id"] = prev.get("lineage_id") or candidate.get("lineage_id")
-            merged = merge_candidates(prev, candidate)
+            merged = merge_candidates(prev, candidate, historical=True)
             if merged.get("status") == "CONFLICT":
                 conflict_count += 1
             elif merged.get("changes"):
