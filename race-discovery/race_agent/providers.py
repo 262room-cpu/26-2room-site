@@ -41,7 +41,7 @@ def _rss_hits(raw: str, limit: int) -> list[SearchHit]:
     return hits
 
 
-class BingRssSearchProvider:
+class _BingRssSearchProvider:
     """Zero-secret broad discovery source. It is intentionally not trusted as evidence."""
 
     name = "BING_RSS"
@@ -70,7 +70,7 @@ class CombinedSearchProvider:
     """Fan out to cheap independent discovery providers and deduplicate URLs."""
 
     def __init__(self) -> None:
-        self.providers = [BingRssSearchProvider(), GoogleNewsRssSearchProvider()]
+        self.providers = [_BingRssSearchProvider(), GoogleNewsRssSearchProvider()]
 
     def search(self, query: str, limit: int = 12) -> list[SearchHit]:
         per_provider = max(4, limit // len(self.providers) + 2)
@@ -89,3 +89,7 @@ class CombinedSearchProvider:
                 if len(out) >= limit:
                     return out
         return out
+
+
+# Backward-compatible default: existing CLI now automatically uses both sources.
+BingRssSearchProvider = CombinedSearchProvider
