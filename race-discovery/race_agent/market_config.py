@@ -45,7 +45,6 @@ def load_market_config(config_dir: pathlib.Path, code: str) -> dict:
         raise ValueError(f"Unknown market code: {code}")
 
     custom = _read_json(config_dir / f"{code}.json", {})
-    # Market manifest owns cross-country routing fields; a country file can enrich search sources/queries.
     cfg = dict(market)
     for key, value in custom.items():
         if key in {"queries", "social_queries", "seed_urls", "source_hints", "event_terms", "cities"}:
@@ -53,13 +52,15 @@ def load_market_config(config_dir: pathlib.Path, code: str) -> dict:
         cfg[key] = value
 
     query_name = (market.get("query_names") or [market.get("country", code)])[0]
-    cfg["queries"] = list(dict.fromkeys(_generic_queries(query_name) + list(custom.get("queries", []))))
-    cfg["social_queries"] = list(dict.fromkeys(custom.get("social_queries", [])))
-    cfg["seed_urls"] = list(dict.fromkeys(custom.get("seed_urls", [])))
-    cfg["source_hints"] = dict(custom.get("source_hints", {}))
-    cfg["event_terms"] = list(dict.fromkeys(DEFAULT_EVENT_TERMS + list(custom.get("event_terms", []))))
+    cfg["queries"] = list(dict.fromkeys(_generic_queries(query_name) + list(market.get("queries", [])) + list(custom.get("queries", []))))
+    cfg["social_queries"] = list(dict.fromkeys(list(market.get("social_queries", [])) + list(custom.get("social_queries", []))))
+    cfg["seed_urls"] = list(dict.fromkeys(list(market.get("seed_urls", [])) + list(custom.get("seed_urls", []))))
+    hints = dict(market.get("source_hints", {}))
+    hints.update(custom.get("source_hints", {}))
+    cfg["source_hints"] = hints
+    cfg["event_terms"] = list(dict.fromkeys(DEFAULT_EVENT_TERMS + list(market.get("event_terms", [])) + list(custom.get("event_terms", []))))
     cfg["cities"] = list(dict.fromkeys(list(market.get("cities", [])) + list(custom.get("cities", []))))
-    cfg["country_aliases"] = list(dict.fromkeys(market.get("country_aliases", []) + market.get("query_names", [])))
+    cfg["country_aliases"] = list(dict.fromkeys(list(market.get("country_aliases", [])) + list(market.get("query_names", []))))
     cfg["market_code"] = code
     cfg["country"] = market.get("country", code)
     return cfg
