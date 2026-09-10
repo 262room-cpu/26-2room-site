@@ -1,0 +1,22 @@
+{
+  "queries": [
+    "site:armeniamarathon.org 2026 marathon trail run",
+    "Armenia marathon 2026 registration",
+    "Armenia trail race 2026 registration",
+    "Yerevan running events 2026",
+    "Dilijan Run 2026 registration"
+  ],
+  "social_queries": [
+    "site:instagram.com Armenia Marathon 2026",
+    "site:t.me Armenia marathon 2026",
+    "site:instagram.com Yerevan run 2026"
+  ],
+  "seed_urls": [
+    "https://www.armeniamarathon.org/",
+    "https://www.armeniamarathon.org/events/yerevan-marathon"
+  ],
+  "source_hints": {
+    "armeniamarathon.org": "official_organizer"
+  },
+  "event_terms": ["yerevan marathon", "spring run", "vineyard trail", "dilijan run"]
+}
