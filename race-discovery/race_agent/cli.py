@@ -12,7 +12,7 @@ from .catalog import annotate_against_catalog, load_catalog
 from .core import candidate_from_document, classify_source, deduplicate, domain, match_score, merge_candidates
 from .inbox import load_private_signals
 from .providers import BingRssSearchProvider, SearchHit, fetch_url
-from .signals import accept_hit, should_fetch_direct, signal_as_html, signal_record, social_queries
+from .signals import accept_hit, page_has_kazakhstan_evidence, should_fetch_direct, signal_as_html, signal_record, social_queries
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 RUNTIME = ROOT / "runtime"
@@ -79,6 +79,7 @@ def run(country: str = "kz") -> int:
     errors: list[dict] = []
     query_count = 0
     hits_seen = hits_accepted = hits_rejected = 0
+    page_geo_rejected = 0
     search_provider = BingRssSearchProvider()
 
     queries = list(dict.fromkeys(cfg.get("queries", []) + social_queries(cfg)))
@@ -88,7 +89,7 @@ def run(country: str = "kz") -> int:
             try:
                 for hit in search_provider.search(query, limit=int(os.environ.get("RESULTS_PER_QUERY", "8"))):
                     hits_seen += 1
-                    if not accept_hit(hit, cfg):
+                    if not accept_hit(hit, cfg, query=query):
                         hits_rejected += 1
                         continue
                     hits_accepted += 1
@@ -116,7 +117,7 @@ def run(country: str = "kz") -> int:
         link = item.get("url", "")
         title = item.get("chat_name") or item.get("source") or "Private signal"
         hit = SearchHit(title=title, url=link or "https://private.signal.local/", snippet=text[:6000])
-        if not accept_hit(hit, cfg, threshold=0.35):
+        if not accept_hit(hit, cfg, query="AUTHORIZED_PRIVATE_INBOX", threshold=0.35):
             continue
         signals.append({
             "observed_at": observed,
@@ -153,6 +154,9 @@ def run(country: str = "kz") -> int:
             source_type = classify_source(url, source_hints)
             candidate = candidate_from_document(url, raw, source_type, observed, known_cities=cfg.get("cities", []), country=cfg.get("country", "Kazakhstan"))
             if candidate:
+                if not page_has_kazakhstan_evidence(raw, candidate, url, source_type, cfg):
+                    page_geo_rejected += 1
+                    continue
                 candidate["discovery"] = meta
                 raw_candidates.append(candidate)
         except Exception as exc:
@@ -212,6 +216,9 @@ def run(country: str = "kz") -> int:
     save_jsonl(RUNTIME / "already_in_app.jsonl", already_in_app)
 
     watchlist = load_json(RUNTIME / "watchlist.json", {"domains": {}, "organizers": {}, "social_sources": {}})
+    watchlist.setdefault("domains", {})
+    watchlist.setdefault("organizers", {})
+    watchlist.setdefault("social_sources", {})
     for candidate in final:
         if candidate.get("confidence", 0) >= 0.85:
             for url in candidate.get("source_urls", []):
@@ -275,6 +282,7 @@ def run(country: str = "kz") -> int:
         "search_hits_seen": hits_seen,
         "search_hits_accepted": hits_accepted,
         "search_hits_rejected": hits_rejected,
+        "page_geo_rejected": page_geo_rejected,
         "signals": len(signals),
         "private_signals": len(private_signals),
         "private_inbox_source": private_inbox_source,
