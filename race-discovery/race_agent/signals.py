@@ -84,7 +84,13 @@ def source_family(url: str) -> str:
 
 def should_fetch_direct(url: str) -> bool:
     d = _domain(url)
-    return "instagram.com" not in d and "facebook.com" not in d
+    # Social search hits stay as signals until a source-specific adapter can isolate one post/profile.
+    # Fetching an entire Instagram/Facebook/Telegram page can mix many unrelated events/contacts.
+    return not (
+        "instagram.com" in d
+        or "facebook.com" in d
+        or d in {"t.me", "telegram.me"}
+    )
 
 
 def signal_record(hit: SearchHit, query: str, observed_at: str, cfg: dict) -> dict:
