@@ -10,6 +10,7 @@ from collections import Counter
 
 from .catalog import annotate_against_catalog, load_catalog
 from .core import candidate_from_document, classify_source, deduplicate, domain, match_score, merge_candidates
+from .hubs import extract_hub_event_links
 from .inbox import load_private_signals
 from .organizers import build_organizer_database, build_organizer_research_queue, organizer_lead_from_document, outreach_ready
 from .providers import BingRssSearchProvider, SearchHit, fetch_url
@@ -155,13 +156,49 @@ def run(country: str = "kz") -> int:
     raw_candidates = list(search_signal_candidates)
     checked = 0
     max_urls = int(os.environ.get("MAX_URLS", "60"))
-    for url, meta in list(urls.items())[:max_urls]:
+    max_hub_links = int(os.environ.get("HUB_LINKS_PER_PAGE", "40"))
+    max_queue = max(max_urls, int(os.environ.get("MAX_DISCOVERY_QUEUE", str(max_urls * 4))))
+    fetch_queue: list[tuple[str, dict]] = list(urls.items())
+    queued = set(urls)
+    hubs: list[dict] = []
+    hub_links_discovered = 0
+    cursor = 0
+
+    while cursor < len(fetch_queue) and checked < max_urls:
+        url, meta = fetch_queue[cursor]
+        cursor += 1
         try:
             raw = fetch_url(url)
             checked += 1
             if not raw:
                 continue
             source_type = classify_source(url, source_hints)
+
+            hub = extract_hub_event_links(url, raw, max_links=max_hub_links)
+            if hub.get("is_hub"):
+                child_count = 0
+                for child in hub.get("event_links", []):
+                    child_url = child.get("url", "")
+                    if not child_url or child_url in queued or len(fetch_queue) >= max_queue:
+                        continue
+                    queued.add(child_url)
+                    child_count += 1
+                    hub_links_discovered += 1
+                    fetch_queue.append((child_url, {
+                        "found_by": list(dict.fromkeys(list(meta.get("found_by", [])) + [f"HUB:{url}"])),
+                        "title": child.get("text", ""),
+                        "snippet": f"Discovered from hub {url}",
+                    }))
+                hubs.append({
+                    "observed_at": observed,
+                    "url": url,
+                    "source_type": source_type,
+                    "child_links": child_count,
+                    "jsonld_event_count": hub.get("jsonld_event_count", 0),
+                })
+                # Never parse a hub as one event. Facts from multiple race cards must not mix.
+                continue
+
             candidate = candidate_from_document(url, raw, source_type, observed, known_cities=cfg.get("cities", []), country=cfg.get("country", "Kazakhstan"))
             if candidate:
                 if not page_has_kazakhstan_evidence(raw, candidate, url, source_type, cfg):
@@ -175,7 +212,15 @@ def run(country: str = "kz") -> int:
         except Exception as exc:
             errors.append({"phase": "FETCH", "url": url, "error": type(exc).__name__ + ": " + str(exc)[:240]})
 
-    state.update({"phase": "DEDUPLICATE", "urls_checked": checked, "raw_candidates": len(raw_candidates)})
+    save_jsonl(RUNTIME / "hubs.jsonl", hubs[-500:])
+    state.update({
+        "phase": "DEDUPLICATE",
+        "urls_checked": checked,
+        "urls_discovered": len(queued),
+        "hubs_detected": len(hubs),
+        "hub_links_discovered": hub_links_discovered,
+        "raw_candidates": len(raw_candidates),
+    })
     write_json(state_path, state)
     candidates, dup_count = deduplicate(raw_candidates)
 
@@ -245,12 +290,12 @@ def run(country: str = "kz") -> int:
     watchlist.setdefault("social_sources", {})
     for candidate in final:
         if candidate.get("confidence", 0) >= 0.85:
-            for url in candidate.get("source_urls", []):
-                d = domain(url)
+            for source_url in candidate.get("source_urls", []):
+                d = domain(source_url)
                 if d:
                     rec = watchlist["domains"].setdefault(d, {"first_seen": observed, "source_urls": [], "event_count": 0})
-                    if url not in rec["source_urls"]:
-                        rec["source_urls"].append(url)
+                    if source_url not in rec["source_urls"]:
+                        rec["source_urls"].append(source_url)
                     rec["last_checked"] = observed
     for d, rec in watchlist["domains"].items():
         rec["event_count"] = sum(1 for c in final if any(domain(u) == d for u in c.get("source_urls", [])))
@@ -313,8 +358,10 @@ def run(country: str = "kz") -> int:
         "signals": len(signals),
         "private_signals": len(private_signals),
         "private_inbox_source": private_inbox_source,
-        "urls_discovered": len(urls),
+        "urls_discovered": len(queued),
         "urls_checked": checked,
+        "hubs_detected": len(hubs),
+        "hub_links_discovered": hub_links_discovered,
         "raw_candidates": len(raw_candidates),
         "deduplicated_candidates": len(candidates),
         "duplicates_discarded": dup_count,
@@ -349,6 +396,7 @@ def main() -> int:
     parser.add_argument("--country", default="kz")
     args = parser.parse_args()
     return run(args.country)
+
 
 if __name__ == "__main__":
     sys.exit(main())
