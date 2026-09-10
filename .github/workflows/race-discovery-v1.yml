@@ -44,6 +44,14 @@ jobs:
           MARKET_TIMEOUT_SECONDS: '420'
         run: python -m race_agent.market_runner --limit 5
 
+      - name: Organizer contact discovery
+        env:
+          ORGANIZER_RESEARCH_MARKETS: '5'
+          ORGANIZER_RESEARCH_TASKS: '5'
+          ORGANIZER_RESEARCH_QUERIES: '2'
+          ORGANIZER_RESEARCH_RESULTS: '5'
+        run: python -m race_agent.organizer_research --all --max-markets 5 --max-tasks 5 --queries-per-task 2 --results-per-query 5
+
       - name: Persist checkpoints, evidence and global index
         shell: bash
         run: |
