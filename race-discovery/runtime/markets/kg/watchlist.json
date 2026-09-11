@@ -10,8 +10,8 @@
         "http://triathlon.kg/events/indoor-triathlon-series-5",
         "http://triathlon.kg/events/cempionat-respubliki-po-duatlonu-2026"
       ],
-      "event_count": 6,
-      "last_checked": "2026-09-10T17:19:07+00:00"
+      "event_count": 8,
+      "last_checked": "2026-09-11T09:01:55+00:00"
     }
   },
   "organizers": {
@@ -34,7 +34,7 @@
       ],
       "name": "",
       "instagram": [],
-      "last_checked": "2026-09-10T17:19:07+00:00"
+      "last_checked": "2026-09-11T09:01:55+00:00"
     },
     "1969edeb0f1e9e66ce22": {
       "first_seen": "2026-09-10T16:41:20+00:00",
@@ -61,7 +61,7 @@
       ],
       "name": "",
       "instagram": [],
-      "last_checked": "2026-09-10T17:19:07+00:00"
+      "last_checked": "2026-09-11T09:01:55+00:00"
     },
     "3f76dccb3af7a9ba5b15": {
       "first_seen": "2026-09-10T17:19:07+00:00",
@@ -70,7 +70,7 @@
       ],
       "name": "",
       "instagram": [],
-      "last_checked": "2026-09-10T17:19:07+00:00"
+      "last_checked": "2026-09-11T09:01:55+00:00"
     },
     "7c0a107ecc4407073dfd": {
       "first_seen": "2026-09-10T17:19:07+00:00",
@@ -79,7 +79,7 @@
       ],
       "name": "",
       "instagram": [],
-      "last_checked": "2026-09-10T17:19:07+00:00"
+      "last_checked": "2026-09-11T09:01:55+00:00"
     },
     "7bf2dc73ee04a4a0dec8": {
       "first_seen": "2026-09-10T17:19:07+00:00",
@@ -88,7 +88,7 @@
       ],
       "name": "",
       "instagram": [],
-      "last_checked": "2026-09-10T17:19:07+00:00"
+      "last_checked": "2026-09-11T09:01:55+00:00"
     },
     "aa3daf236c27005e4934": {
       "first_seen": "2026-09-10T17:19:07+00:00",
@@ -97,7 +97,25 @@
       ],
       "name": "",
       "instagram": [],
-      "last_checked": "2026-09-10T17:19:07+00:00"
+      "last_checked": "2026-09-11T09:01:55+00:00"
+    },
+    "8cd8cead64bbdfdf132e": {
+      "first_seen": "2026-09-11T09:01:55+00:00",
+      "event_ids": [
+        "484086b5badaed7b01cc"
+      ],
+      "name": "",
+      "instagram": [],
+      "last_checked": "2026-09-11T09:01:55+00:00"
+    },
+    "ce85e9a74a361db9a4ed": {
+      "first_seen": "2026-09-11T09:01:55+00:00",
+      "event_ids": [
+        "1c1ad4e7ba6bf4af3d2c"
+      ],
+      "name": "",
+      "instagram": [],
+      "last_checked": "2026-09-11T09:01:55+00:00"
     }
   },
   "social_sources": {}
