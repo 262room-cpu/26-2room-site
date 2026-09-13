@@ -1,6 +1,6 @@
 # 26.2 ROOM — Race Discovery Action Report
 
-Generated: 2026-09-13T07:11:31+00:00
+Generated: 2026-09-13T07:25:10+00:00
 
 ## Сводка
 
@@ -9,7 +9,7 @@ Generated: 2026-09-13T07:11:31+00:00
 - Готовы для связи: **0**
 - Неустановленный организатор, но найден канал связи: **0**
 - Конфликты / требуют проверки: **6**
-- Новые относительно приложения: **22**
+- Новые относительно приложения: **31**
 - Изменились относительно приложения: **5**
 - Возможные совпадения: **2**
 - ℹ️ Приватная CRM организаторов не подключена к этому runtime; публичный prototype её не читает.
@@ -20,24 +20,27 @@ Generated: 2026-09-13T07:11:31+00:00
 - Backyard Ultra KZ 2026 — 2026-03-22 — Алматы, Kazakhstan
 - Road Race 2026 — 2026-04-05 — Астана, Kazakhstan
 - Забег «Апрель» — 2026-04-05 — Москва, Russia
+- Спорт — 2026-04-14 — Ашхабад, Turkmenistan
 - Tengri Ultra 2026 — 2026-05-01 — Алматы, Kazakhstan
 - KAZ MINERALS HALF MARATHON OSKEMEN 2026 — 2026-05-24 — Өскемен, Kazakhstan
+- Ulaanbaatar Marathon 2026 — 2026-05-24 — Улан-Батор, Mongolia
 - Регистрация на Ekibastuz Half Marathon 2026 — 2026-06-06 — Экибастуз, Kazakhstan
 - Astana Trail — 2026-06-13 — Астана, Kazakhstan
 - Karkyra Ultra 2026 — 2026-06-20 — Алматы, Kazakhstan
 - СПБ полумарафон «Северная столица» — 2026-08-09 — Санкт-Петербург, Russia
 - JANA MEN KÙZ RUN — 2026-09-12 — Астана, Kazakhstan
+- Этап ЧКР по триатлону Супер Спринт — 2026-09-12 — Чолпон-Ата, Kyrgyzstan
 - Детский марафон 2026 — 2026-09-12 — Moldova
+- 2026 VISA Asia Triathlon Cup Cholpon-Ata AG Relay — 2026-09-13 — Чолпон-Ата, Kyrgyzstan
+- 2026 VISA Asia Triathlon Cup Cholpon-Ata AG Standard — 2026-09-13 — Чолпон-Ата, Kyrgyzstan
+- 2026 VISA Asia Triathlon Cup Cholpon-Ata AG Super Sprint — 2026-09-13 — Чолпон-Ата, Kyrgyzstan
 - Chisinau Marathon 2026 — 2026-09-13 — Кишинёв, Moldova
 - Fun run — 2026-09-13 — Chișinău, Moldova
 - Кишиневский марафон 2026 — 2026-09-13 — Кишинёв, Moldova
 - СберПрайм Московский Марафон — 2026-09-26 — Москва, Russia
 - თბილისიმარათონი 2026 — 2026-09-27 — Тбилиси, Georgia
+- Чемпионат Республики по дуатлону 2026 — 2026-10-04 — Kyrgyzstan
 - CITY RUN 2026 — 2026-11-08 — Алматы, Kazakhstan
-- Chisinau Marathon 2026 — 2027-09-26 — Кишинёв, Moldova
-- Fun run — 2027-09-26 — Chișinău, Moldova
-- Marathon for All 2026 — 2027-09-26 — Moldova
-- Кишиневский марафон 2026 — 2027-09-26 — Кишинёв, Moldova
 
 ## Изменения существующих стартов
 
