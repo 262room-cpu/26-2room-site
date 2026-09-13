@@ -13,6 +13,8 @@ from .admin_catalog import load_from_env as load_admin_catalog
 from .core import normalize
 from .firebase_catalog import configured as firestore_configured
 from .firebase_catalog import load_from_env as load_firestore_catalog
+from .supabase_catalog import configured as supabase_catalog_configured
+from .supabase_catalog import load_from_env as load_supabase_catalog
 
 TRACKED_FIELDS = ("name", "date", "city", "location", "distances", "registration_status", "registration_url", "instagram")
 
@@ -34,12 +36,12 @@ def _first(row: dict, *keys, default=""):
 
 def normalize_catalog_row(row: dict) -> dict:
     name = str(_first(row, "name", "title", "eventName", "event_name"))
-    date = str(_first(row, "date", "startDate", "start_date", "startsAt", "starts_at"))[:10]
+    date = str(_first(row, "date", "startDate", "start_date", "startsAt", "starts_at", "start_at"))[:10]
     city = str(_first(row, "city", "locationCity", "location_city"))
     location = str(_first(row, "location", "venue", "address"))
     organizer = str(_first(row, "organizer", "organizerName", "organizer_name"))
     website = str(_first(row, "official_site", "website", "site", "url"))
-    registration = str(_first(row, "registration_url", "registrationUrl", "registration"))
+    registration = str(_first(row, "registration_url", "registrationUrl", "registration", "registration_link"))
     instagram = str(_first(row, "instagram", "instagramUrl", "instagram_url"))
     distances = _first(row, "distances", "distance", default=[])
     if isinstance(distances, str):
@@ -71,7 +73,6 @@ def catalog_match_score(candidate: dict, app_event: dict) -> float:
     urls_b = {_domain(u) for u in app_event.get("source_urls", []) if u}
     url = 1.0 if urls_a & urls_b else 0.0
     organizer = SequenceMatcher(None, normalize(candidate.get("organizer")), normalize(app_event.get("organizer"))).ratio() if candidate.get("organizer") and app_event.get("organizer") else 0.0
-    # Exact/near-exact name + city must still match when the organizer moves the date.
     return round(0.60 * title + 0.15 * city + 0.15 * date + 0.05 * url + 0.05 * organizer, 4)
 
 
@@ -120,7 +121,7 @@ def annotate_against_catalog(candidate: dict, catalog: list[dict]) -> dict:
 
 
 def _load_legacy_url(url: str) -> list[dict]:
-    req = urllib.request.Request(url, headers={"User-Agent": "262room-race-discovery/0.5", "Accept": "application/json"}, method="GET")
+    req = urllib.request.Request(url, headers={"User-Agent": "262room-race-discovery/0.6", "Accept": "application/json"}, method="GET")
     with urllib.request.urlopen(req, timeout=20) as resp:
         text = resp.read(10_000_000).decode("utf-8", errors="replace")
     return _decode_rows(text)
@@ -138,14 +139,14 @@ def load_catalog(runtime_dir: pathlib.Path) -> tuple[list[dict], str]:
 
     Current priority:
       1. explicit local/export file (`APP_CATALOG_FILE`),
-      2. real admin-panel GET API (`APP_ADMIN_CATALOG_URL`),
-      3. legacy generic read-only URL (`APP_CATALOG_URL`),
-      4. local JSONL snapshot from an admin export,
-      5. Firestore only when explicitly re-enabled with ENABLE_FIRESTORE_CATALOG=1.
+      2. real mobile-app Supabase read source (`events_with_stats` by default),
+      3. generic admin-panel GET API,
+      4. legacy generic read-only URL,
+      5. local JSONL snapshot from an admin export,
+      6. Firestore only when explicitly re-enabled with ENABLE_FIRESTORE_CATALOG=1.
 
-    The mobile app's Firebase project currently has neither Firestore nor Realtime Database created,
-    so Firebase is deliberately not an automatic source. Any remote-source failure falls back to a
-    local snapshot when one exists instead of stopping race discovery.
+    The discovered production admin panel at pro.26-2room.com reads its events through Supabase.
+    Remote-source failures fall back to a local snapshot instead of stopping race discovery.
     """
     rows: list[dict] = []
     source = "NOT_CONNECTED"
@@ -157,6 +158,12 @@ def load_catalog(runtime_dir: pathlib.Path) -> tuple[list[dict], str]:
         if path.exists():
             source = f"FILE:{path.name}"
             rows = _decode_rows(path.read_text(encoding="utf-8-sig"))
+    elif supabase_catalog_configured():
+        try:
+            rows, source = load_supabase_catalog()
+        except Exception as exc:
+            rows = _load_snapshot(runtime_dir)
+            source = f"SUPABASE_UNAVAILABLE:{type(exc).__name__}" + ("->LOCAL_SNAPSHOT" if rows else "")
     elif admin_catalog_configured():
         try:
             rows, source = load_admin_catalog()
