@@ -34,10 +34,34 @@ def _first(row: dict, *keys, default=""):
     return default
 
 
+def _nested_name(value) -> str:
+    """Return a human-readable name from Supabase relationship objects.
+
+    The production 26.2 ROOM `events_with_stats` query returns `city` and `country`
+    as embedded PostgREST relationship objects, e.g. {"id": ..., "name": "Алматы"}.
+    Older snapshots may still contain plain strings, so both shapes are accepted.
+    """
+    if isinstance(value, dict):
+        for key in ("name", "title", "label"):
+            nested = value.get(key)
+            if nested not in (None, ""):
+                return str(nested)
+        return ""
+    if value in (None, ""):
+        return ""
+    return str(value)
+
+
 def normalize_catalog_row(row: dict) -> dict:
     name = str(_first(row, "name", "title", "eventName", "event_name"))
-    date = str(_first(row, "date", "startDate", "start_date", "startsAt", "starts_at", "start_at"))[:10]
-    city = str(_first(row, "city", "locationCity", "location_city"))
+    # Production admin stores the event timestamp in `event_at`.
+    date = str(_first(row, "event_at", "date", "startDate", "start_date", "startsAt", "starts_at", "start_at"))[:10]
+
+    city_raw = _first(row, "city", "locationCity", "location_city")
+    country_raw = _first(row, "country", "locationCountry", "location_country")
+    city = _nested_name(city_raw)
+    country = _nested_name(country_raw)
+
     location = str(_first(row, "location", "venue", "address"))
     organizer = str(_first(row, "organizer", "organizerName", "organizer_name"))
     website = str(_first(row, "official_site", "website", "site", "url"))
@@ -52,6 +76,7 @@ def normalize_catalog_row(row: dict) -> dict:
         "name": name,
         "date": date,
         "city": city,
+        "country": country,
         "location": location,
         "organizer": organizer,
         "official_site": website,
@@ -145,8 +170,9 @@ def load_catalog(runtime_dir: pathlib.Path) -> tuple[list[dict], str]:
       5. local JSONL snapshot from an admin export,
       6. Firestore only when explicitly re-enabled with ENABLE_FIRESTORE_CATALOG=1.
 
-    The discovered production admin panel at pro.26-2room.com reads its events through Supabase.
-    Remote-source failures fall back to a local snapshot instead of stopping race discovery.
+    The production admin panel at pro.26-2room.com reads its events through Supabase/PostgREST at
+    ma.26-2room.com and uses `events_with_stats`. Remote-source failures fall back to a local
+    snapshot instead of stopping race discovery.
     """
     rows: list[dict] = []
     source = "NOT_CONNECTED"
