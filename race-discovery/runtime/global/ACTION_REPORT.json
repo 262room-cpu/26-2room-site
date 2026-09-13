@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-13T06:45:07+00:00",
+  "generated_at": "2026-09-13T06:58:57+00:00",
   "catalog_connected": false,
   "catalog_note": "APP_CATALOG_NOT_CONNECTED_YET",
   "organizer_crm_connected": false,
@@ -90,7 +90,7 @@
         "source_urls": [
           "https://qhm26.athleticfamily.kz/ru"
         ],
-        "last_checked_at": "2026-09-13T06:40:37+00:00"
+        "last_checked_at": "2026-09-13T06:55:45+00:00"
       },
       {
         "candidate_id": "00317196b5ee669a0850",
@@ -105,13 +105,13 @@
         "app_match_id": "",
         "app_diffs": [],
         "organizer": "Корпоративный фонд «Смелость быть первым»",
-        "organizer_id": "dbad1d470c96b22649ce",
+        "organizer_id": "34754fd33aefe0ba89a7",
         "organizer_contact_status": "CONTACTS_MISSING",
         "source_urls": [
           "https://almaty-marathon.kz/ru/events/almaty_marathon_2026/",
           "https://almaty-marathon.kz/ru/events/almaty_marathon_2026/regulation?page=text"
         ],
-        "last_checked_at": "2026-09-13T06:27:26+00:00"
+        "last_checked_at": "2026-09-13T06:55:45+00:00"
       },
       {
         "candidate_id": "d99f3b407b82c34209f1",
@@ -133,7 +133,7 @@
           "https://caspian-marathon.kz/ru/users_list?distance=5",
           "https://www.caspian-marathon.kz/ru/calendar"
         ],
-        "last_checked_at": "2026-09-13T06:40:37+00:00"
+        "last_checked_at": "2026-09-13T06:55:45+00:00"
       }
     ],
     "cancelled_and_postponed": [],
@@ -150,7 +150,7 @@
           "Kazakhstan"
         ],
         "cities": [
-          "Алматы"
+          "Астана"
         ],
         "contacts": {
           "instagram": [],
@@ -1938,13 +1938,13 @@
       "country": "Kazakhstan",
       "events": 20,
       "organizers": 19,
-      "last_run_id": "20260913T064037Z",
+      "last_run_id": "20260913T065545Z",
       "status": "PASS_WITH_REVIEW_QUEUE",
       "organizer_research": {
         "market_code": "kz",
-        "observed_at": "2026-09-13T06:44:53+00:00",
+        "observed_at": "2026-09-13T06:58:43+00:00",
         "tasks_processed": 5,
-        "search_hits": 45,
+        "search_hits": 48,
         "candidates_found": 0,
         "contacts_promoted": 0,
         "identities_resolved": 0,
@@ -1956,11 +1956,11 @@
       "country": "Russia",
       "events": 3,
       "organizers": 3,
-      "last_run_id": "20260913T064225Z",
+      "last_run_id": "20260913T065641Z",
       "status": "PASS_WITH_REVIEW_QUEUE",
       "organizer_research": {
         "market_code": "ru",
-        "observed_at": "2026-09-13T06:45:06+00:00",
+        "observed_at": "2026-09-13T06:58:56+00:00",
         "tasks_processed": 3,
         "search_hits": 0,
         "candidates_found": 0,
@@ -1978,7 +1978,7 @@
       "status": "PASS_WITH_REVIEW_QUEUE",
       "organizer_research": {
         "market_code": "kg",
-        "observed_at": "2026-09-13T06:44:57+00:00",
+        "observed_at": "2026-09-13T06:58:47+00:00",
         "tasks_processed": 5,
         "search_hits": 44,
         "candidates_found": 0,
@@ -2009,7 +2009,7 @@
       "country": "Armenia",
       "events": 0,
       "organizers": 0,
-      "last_run_id": "20260911T090257Z",
+      "last_run_id": "20260913T065747Z",
       "status": "PASS",
       "organizer_research": {}
     },
@@ -2017,7 +2017,7 @@
       "country": "Azerbaijan",
       "events": 0,
       "organizers": 0,
-      "last_run_id": "20260912T084549Z",
+      "last_run_id": "20260913T065805Z",
       "status": "PASS",
       "organizer_research": {}
     },
@@ -2025,7 +2025,7 @@
       "country": "Belarus",
       "events": 0,
       "organizers": 0,
-      "last_run_id": "20260912T084610Z",
+      "last_run_id": "20260913T065822Z",
       "status": "PASS",
       "organizer_research": {}
     },
@@ -2037,7 +2037,7 @@
       "status": "PASS_WITH_REVIEW_QUEUE",
       "organizer_research": {
         "market_code": "ge",
-        "observed_at": "2026-09-13T06:45:06+00:00",
+        "observed_at": "2026-09-13T06:58:56+00:00",
         "tasks_processed": 1,
         "search_hits": 8,
         "candidates_found": 0,
@@ -2055,7 +2055,7 @@
       "status": "PASS_WITH_REVIEW_QUEUE",
       "organizer_research": {
         "market_code": "md",
-        "observed_at": "2026-09-13T06:45:01+00:00",
+        "observed_at": "2026-09-13T06:58:52+00:00",
         "tasks_processed": 5,
         "search_hits": 45,
         "candidates_found": 0,
