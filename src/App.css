@@ -941,6 +941,10 @@ a {
   margin: 0 auto;
 }
 
+.appStatus .primaryBtn {
+  margin-top: 24px;
+}
+
 .statusBadge {
   display: inline-flex;
   border: 1px solid rgba(255, 214, 0, 0.35);
