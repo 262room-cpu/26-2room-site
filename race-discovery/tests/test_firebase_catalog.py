@@ -80,13 +80,27 @@ class FirestoreCatalogTests(unittest.TestCase):
             self.assertGreater(timeout, 0)
         self.assertIn("pageToken=next-token", requests[1][0].full_url)
 
-    def test_catalog_fails_open_when_firestore_read_is_unavailable(self):
+    def test_firestore_is_not_auto_selected_for_mobile_catalog(self):
         with tempfile.TemporaryDirectory() as tmp:
             env = {
                 "FIRESTORE_CATALOG_PROJECT": "room26-2app",
                 "FIRESTORE_CATALOG_COLLECTION": "events",
             }
-            with mock.patch.dict(os.environ, env, clear=False):
+            with mock.patch.dict(os.environ, env, clear=True):
+                with mock.patch("race_agent.catalog.load_firestore_catalog") as loader:
+                    rows, source = load_catalog(pathlib.Path(tmp))
+        self.assertEqual(rows, [])
+        self.assertEqual(source, "NOT_CONNECTED")
+        loader.assert_not_called()
+
+    def test_catalog_fails_open_when_firestore_is_explicitly_enabled_and_unavailable(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            env = {
+                "ENABLE_FIRESTORE_CATALOG": "1",
+                "FIRESTORE_CATALOG_PROJECT": "room26-2app",
+                "FIRESTORE_CATALOG_COLLECTION": "events",
+            }
+            with mock.patch.dict(os.environ, env, clear=True):
                 with mock.patch("race_agent.catalog.load_firestore_catalog", side_effect=RuntimeError("denied")):
                     rows, source = load_catalog(pathlib.Path(tmp))
         self.assertEqual(rows, [])
