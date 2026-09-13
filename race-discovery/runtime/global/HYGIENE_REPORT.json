@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-13T06:32:00+00:00",
+  "generated_at": "2026-09-13T06:44:53+00:00",
   "markets": [
     {
       "market_code": "am",
@@ -46,16 +46,18 @@
     },
     {
       "market_code": "kg",
-      "candidates_before": 7,
-      "quarantined": 0,
-      "quarantine_reasons": {},
+      "candidates_before": 8,
+      "quarantined": 1,
+      "quarantine_reasons": {
+        "JSON_OR_SCHEMA_FRAGMENT_AS_EVENT_TITLE": 1
+      },
       "same_edition_duplicates_collapsed": 0,
       "variant_evidence_rows_removed": 0,
       "variant_sources_sanitized": 0,
       "candidates_after": 7,
-      "related_rows_removed": 0,
-      "organizers_removed": 0,
-      "evidence_rows_compacted": 0
+      "related_rows_removed": 2,
+      "organizers_removed": 1,
+      "evidence_rows_compacted": 44
     },
     {
       "market_code": "kz",
@@ -70,20 +72,20 @@
       "candidates_after": 20,
       "related_rows_removed": 2,
       "organizers_removed": 1,
-      "evidence_rows_compacted": 168
+      "evidence_rows_compacted": 148
     },
     {
       "market_code": "md",
-      "candidates_before": 6,
+      "candidates_before": 5,
       "quarantined": 0,
       "quarantine_reasons": {},
-      "same_edition_duplicates_collapsed": 1,
+      "same_edition_duplicates_collapsed": 0,
       "variant_evidence_rows_removed": 0,
       "variant_sources_sanitized": 0,
       "candidates_after": 5,
       "related_rows_removed": 0,
       "organizers_removed": 0,
-      "evidence_rows_compacted": 425
+      "evidence_rows_compacted": 0
     },
     {
       "market_code": "mn",
@@ -96,7 +98,7 @@
       "candidates_after": 1,
       "related_rows_removed": 0,
       "organizers_removed": 0,
-      "evidence_rows_compacted": 0
+      "evidence_rows_compacted": 5
     },
     {
       "market_code": "ru",
@@ -150,9 +152,9 @@
       "evidence_rows_compacted": 0
     }
   ],
-  "quarantined_total": 2,
-  "same_edition_duplicates_collapsed_total": 1,
+  "quarantined_total": 3,
+  "same_edition_duplicates_collapsed_total": 0,
   "variant_evidence_rows_removed_total": 0,
   "variant_sources_sanitized_total": 0,
-  "evidence_rows_compacted_total": 593
+  "evidence_rows_compacted_total": 197
 }
