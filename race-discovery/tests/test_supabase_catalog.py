@@ -45,7 +45,7 @@ class SupabaseCatalogTests(unittest.TestCase):
         self.assertEqual(len(requests), 1)
         request, timeout = requests[0]
         self.assertEqual(request.get_method(), "GET")
-        self.assertIn("/rest/v1/events_with_stats?select=%2A", request.full_url)
+        self.assertIn("/rest/v1/events_with_stats?select=*", request.full_url)
         self.assertEqual(request.headers.get("Apikey"), "anon-public-key")
         self.assertEqual(request.headers.get("Authorization"), "Bearer anon-public-key")
         self.assertEqual(request.headers.get("Range"), "0-999")
