@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from unittest import mock
 
-from race_agent.catalog import load_catalog
+from race_agent.catalog import load_catalog, normalize_catalog_row
 from race_agent.supabase_catalog import fetch_catalog
 
 
@@ -50,6 +50,22 @@ class SupabaseCatalogTests(unittest.TestCase):
         self.assertEqual(request.headers.get("Authorization"), "Bearer anon-public-key")
         self.assertEqual(request.headers.get("Range"), "0-999")
         self.assertGreater(timeout, 0)
+
+    def test_production_events_with_stats_shape_normalizes_event_at_and_relationships(self):
+        row = {
+            "id": "07aa1ba3-f5b6-4a63-ba14-4830fcc01567",
+            "name": "STEPPE WATERS TURKISTAN",
+            "event_at": "2026-07-13T02:00:00+00:00",
+            "country": {"id": "country-1", "name": "Казахстан", "code": "KZ"},
+            "city": {"id": "city-1", "name": "Туркестан", "country_id": "country-1"},
+            "description": "STEPPE WATERS TURKISTAN",
+        }
+        normalized = normalize_catalog_row(row)
+        self.assertEqual(normalized["app_event_id"], row["id"])
+        self.assertEqual(normalized["name"], "STEPPE WATERS TURKISTAN")
+        self.assertEqual(normalized["date"], "2026-07-13")
+        self.assertEqual(normalized["city"], "Туркестан")
+        self.assertEqual(normalized["country"], "Казахстан")
 
     def test_catalog_prefers_supabase_when_configured(self):
         with tempfile.TemporaryDirectory() as tmp:
