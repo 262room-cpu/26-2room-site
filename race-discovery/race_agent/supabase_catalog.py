@@ -8,6 +8,7 @@ import urllib.request
 from urllib.parse import urlparse
 
 _RESOURCE_RE = re.compile(r"^[A-Za-z0-9_.-]+$")
+_ORDER_RE = re.compile(r"^[A-Za-z0-9_.-]+\.(?:asc|desc)(?:,[A-Za-z0-9_.-]+\.(?:asc|desc))*$")
 
 
 def configured() -> bool:
@@ -39,12 +40,20 @@ def _resource(value: str) -> str:
     return value
 
 
+def _order(value: str) -> str:
+    value = (value or "event_at.desc").strip()
+    if not _ORDER_RE.fullmatch(value):
+        raise ValueError("invalid Supabase order expression")
+    return value
+
+
 def fetch_catalog(
     base_url: str,
     anon_key: str,
     *,
     resource: str = "events_with_stats",
     select: str = "*",
+    order: str = "event_at.desc",
     bearer_token: str = "",
     page_size: int = 1000,
     max_rows: int = 5000,
@@ -56,11 +65,12 @@ def fetch_catalog(
     """
     base = _base_url(base_url)
     resource = _resource(resource)
+    order = _order(order)
     page_size = max(1, min(int(page_size), 1000))
     max_rows = max(page_size, min(int(max_rows), 20_000))
     select = (select or "*").strip() or "*"
 
-    query = urllib.parse.urlencode({"select": select}, safe="*,().!:-_")
+    query = urllib.parse.urlencode({"select": select, "order": order}, safe="*,().!:-_")
     url = f"{base}/rest/v1/{resource}?{query}"
 
     auth = (bearer_token or anon_key).strip()
@@ -101,12 +111,14 @@ def load_from_env() -> tuple[list[dict], str]:
 
     resource = os.environ.get("APP_SUPABASE_EVENTS_RESOURCE", "events_with_stats").strip() or "events_with_stats"
     select = os.environ.get("APP_SUPABASE_EVENTS_SELECT", "*").strip() or "*"
+    order = os.environ.get("APP_SUPABASE_EVENTS_ORDER", "event_at.desc").strip() or "event_at.desc"
     bearer = os.environ.get("APP_SUPABASE_BEARER_TOKEN", "").strip()
     rows = fetch_catalog(
         base_url,
         anon_key,
         resource=resource,
         select=select,
+        order=order,
         bearer_token=bearer,
     )
     host = urlparse(_base_url(base_url)).netloc.lower()
