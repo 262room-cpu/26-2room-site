@@ -4,11 +4,11 @@ from race_agent.organizer_catalog import annotate_organizer_against_crm, crm_mat
 
 
 class OrganizerCatalogTests(unittest.TestCase):
-    def profile(self, name, website=None, instagram=None, email=None, phone=None):
+    def profile(self, name, website=None, instagram=None, email=None, phone=None, source_url=None, city="Алматы"):
         return {
             "name": name,
             "aliases": [],
-            "cities": ["Алматы"],
+            "cities": [city] if city else [],
             "contacts": {
                 "website": [website] if website else [],
                 "instagram": [instagram] if instagram else [],
@@ -16,7 +16,7 @@ class OrganizerCatalogTests(unittest.TestCase):
                 "phone": [phone] if phone else [],
                 "whatsapp": [], "telegram": [],
             },
-            "source_urls": [website] if website else [],
+            "source_urls": [source_url or website] if (source_url or website) else [],
         }
 
     def test_exact_name_matches_existing_crm(self):
@@ -32,6 +32,31 @@ class OrganizerCatalogTests(unittest.TestCase):
         ]
         out = annotate_organizer_against_crm(self.profile("Совсем новый старт", website="https://athletex.kz/"), crm)
         self.assertNotEqual(out["crm_relation"], "EXISTING_ORGANIZER")
+
+    def test_shared_source_domain_alone_does_not_auto_merge(self):
+        crm = [
+            normalize_crm_row({"CRM ID": 28, "Название": "Дирекция по организации спортивно-массовых мероприятий Астаны / Elorda Sport", "Сайт": "https://reg.elordasport.kz/"}),
+            normalize_crm_row({"CRM ID": 40, "Название": "Police Run Kazakhstan", "Сайт": "https://reg.elordasport.kz/"}),
+        ]
+        out = annotate_organizer_against_crm(
+            self.profile("Совсем другой организатор", source_url="https://reg.elordasport.kz/ru/events/test", city="Астана"),
+            crm,
+        )
+        self.assertNotEqual(out["crm_relation"], "EXISTING_ORGANIZER")
+
+    def test_elorda_wording_variant_plus_primary_source_matches_existing(self):
+        crm = [
+            normalize_crm_row({"CRM ID": 28, "Название": "Дирекция по организации спортивно-массовых мероприятий Астаны / Elorda Sport", "Город / регион": "Астана", "Сайт": "https://reg.elordasport.kz/"}),
+            normalize_crm_row({"CRM ID": 40, "Название": "Police Run Kazakhstan", "Город / регион": "Астана", "Сайт": "https://reg.elordasport.kz/"}),
+        ]
+        profile = self.profile(
+            "Дирекция по проведению спортивно-массовых мероприятий акимата города Астаны",
+            source_url="https://reg.elordasport.kz/ru/events/12sep-jana-men-kuz-run/",
+            city="Астана",
+        )
+        out = annotate_organizer_against_crm(profile, crm)
+        self.assertEqual(out["crm_relation"], "EXISTING_ORGANIZER")
+        self.assertEqual(out["crm_match_id"], "28")
 
     def test_same_instagram_on_multiple_brands_is_ambiguous(self):
         crm = [
