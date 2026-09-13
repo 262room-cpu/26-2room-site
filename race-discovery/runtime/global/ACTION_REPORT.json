@@ -1,40 +1,40 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-12T08:47:11+00:00",
+  "generated_at": "2026-09-13T06:32:16+00:00",
   "catalog_connected": false,
   "catalog_note": "APP_CATALOG_NOT_CONNECTED_YET",
   "organizer_crm_connected": false,
   "organizer_crm_source": "PRIVATE_CRM_BLOCKED_IN_PUBLIC_RUNTIME",
   "organizer_crm_note": "PRIVATE_CRM_BLOCKED_IN_PUBLIC_RUNTIME",
   "counts": {
-    "events_total": 38,
+    "events_total": 39,
     "event_statuses": {
       "UPDATED": 18,
+      "NEW": 9,
       "VERIFIED": 8,
-      "NEW": 8,
       "CONFLICT": 4
     },
     "catalog_relations": {
-      "CATALOG_NOT_CONNECTED": 38
+      "CATALOG_NOT_CONNECTED": 39
     },
     "events_not_in_app": null,
     "events_changed_in_app": null,
     "possible_app_matches": null,
     "conflicts_or_review": 4,
     "cancelled_or_postponed": 0,
-    "organizers_total": 36,
+    "organizers_total": 37,
     "organizer_identity_statuses": {
       "NAMED": 4,
-      "UNRESOLVED": 32
+      "UNRESOLVED": 33
     },
     "organizer_contact_statuses": {
       "CONTACTS_MISSING": 4,
-      "NEEDS_IDENTITY_CHECK": 32
+      "NEEDS_IDENTITY_CHECK": 33
     },
     "outreach_ready": 0,
     "unknown_organizers_with_contact_route": 0,
     "organizer_crm_relations": {
-      "CRM_NOT_CONNECTED": 36
+      "CRM_NOT_CONNECTED": 37
     },
     "organizers_existing_in_crm": null,
     "organizer_contact_updates_for_crm": null,
@@ -70,7 +70,7 @@
           "https://marathon.md/ru/marathon5km",
           "https://marathon.md/en/run-2026"
         ],
-        "last_checked_at": "2026-09-10T17:37:48+00:00"
+        "last_checked_at": "2026-09-13T06:29:31+00:00"
       },
       {
         "candidate_id": "a8dc9cd256752be0a77b",
@@ -90,7 +90,7 @@
         "source_urls": [
           "https://qhm26.athleticfamily.kz/ru"
         ],
-        "last_checked_at": "2026-09-12T08:43:18+00:00"
+        "last_checked_at": "2026-09-13T06:27:26+00:00"
       },
       {
         "candidate_id": "00317196b5ee669a0850",
@@ -111,7 +111,7 @@
           "https://almaty-marathon.kz/ru/events/almaty_marathon_2026/",
           "https://almaty-marathon.kz/ru/events/almaty_marathon_2026/regulation?page=text"
         ],
-        "last_checked_at": "2026-09-12T08:43:18+00:00"
+        "last_checked_at": "2026-09-13T06:27:26+00:00"
       },
       {
         "candidate_id": "d99f3b407b82c34209f1",
@@ -133,7 +133,7 @@
           "https://caspian-marathon.kz/ru/users_list?distance=5",
           "https://www.caspian-marathon.kz/ru/calendar"
         ],
-        "last_checked_at": "2026-09-12T08:43:18+00:00"
+        "last_checked_at": "2026-09-13T06:27:26+00:00"
       }
     ],
     "cancelled_and_postponed": [],
@@ -705,7 +705,7 @@
           "Kazakhstan"
         ],
         "cities": [
-          "Астана"
+          "Алматы"
         ],
         "contacts": {
           "instagram": [],
@@ -1880,6 +1880,50 @@
           "https://marathon.md/ru/marathon5km",
           "https://marathon.md/en/run-2026"
         ]
+      },
+      {
+        "global_organizer_id": "46ebab9ce2fe50b973c0",
+        "organizer_id": "9ddb501a78b802807fe4",
+        "name": "",
+        "display_name": "Неустановленный организатор — Спорт",
+        "identity_status": "UNRESOLVED",
+        "contact_status": "NEEDS_IDENTITY_CHECK",
+        "countries": [
+          "Turkmenistan"
+        ],
+        "cities": [
+          "Ашхабад"
+        ],
+        "contacts": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "contact_candidates": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "event_ids": [
+          "bb8c385bface50b485e6"
+        ],
+        "crm_status": "NEW_LEAD",
+        "crm_relation": "CRM_NOT_CONNECTED",
+        "crm_match_id": "",
+        "crm_match_name": "",
+        "crm_match_score": 0.0,
+        "crm_match_reasons": [],
+        "crm_contact_additions": [],
+        "last_contacted_at": "",
+        "source_urls": [
+          "https://turkmenistan.gov.tm/ru/razdel/sport/13"
+        ]
       }
     ],
     "contact_route_identity_pending": [],
@@ -1894,11 +1938,11 @@
       "country": "Kazakhstan",
       "events": 20,
       "organizers": 19,
-      "last_run_id": "20260912T084318Z",
+      "last_run_id": "20260913T062726Z",
       "status": "PASS_WITH_REVIEW_QUEUE",
       "organizer_research": {
         "market_code": "kz",
-        "observed_at": "2026-09-12T08:46:52+00:00",
+        "observed_at": "2026-09-13T06:32:00+00:00",
         "tasks_processed": 5,
         "search_hits": 42,
         "candidates_found": 0,
@@ -1912,11 +1956,11 @@
       "country": "Russia",
       "events": 3,
       "organizers": 3,
-      "last_run_id": "20260912T084426Z",
+      "last_run_id": "20260913T062825Z",
       "status": "PASS_WITH_REVIEW_QUEUE",
       "organizer_research": {
         "market_code": "ru",
-        "observed_at": "2026-09-12T08:47:09+00:00",
+        "observed_at": "2026-09-13T06:32:15+00:00",
         "tasks_processed": 3,
         "search_hits": 10,
         "candidates_found": 0,
@@ -1934,7 +1978,7 @@
       "status": "PASS_WITH_REVIEW_QUEUE",
       "organizer_research": {
         "market_code": "kg",
-        "observed_at": "2026-09-12T08:46:57+00:00",
+        "observed_at": "2026-09-13T06:32:07+00:00",
         "tasks_processed": 5,
         "search_hits": 42,
         "candidates_found": 0,
@@ -1993,9 +2037,9 @@
       "status": "PASS_WITH_REVIEW_QUEUE",
       "organizer_research": {
         "market_code": "ge",
-        "observed_at": "2026-09-12T08:47:10+00:00",
+        "observed_at": "2026-09-13T06:32:15+00:00",
         "tasks_processed": 1,
-        "search_hits": 6,
+        "search_hits": 8,
         "candidates_found": 0,
         "contacts_promoted": 0,
         "identities_resolved": 0,
@@ -2007,11 +2051,11 @@
       "country": "Moldova",
       "events": 5,
       "organizers": 6,
-      "last_run_id": "20260910T173748Z",
+      "last_run_id": "20260913T062931Z",
       "status": "PASS_WITH_REVIEW_QUEUE",
       "organizer_research": {
         "market_code": "md",
-        "observed_at": "2026-09-12T08:47:03+00:00",
+        "observed_at": "2026-09-13T06:32:11+00:00",
         "tasks_processed": 5,
         "search_hits": 45,
         "candidates_found": 0,
@@ -2025,16 +2069,16 @@
       "country": "Tajikistan",
       "events": 0,
       "organizers": 0,
-      "last_run_id": "20260910T174927Z",
+      "last_run_id": "20260913T063112Z",
       "status": "PASS",
       "organizer_research": {}
     },
     "tm": {
       "country": "Turkmenistan",
-      "events": 0,
-      "organizers": 0,
-      "last_run_id": "20260910T174943Z",
-      "status": "PASS",
+      "events": 1,
+      "organizers": 1,
+      "last_run_id": "20260913T063125Z",
+      "status": "PASS_WITH_REVIEW_QUEUE",
       "organizer_research": {}
     },
     "mn": {

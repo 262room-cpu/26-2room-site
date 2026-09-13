@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-12T08:46:52+00:00",
+  "generated_at": "2026-09-13T06:32:00+00:00",
   "markets": [
     {
       "market_code": "am",
@@ -42,7 +42,7 @@
       "candidates_after": 1,
       "related_rows_removed": 0,
       "organizers_removed": 0,
-      "evidence_rows_compacted": 7
+      "evidence_rows_compacted": 0
     },
     {
       "market_code": "kg",
@@ -59,32 +59,31 @@
     },
     {
       "market_code": "kz",
-      "candidates_before": 22,
-      "quarantined": 2,
+      "candidates_before": 21,
+      "quarantined": 1,
       "quarantine_reasons": {
-        "CSS_OR_TEMPLATE_AS_EVENT_TITLE": 1,
         "ANCILLARY_PROGRAM_ITEM_NOT_RACE": 1
       },
       "same_edition_duplicates_collapsed": 0,
       "variant_evidence_rows_removed": 0,
       "variant_sources_sanitized": 0,
       "candidates_after": 20,
-      "related_rows_removed": 4,
-      "organizers_removed": 2,
+      "related_rows_removed": 2,
+      "organizers_removed": 1,
       "evidence_rows_compacted": 168
     },
     {
       "market_code": "md",
-      "candidates_before": 5,
+      "candidates_before": 6,
       "quarantined": 0,
       "quarantine_reasons": {},
-      "same_edition_duplicates_collapsed": 0,
+      "same_edition_duplicates_collapsed": 1,
       "variant_evidence_rows_removed": 0,
       "variant_sources_sanitized": 0,
       "candidates_after": 5,
       "related_rows_removed": 0,
       "organizers_removed": 0,
-      "evidence_rows_compacted": 0
+      "evidence_rows_compacted": 425
     },
     {
       "market_code": "mn",
@@ -126,12 +125,15 @@
     },
     {
       "market_code": "tm",
-      "candidates_before": 0,
+      "candidates_before": 1,
       "quarantined": 0,
+      "quarantine_reasons": {},
       "same_edition_duplicates_collapsed": 0,
       "variant_evidence_rows_removed": 0,
       "variant_sources_sanitized": 0,
-      "candidates_after": 0,
+      "candidates_after": 1,
+      "related_rows_removed": 0,
+      "organizers_removed": 0,
       "evidence_rows_compacted": 0
     },
     {
@@ -148,9 +150,9 @@
       "evidence_rows_compacted": 0
     }
   ],
-  "quarantined_total": 3,
-  "same_edition_duplicates_collapsed_total": 0,
+  "quarantined_total": 2,
+  "same_edition_duplicates_collapsed_total": 1,
   "variant_evidence_rows_removed_total": 0,
   "variant_sources_sanitized_total": 0,
-  "evidence_rows_compacted_total": 175
+  "evidence_rows_compacted_total": 593
 }
