@@ -97,7 +97,7 @@ jobs:
           ORGANIZER_RESEARCH_TASKS: '5'
           ORGANIZER_RESEARCH_QUERIES: '2'
           ORGANIZER_RESEARCH_RESULTS: '5'
-        run: python -m race_agent.organizer_research --max-markets 5 --max-tasks 5 --queries-per_task 2 --results-per-query 5
+        run: python -m race_agent.organizer_research --max-markets 5 --max-tasks 5 --queries-per-task 2 --results-per-query 5
 
       - name: Build 26.2 ROOM action report
         run: python -m race_agent.report --max-items 50
