@@ -8,6 +8,8 @@ import urllib.request
 from difflib import SequenceMatcher
 from urllib.parse import urlparse
 
+from .admin_catalog import configured as admin_catalog_configured
+from .admin_catalog import load_from_env as load_admin_catalog
 from .core import normalize
 from .firebase_catalog import configured as firestore_configured
 from .firebase_catalog import load_from_env as load_firestore_catalog
@@ -32,7 +34,7 @@ def _first(row: dict, *keys, default=""):
 
 def normalize_catalog_row(row: dict) -> dict:
     name = str(_first(row, "name", "title", "eventName", "event_name"))
-    date = str(_first(row, "date", "startDate", "start_date"))[:10]
+    date = str(_first(row, "date", "startDate", "start_date", "startsAt", "starts_at"))[:10]
     city = str(_first(row, "city", "locationCity", "location_city"))
     location = str(_first(row, "location", "venue", "address"))
     organizer = str(_first(row, "organizer", "organizerName", "organizer_name"))
@@ -44,7 +46,7 @@ def normalize_catalog_row(row: dict) -> dict:
         distances = [x.strip() for x in re.split(r"[,;/|]", distances) if x.strip()]
     urls = [u for u in (website, registration, instagram) if u.startswith("http")]
     return {
-        "app_event_id": str(_first(row, "id", "eventId", "event_id", "docId", "documentId")),
+        "app_event_id": str(_first(row, "id", "eventId", "event_id", "docId", "documentId", "uuid")),
         "name": name,
         "date": date,
         "city": city,
@@ -53,7 +55,7 @@ def normalize_catalog_row(row: dict) -> dict:
         "official_site": website,
         "registration_url": registration,
         "instagram": instagram,
-        "registration_status": str(_first(row, "registration_status", "registrationStatus")),
+        "registration_status": str(_first(row, "registration_status", "registrationStatus", "status")),
         "distances": distances if isinstance(distances, list) else [],
         "source_urls": urls,
         "raw": row,
@@ -117,40 +119,68 @@ def annotate_against_catalog(candidate: dict, catalog: list[dict]) -> dict:
     return out
 
 
-def load_catalog(runtime_dir: pathlib.Path) -> tuple[list[dict], str]:
-    """Load a comparison catalog without ever granting discovery code write authority.
+def _load_legacy_url(url: str) -> list[dict]:
+    req = urllib.request.Request(url, headers={"User-Agent": "262room-race-discovery/0.5", "Accept": "application/json"}, method="GET")
+    with urllib.request.urlopen(req, timeout=20) as resp:
+        text = resp.read(10_000_000).decode("utf-8", errors="replace")
+    return _decode_rows(text)
 
-    Priority is explicit file/URL overrides, then the dedicated Firestore GET-only adapter, then an
-    optional local snapshot. Firestore failures degrade to an empty catalog instead of stopping race
-    discovery; the source string keeps the failure visible in run metrics.
+
+def _load_snapshot(runtime_dir: pathlib.Path) -> list[dict]:
+    snapshot = runtime_dir / "app_catalog_snapshot.jsonl"
+    if not snapshot.exists():
+        return []
+    return _decode_rows(snapshot.read_text(encoding="utf-8"))
+
+
+def load_catalog(runtime_dir: pathlib.Path) -> tuple[list[dict], str]:
+    """Load the existing 26.2 ROOM event catalog with no write authority.
+
+    Current priority:
+      1. explicit local/export file (`APP_CATALOG_FILE`),
+      2. real admin-panel GET API (`APP_ADMIN_CATALOG_URL`),
+      3. legacy generic read-only URL (`APP_CATALOG_URL`),
+      4. local JSONL snapshot from an admin export,
+      5. Firestore only when explicitly re-enabled with ENABLE_FIRESTORE_CATALOG=1.
+
+    The mobile app's Firebase project currently has neither Firestore nor Realtime Database created,
+    so Firebase is deliberately not an automatic source. Any remote-source failure falls back to a
+    local snapshot when one exists instead of stopping race discovery.
     """
     rows: list[dict] = []
     source = "NOT_CONNECTED"
-    file_path = os.environ.get("APP_CATALOG_FILE")
-    url = os.environ.get("APP_CATALOG_URL")
+    file_path = os.environ.get("APP_CATALOG_FILE", "").strip()
+    legacy_url = os.environ.get("APP_CATALOG_URL", "").strip()
+
     if file_path:
         path = pathlib.Path(file_path)
         if path.exists():
             source = f"FILE:{path.name}"
-            text = path.read_text(encoding="utf-8")
-            rows = _decode_rows(text)
-    elif url:
-        req = urllib.request.Request(url, headers={"User-Agent": "262room-race-discovery/0.4"}, method="GET")
-        with urllib.request.urlopen(req, timeout=20) as resp:
-            text = resp.read(5_000_000).decode("utf-8", errors="replace")
-        rows = _decode_rows(text)
-        source = "READ_ONLY_URL"
-    elif firestore_configured():
+            rows = _decode_rows(path.read_text(encoding="utf-8-sig"))
+    elif admin_catalog_configured():
         try:
-            rows, source = load_firestore_catalog()
+            rows, source = load_admin_catalog()
         except Exception as exc:
-            rows = []
-            source = f"FIRESTORE_UNAVAILABLE:{type(exc).__name__}"
+            rows = _load_snapshot(runtime_dir)
+            source = f"ADMIN_API_UNAVAILABLE:{type(exc).__name__}" + ("->LOCAL_SNAPSHOT" if rows else "")
+    elif legacy_url:
+        try:
+            rows = _load_legacy_url(legacy_url)
+            source = "READ_ONLY_URL"
+        except Exception as exc:
+            rows = _load_snapshot(runtime_dir)
+            source = f"READ_ONLY_URL_UNAVAILABLE:{type(exc).__name__}" + ("->LOCAL_SNAPSHOT" if rows else "")
     else:
-        snapshot = runtime_dir / "app_catalog_snapshot.jsonl"
-        if snapshot.exists():
-            rows = _decode_rows(snapshot.read_text(encoding="utf-8"))
+        rows = _load_snapshot(runtime_dir)
+        if rows:
             source = "LOCAL_SNAPSHOT"
+        elif os.environ.get("ENABLE_FIRESTORE_CATALOG") == "1" and firestore_configured():
+            try:
+                rows, source = load_firestore_catalog()
+            except Exception as exc:
+                rows = []
+                source = f"FIRESTORE_UNAVAILABLE:{type(exc).__name__}"
+
     return [normalize_catalog_row(r) for r in rows if isinstance(r, dict)], source
 
 
@@ -163,9 +193,15 @@ def _decode_rows(text: str) -> list[dict]:
         if isinstance(obj, list):
             return obj
         if isinstance(obj, dict):
-            for key in ("events", "data", "items"):
-                if isinstance(obj.get(key), list):
-                    return obj[key]
+            for key in ("events", "data", "items", "results", "rows"):
+                value = obj.get(key)
+                if isinstance(value, list):
+                    return value
+                if isinstance(value, dict):
+                    for nested in ("events", "items", "results", "rows"):
+                        nested_value = value.get(nested)
+                        if isinstance(nested_value, list):
+                            return nested_value
             return [obj]
     except json.JSONDecodeError:
         pass
