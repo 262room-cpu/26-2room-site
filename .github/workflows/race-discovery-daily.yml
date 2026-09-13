@@ -14,11 +14,12 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  # Public Firebase project id is safe here. Collection/auth are external GitHub config.
-  FIRESTORE_CATALOG_PROJECT: room26-2app
-  FIRESTORE_CATALOG_COLLECTION: ${{ vars.FIRESTORE_CATALOG_COLLECTION }}
-  FIRESTORE_CATALOG_BEARER_TOKEN: ${{ secrets.FIRESTORE_CATALOG_BEARER_TOKEN }}
-  FIRESTORE_CATALOG_API_KEY: ${{ secrets.FIRESTORE_CATALOG_API_KEY }}
+  # The real mobile catalog is maintained through the admin panel, not Firebase.
+  APP_ADMIN_CATALOG_URL: ${{ vars.APP_ADMIN_CATALOG_URL }}
+  APP_ADMIN_CATALOG_ITEMS_PATH: ${{ vars.APP_ADMIN_CATALOG_ITEMS_PATH }}
+  APP_ADMIN_CATALOG_BEARER_TOKEN: ${{ secrets.APP_ADMIN_CATALOG_BEARER_TOKEN }}
+  APP_ADMIN_CATALOG_API_KEY: ${{ secrets.APP_ADMIN_CATALOG_API_KEY }}
+  APP_ADMIN_CATALOG_API_KEY_HEADER: ${{ vars.APP_ADMIN_CATALOG_API_KEY_HEADER }}
 
 jobs:
   discover:
