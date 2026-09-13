@@ -60,12 +60,52 @@ _LEGAL_FORM_ALIASES = (
     (r"\bано\b", "автономная некоммерческая организация"),
 )
 
+# Administrative/legal wording changes often while the actual entity stays the same. These words
+# are deliberately ignored only for the secondary token-overlap signal; the original full-name
+# similarity remains intact and is still used for ordinary fuzzy matching.
+_CORE_NAME_STOPWORDS = {
+    "по", "и", "the", "of",
+    "город", "города", "акимат", "акимата",
+    "организация", "организации", "организатор",
+    "проведение", "проведению", "проведения",
+    "корпоративный", "фонд", "общественный", "общественное", "объединение",
+    "товарищество", "ограниченной", "ответственностью",
+    "индивидуальный", "предприниматель", "общество", "автономная", "некоммерческая",
+}
+
 
 def _identity_name(value: str) -> str:
     text = normalize(str(value or ""))
     for pattern, replacement in _LEGAL_FORM_ALIASES:
         text = re.sub(pattern, replacement, text)
     return " ".join(text.split())
+
+
+def _core_name_tokens(value: str) -> set[str]:
+    return {
+        token
+        for token in _identity_name(value).split()
+        if len(token) >= 3 and token not in _CORE_NAME_STOPWORDS
+    }
+
+
+def _core_name_overlap(profile: dict, row: dict) -> float:
+    names = [str(profile.get("name") or "")] + list(profile.get("aliases", []))
+    targets = [row.get("name", "")] + list(row.get("aliases", []))
+    best = 0.0
+    for a in names:
+        a_tokens = _core_name_tokens(a)
+        if not a_tokens:
+            continue
+        for b in targets:
+            b_tokens = _core_name_tokens(b)
+            if not b_tokens:
+                continue
+            denominator = min(len(a_tokens), len(b_tokens))
+            if denominator < 2:
+                continue
+            best = max(best, len(a_tokens & b_tokens) / denominator)
+    return best
 
 
 def normalize_crm_row(row: dict) -> dict:
@@ -228,6 +268,7 @@ def crm_match_score(profile: dict, row: dict) -> tuple[float, list[str]]:
         reasons.append("phone_exact")
 
     name_sim = _name_similarity(profile, row)
+    core_overlap = _core_name_overlap(profile, row)
     if name_sim == 1.0:
         score = max(score, 0.94)
         reasons.append("name_exact")
@@ -238,15 +279,33 @@ def crm_match_score(profile: dict, row: dict) -> tuple[float, list[str]]:
         score = max(score, 0.74)
         reasons.append("name_close")
 
-    profile_domains = {domain(x) for x in (profile.get("contacts") or {}).get("website", []) if domain(x)}
+    if core_overlap >= 0.85:
+        score = max(score, 0.84)
+        reasons.append("core_name_overlap")
+
+    contact_domains = {domain(x) for x in (profile.get("contacts") or {}).get("website", []) if domain(x)}
+    source_domains = {domain(x) for x in profile.get("source_urls", []) if domain(x)}
     row_domains = set(row.get("website_domains", []))
-    if profile_domains & row_domains:
+
+    if contact_domains & row_domains:
         # Same site alone can mean multiple brands under one registration/organizer umbrella.
         score = max(score, 0.64)
         reasons.append("website_domain")
-        if name_sim >= 0.75:
+        if name_sim >= 0.75 or core_overlap >= 0.75:
             score = max(score, 0.88)
             reasons.append("website_plus_name")
+
+    if source_domains & row_domains:
+        # A primary event source can help resolve an entity, but a shared platform/domain alone is
+        # still too weak. Requiring strong core-name overlap protects AthleteX/Elorda umbrella cases.
+        score = max(score, 0.58)
+        reasons.append("source_domain")
+        if core_overlap >= 0.75:
+            score = max(score, 0.95)
+            reasons.append("source_domain_plus_core_name")
+        elif name_sim >= 0.82:
+            score = max(score, 0.90)
+            reasons.append("source_domain_plus_name")
 
     city = normalize(" ".join(profile.get("cities", [])))
     crm_city = normalize(row.get("city_region", ""))
@@ -286,8 +345,13 @@ def annotate_organizer_against_crm(profile: dict, catalog: list[dict]) -> dict:
     ambiguity_gap = best_score - second_score
 
     exact_unique_signal = bool({"email_exact", "phone_exact", "name_exact"} & set(reasons))
+    source_identity_signal = "source_domain_plus_core_name" in reasons and ambiguity_gap >= 0.06
     social_exact = "instagram_exact" in reasons
-    automatic = best_score >= 0.92 and (exact_unique_signal or (social_exact and ambiguity_gap >= 0.06))
+    automatic = best_score >= 0.92 and (
+        exact_unique_signal
+        or source_identity_signal
+        or (social_exact and ambiguity_gap >= 0.06)
+    )
 
     if automatic:
         relation = "EXISTING_ORGANIZER"
