@@ -14,7 +14,13 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  # The real mobile catalog is maintained through the admin panel, not Firebase.
+  # The real app catalog is served by Supabase and exposed in the admin panel.
+  APP_SUPABASE_URL: ${{ vars.APP_SUPABASE_URL }}
+  APP_SUPABASE_EVENTS_RESOURCE: events_with_stats
+  APP_SUPABASE_EVENTS_SELECT: ${{ vars.APP_SUPABASE_EVENTS_SELECT }}
+  APP_SUPABASE_ANON_KEY: ${{ secrets.APP_SUPABASE_ANON_KEY }}
+  APP_SUPABASE_BEARER_TOKEN: ${{ secrets.APP_SUPABASE_BEARER_TOKEN }}
+  # Generic admin GET remains as a fallback for future backend changes.
   APP_ADMIN_CATALOG_URL: ${{ vars.APP_ADMIN_CATALOG_URL }}
   APP_ADMIN_CATALOG_ITEMS_PATH: ${{ vars.APP_ADMIN_CATALOG_ITEMS_PATH }}
   APP_ADMIN_CATALOG_BEARER_TOKEN: ${{ secrets.APP_ADMIN_CATALOG_BEARER_TOKEN }}
