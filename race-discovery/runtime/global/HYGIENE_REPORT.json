@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-13T07:39:36+00:00",
+  "generated_at": "2026-09-13T09:41:45+00:00",
   "markets": [
     {
       "market_code": "am",
@@ -42,7 +42,7 @@
       "candidates_after": 1,
       "related_rows_removed": 0,
       "organizers_removed": 0,
-      "evidence_rows_compacted": 7
+      "evidence_rows_compacted": 0
     },
     {
       "market_code": "kg",
@@ -83,7 +83,7 @@
       "candidates_after": 8,
       "related_rows_removed": 0,
       "organizers_removed": 0,
-      "evidence_rows_compacted": 64
+      "evidence_rows_compacted": 0
     },
     {
       "market_code": "mn",
@@ -96,7 +96,7 @@
       "candidates_after": 1,
       "related_rows_removed": 0,
       "organizers_removed": 0,
-      "evidence_rows_compacted": 0
+      "evidence_rows_compacted": 5
     },
     {
       "market_code": "ru",
@@ -154,5 +154,5 @@
   "same_edition_duplicates_collapsed_total": 0,
   "variant_evidence_rows_removed_total": 0,
   "variant_sources_sanitized_total": 0,
-  "evidence_rows_compacted_total": 239
+  "evidence_rows_compacted_total": 173
 }

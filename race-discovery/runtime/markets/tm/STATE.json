@@ -1,38 +1,38 @@
 {
   "status": "PASS_WITH_REVIEW_QUEUE",
-  "run_id": "20260913T072228Z",
-  "started_at": "2026-09-13T07:22:28+00:00",
+  "run_id": "20260913T094102Z",
+  "started_at": "2026-09-13T09:41:02+00:00",
   "phase": "DONE",
   "queries_completed": 16,
   "urls_discovered": 8,
   "signals_accepted": 5,
-  "urls_checked": 5,
+  "urls_checked": 8,
   "hubs_detected": 0,
   "hub_links_discovered": 0,
-  "raw_candidates": 0,
-  "finished_at": "2026-09-13T07:23:23+00:00",
+  "raw_candidates": 1,
+  "finished_at": "2026-09-13T09:41:33+00:00",
   "last_summary": {
-    "run_id": "20260913T072228Z",
-    "started_at": "2026-09-13T07:22:28+00:00",
-    "finished_at": "2026-09-13T07:23:23+00:00",
+    "run_id": "20260913T094102Z",
+    "started_at": "2026-09-13T09:41:02+00:00",
+    "finished_at": "2026-09-13T09:41:33+00:00",
     "queries": 16,
-    "search_hits_seen": 104,
+    "search_hits_seen": 103,
     "search_hits_accepted": 5,
-    "search_hits_rejected": 99,
+    "search_hits_rejected": 98,
     "page_geo_rejected": 0,
     "signals": 5,
     "private_signals": 0,
     "private_inbox_source": "NONE",
     "urls_discovered": 8,
-    "urls_checked": 5,
+    "urls_checked": 8,
     "hubs_detected": 0,
     "hub_links_discovered": 0,
     "telegram_feeds": 0,
     "telegram_messages_seen": 0,
     "telegram_messages_accepted": 0,
     "telegram_external_links": 0,
-    "raw_candidates": 0,
-    "deduplicated_candidates": 0,
+    "raw_candidates": 1,
+    "deduplicated_candidates": 1,
     "duplicates_discarded": 0,
     "quarantined_noise": 0,
     "new": 0,
@@ -56,23 +56,7 @@
     "organizer_contact_status_counts": {
       "NEEDS_IDENTITY_CHECK": 1
     },
-    "errors": [
-      {
-        "phase": "FETCH",
-        "url": "https://sportcom.gov.tm/ru/",
-        "error": "URLError: <urlopen error [Errno -3] Temporary failure in name resolution>"
-      },
-      {
-        "phase": "FETCH",
-        "url": "https://sportcom.gov.tm/ru/federation/64",
-        "error": "URLError: <urlopen error [Errno -3] Temporary failure in name resolution>"
-      },
-      {
-        "phase": "FETCH",
-        "url": "https://turkmenistan.gov.tm/ru/razdel/sport/13",
-        "error": "URLError: <urlopen error [Errno -3] Temporary failure in name resolution>"
-      }
-    ]
+    "errors": []
   },
   "catalog_source": "SUPABASE:ma.26-2room.com/events_with_stats",
   "telegram_feeds": 0,
