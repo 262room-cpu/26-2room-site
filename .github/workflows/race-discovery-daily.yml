@@ -14,10 +14,10 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  # The real app catalog is served by Supabase and exposed in the admin panel.
-  APP_SUPABASE_URL: ${{ vars.APP_SUPABASE_URL }}
+  # Production app catalog discovered through pro.26-2room.com/admin/events.
+  APP_SUPABASE_URL: https://ma.26-2room.com
   APP_SUPABASE_EVENTS_RESOURCE: events_with_stats
-  APP_SUPABASE_EVENTS_SELECT: ${{ vars.APP_SUPABASE_EVENTS_SELECT }}
+  APP_SUPABASE_EVENTS_SELECT: '*,country:countries(id,name,code),city:cities(id,name,country_id)'
   APP_SUPABASE_ANON_KEY: ${{ secrets.APP_SUPABASE_ANON_KEY }}
   APP_SUPABASE_BEARER_TOKEN: ${{ secrets.APP_SUPABASE_BEARER_TOKEN }}
   # Generic admin GET remains as a fallback for future backend changes.
