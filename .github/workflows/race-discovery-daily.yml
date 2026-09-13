@@ -26,6 +26,10 @@ env:
   APP_ADMIN_CATALOG_BEARER_TOKEN: ${{ secrets.APP_ADMIN_CATALOG_BEARER_TOKEN }}
   APP_ADMIN_CATALOG_API_KEY: ${{ secrets.APP_ADMIN_CATALOG_API_KEY }}
   APP_ADMIN_CATALOG_API_KEY_HEADER: ${{ vars.APP_ADMIN_CATALOG_API_KEY_HEADER }}
+  # Private organizer CRM is staged only in /tmp on the ephemeral runner.
+  PRIVATE_RUNTIME: '1'
+  ORGANIZER_CRM_FILE: /tmp/organizer_crm.json
+  ORGANIZER_CRM_ZLIB_B64: ${{ secrets.ORGANIZER_CRM_ZLIB_B64 }}
 
 jobs:
   discover:
@@ -49,6 +53,31 @@ jobs:
       - name: Deterministic tests first
         run: python -m unittest discover -s tests -v
 
+      - name: Prepare private organizer CRM
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import base64
+          import json
+          import os
+          import pathlib
+          import zlib
+
+          path = pathlib.Path('/tmp/organizer_crm.json')
+          payload = os.environ.get('ORGANIZER_CRM_ZLIB_B64', '').strip()
+          if not payload:
+              path.write_text('[]', encoding='utf-8')
+              print('Private organizer CRM secret not configured; continuing without CRM.')
+          else:
+              raw = zlib.decompress(base64.b64decode(payload))
+              rows = json.loads(raw.decode('utf-8'))
+              if not isinstance(rows, list):
+                  raise SystemExit('Organizer CRM payload must decode to a JSON list')
+              path.write_text(json.dumps(rows, ensure_ascii=False), encoding='utf-8')
+              print(f'Private organizer CRM prepared: {len(rows)} rows')
+          PY
+
       - name: Multi-market discovery rotation
         env:
           MARKETS_PER_RUN: '5'
@@ -68,10 +97,15 @@ jobs:
           ORGANIZER_RESEARCH_TASKS: '5'
           ORGANIZER_RESEARCH_QUERIES: '2'
           ORGANIZER_RESEARCH_RESULTS: '5'
-        run: python -m race_agent.organizer_research --max-markets 5 --max-tasks 5 --queries-per-task 2 --results-per-query 5
+        run: python -m race_agent.organizer_research --max-markets 5 --max-tasks 5 --queries-per_task 2 --results-per-query 5
 
       - name: Build 26.2 ROOM action report
         run: python -m race_agent.report --max-items 50
+
+      - name: Remove private CRM staging file
+        if: always()
+        shell: bash
+        run: rm -f /tmp/organizer_crm.json
 
       - name: Persist checkpoints to agent branch only
         shell: bash
