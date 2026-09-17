@@ -1,28 +1,28 @@
 {
   "status": "PASS_WITH_REVIEW_QUEUE",
-  "run_id": "20260914T100349Z",
-  "started_at": "2026-09-14T10:03:49+00:00",
+  "run_id": "20260917T093620Z",
+  "started_at": "2026-09-17T09:36:20+00:00",
   "phase": "DONE",
   "queries_completed": 16,
-  "urls_discovered": 11,
-  "signals_accepted": 14,
-  "urls_checked": 10,
+  "urls_discovered": 9,
+  "signals_accepted": 12,
+  "urls_checked": 9,
   "raw_candidates": 1,
-  "finished_at": "2026-09-14T10:04:31+00:00",
+  "finished_at": "2026-09-17T09:36:39+00:00",
   "last_summary": {
-    "run_id": "20260914T100349Z",
-    "started_at": "2026-09-14T10:03:49+00:00",
-    "finished_at": "2026-09-14T10:04:31+00:00",
+    "run_id": "20260917T093620Z",
+    "started_at": "2026-09-17T09:36:20+00:00",
+    "finished_at": "2026-09-17T09:36:39+00:00",
     "queries": 16,
-    "search_hits_seen": 109,
-    "search_hits_accepted": 14,
-    "search_hits_rejected": 95,
+    "search_hits_seen": 108,
+    "search_hits_accepted": 12,
+    "search_hits_rejected": 96,
     "page_geo_rejected": 0,
-    "signals": 14,
+    "signals": 12,
     "private_signals": 0,
     "private_inbox_source": "NONE",
-    "urls_discovered": 11,
-    "urls_checked": 10,
+    "urls_discovered": 9,
+    "urls_checked": 9,
     "hubs_detected": 0,
     "hub_links_discovered": 0,
     "telegram_feeds": 0,
@@ -37,7 +37,7 @@
     "updated": 1,
     "conflicts": 0,
     "catalog_source": "SUPABASE:ma.26-2room.com/events_with_stats",
-    "catalog_events": 72,
+    "catalog_events": 73,
     "catalog_relations": {
       "NOT_IN_APP": 1
     },
@@ -54,13 +54,7 @@
     "organizer_contact_status_counts": {
       "NEEDS_IDENTITY_CHECK": 1
     },
-    "errors": [
-      {
-        "phase": "FETCH",
-        "url": "https://www.stepstone.de/jobs/in-berlin",
-        "error": "TimeoutError: The read operation timed out"
-      }
-    ]
+    "errors": []
   },
   "catalog_source": "SUPABASE:ma.26-2room.com/events_with_stats",
   "hubs_detected": 0,
