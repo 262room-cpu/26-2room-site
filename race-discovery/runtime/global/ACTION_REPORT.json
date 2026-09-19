@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-18T09:09:11+00:00",
+  "generated_at": "2026-09-19T08:56:35+00:00",
   "catalog_connected": true,
   "catalog_note": "READ_ONLY_COMPARISON_ACTIVE",
   "organizer_crm_connected": true,
@@ -68,7 +68,7 @@
         "source_urls": [
           "https://athletex.kz/competitions/AmangeldyRace2026"
         ],
-        "last_checked_at": "2026-09-18T09:05:36+00:00"
+        "last_checked_at": "2026-09-19T08:53:01+00:00"
       },
       {
         "candidate_id": "47579f55486d9712a344",
@@ -108,7 +108,7 @@
         "source_urls": [
           "https://athletex.kz/competitions/Backyard_Ultra_2026"
         ],
-        "last_checked_at": "2026-09-18T09:05:36+00:00"
+        "last_checked_at": "2026-09-19T08:53:01+00:00"
       },
       {
         "candidate_id": "a43c9dd38e9b1f673bc5",
@@ -128,7 +128,7 @@
         "source_urls": [
           "https://aprilrun5km.runc.run/"
         ],
-        "last_checked_at": "2026-09-18T09:06:39+00:00"
+        "last_checked_at": "2026-09-19T08:54:01+00:00"
       },
       {
         "candidate_id": "bb8c385bface50b485e6",
@@ -168,7 +168,7 @@
         "source_urls": [
           "https://athletex.kz/competitions/TengriUltra2026"
         ],
-        "last_checked_at": "2026-09-18T09:05:36+00:00"
+        "last_checked_at": "2026-09-19T08:53:01+00:00"
       },
       {
         "candidate_id": "cf598e75284cde8e59c8",
@@ -188,7 +188,7 @@
         "source_urls": [
           "https://athletex.kz/competitions/HMOskemen2026"
         ],
-        "last_checked_at": "2026-09-18T09:05:36+00:00"
+        "last_checked_at": "2026-09-19T08:53:01+00:00"
       },
       {
         "candidate_id": "05c0ae4fa31f7206f7a4",
@@ -228,7 +228,7 @@
         "source_urls": [
           "https://rwsrun.kz/ru/"
         ],
-        "last_checked_at": "2026-09-18T09:05:36+00:00"
+        "last_checked_at": "2026-09-19T08:53:01+00:00"
       },
       {
         "candidate_id": "0849561b0b34db2d4b75",
@@ -248,7 +248,7 @@
         "source_urls": [
           "https://athletex.kz/competitions/astanatrail26"
         ],
-        "last_checked_at": "2026-09-18T09:05:36+00:00"
+        "last_checked_at": "2026-09-19T08:53:01+00:00"
       },
       {
         "candidate_id": "9a2a780c84859e0f231c",
@@ -268,7 +268,7 @@
         "source_urls": [
           "https://athletex.kz/competitions/KarkyraUltra2026"
         ],
-        "last_checked_at": "2026-09-18T09:05:36+00:00"
+        "last_checked_at": "2026-09-19T08:53:01+00:00"
       },
       {
         "candidate_id": "6203eac8f927caa4c83f",
@@ -288,7 +288,7 @@
         "source_urls": [
           "https://spbhalf.runc.run/"
         ],
-        "last_checked_at": "2026-09-18T09:06:39+00:00"
+        "last_checked_at": "2026-09-19T08:54:01+00:00"
       },
       {
         "candidate_id": "e89ad2a3fb2a576eae54",
@@ -498,7 +498,7 @@
         "source_urls": [
           "https://moscowmarathon.runc.run/"
         ],
-        "last_checked_at": "2026-09-18T09:06:39+00:00"
+        "last_checked_at": "2026-09-19T08:54:01+00:00"
       },
       {
         "candidate_id": "3cda59c0079f4491e5b7",
@@ -518,7 +518,7 @@
         "source_urls": [
           "https://www.tbilisimarathon.ge/en/index"
         ],
-        "last_checked_at": "2026-09-15T09:33:00+00:00"
+        "last_checked_at": "2026-09-19T08:55:09+00:00"
       },
       {
         "candidate_id": "521c0c6333e40f040fb7",
@@ -718,7 +718,7 @@
         "source_urls": [
           "https://qhm26.athleticfamily.kz/ru"
         ],
-        "last_checked_at": "2026-09-18T09:05:36+00:00"
+        "last_checked_at": "2026-09-19T08:53:01+00:00"
       },
       {
         "candidate_id": "5241a5fed59554dcce89",
@@ -776,7 +776,7 @@
           "https://almaty-marathon.kz/ru/events/almaty_marathon_2026/",
           "https://almaty-marathon.kz/ru/events/almaty_marathon_2026/regulation?page=text"
         ],
-        "last_checked_at": "2026-09-18T09:05:36+00:00"
+        "last_checked_at": "2026-09-19T08:53:01+00:00"
       },
       {
         "candidate_id": "d99f3b407b82c34209f1",
@@ -804,7 +804,7 @@
           "https://caspian-marathon.kz/ru/users_list?distance=5",
           "https://www.caspian-marathon.kz/ru/calendar"
         ],
-        "last_checked_at": "2026-09-18T09:05:36+00:00"
+        "last_checked_at": "2026-09-19T08:53:01+00:00"
       },
       {
         "candidate_id": "05850758ebc06baf087f",
@@ -831,7 +831,7 @@
           "https://almaty-marathon.kz/ru/events/turkistan_marathon_2026/",
           "https://almaty-marathon.kz/ru/events"
         ],
-        "last_checked_at": "2026-09-18T09:05:36+00:00"
+        "last_checked_at": "2026-09-19T08:53:01+00:00"
       }
     ],
     "possible_app_matches": [
@@ -869,7 +869,7 @@
         "source_urls": [
           "https://athletex.kz/competitions/AlpineRace2026"
         ],
-        "last_checked_at": "2026-09-18T09:05:36+00:00"
+        "last_checked_at": "2026-09-19T08:53:01+00:00"
       },
       {
         "candidate_id": "41f381f5b9f3d6e9053c",
@@ -905,7 +905,7 @@
         "source_urls": [
           "https://athletex.kz/competitions/rrspring2026"
         ],
-        "last_checked_at": "2026-09-18T09:05:36+00:00"
+        "last_checked_at": "2026-09-19T08:53:01+00:00"
       },
       {
         "candidate_id": "8594284542683da69c00",
@@ -931,7 +931,7 @@
         "source_urls": [
           "https://athletex.kz/competitions/racenation2026"
         ],
-        "last_checked_at": "2026-09-18T09:05:36+00:00"
+        "last_checked_at": "2026-09-19T08:53:01+00:00"
       }
     ],
     "conflicts_and_review": [
@@ -983,7 +983,7 @@
         "source_urls": [
           "https://qhm26.athleticfamily.kz/ru"
         ],
-        "last_checked_at": "2026-09-18T09:05:36+00:00"
+        "last_checked_at": "2026-09-19T08:53:01+00:00"
       },
       {
         "candidate_id": "00317196b5ee669a0850",
@@ -1015,7 +1015,7 @@
           "https://almaty-marathon.kz/ru/events/almaty_marathon_2026/",
           "https://almaty-marathon.kz/ru/events/almaty_marathon_2026/regulation?page=text"
         ],
-        "last_checked_at": "2026-09-18T09:05:36+00:00"
+        "last_checked_at": "2026-09-19T08:53:01+00:00"
       },
       {
         "candidate_id": "d99f3b407b82c34209f1",
@@ -1043,7 +1043,7 @@
           "https://caspian-marathon.kz/ru/users_list?distance=5",
           "https://www.caspian-marathon.kz/ru/calendar"
         ],
-        "last_checked_at": "2026-09-18T09:05:36+00:00"
+        "last_checked_at": "2026-09-19T08:53:01+00:00"
       },
       {
         "candidate_id": "06a5692ddda3d95611c5",
@@ -2597,66 +2597,6 @@
         ]
       },
       {
-        "global_organizer_id": "619423d74aa9f8c55a96",
-        "organizer_id": "2fefd649476a5d30c6f6",
-        "name": "",
-        "display_name": "Неустановленный организатор — Chisinau Marathon 2026",
-        "identity_status": "UNRESOLVED",
-        "contact_status": "NEEDS_IDENTITY_CHECK",
-        "countries": [
-          "Moldova"
-        ],
-        "cities": [
-          "Кишинёв"
-        ],
-        "contacts": {
-          "instagram": [],
-          "telegram": [],
-          "whatsapp": [],
-          "email": [],
-          "phone": [],
-          "website": []
-        },
-        "contact_candidates": {
-          "instagram": [
-            "https://www.instagram.com/chisinaumarathon/"
-          ],
-          "telegram": [],
-          "whatsapp": [],
-          "email": [
-            "event@sporter.md"
-          ],
-          "phone": [
-            "+37322111072"
-          ],
-          "website": [
-            "https://marathon.md/en/about-run",
-            "https://marathon.md/en/about",
-            "https://marathon.md/ro/marathon42km",
-            "https://marathon.md/ro/halfmarathon21km",
-            "https://marathon.md/ro/marathon10km"
-          ]
-        },
-        "event_ids": [
-          "06a5692ddda3d95611c5"
-        ],
-        "crm_status": "NEW_LEAD",
-        "crm_relation": "CRM_IDENTITY_INSUFFICIENT",
-        "crm_match_id": "",
-        "crm_match_name": "",
-        "crm_match_score": 0.0,
-        "crm_match_reasons": [],
-        "crm_contact_additions": [],
-        "last_contacted_at": "",
-        "source_urls": [
-          "https://marathon.md/en/about-run",
-          "https://marathon.md/en/about",
-          "https://marathon.md/ro/marathon42km",
-          "https://marathon.md/ro/halfmarathon21km",
-          "https://marathon.md/ro/marathon10km"
-        ]
-      },
-      {
         "global_organizer_id": "3e78b8fc664e460598f4",
         "organizer_id": "413632b260f73883d784",
         "name": "",
@@ -2717,17 +2657,17 @@
         ]
       },
       {
-        "global_organizer_id": "f87cb77740056f59d213",
-        "organizer_id": "06d876b3825db501f7bf",
+        "global_organizer_id": "619423d74aa9f8c55a96",
+        "organizer_id": "2fefd649476a5d30c6f6",
         "name": "",
-        "display_name": "Неустановленный организатор — Fun run",
+        "display_name": "Неустановленный организатор — Chisinau Marathon 2026",
         "identity_status": "UNRESOLVED",
         "contact_status": "NEEDS_IDENTITY_CHECK",
         "countries": [
           "Moldova"
         ],
         "cities": [
-          "Chișinău"
+          "Кишинёв"
         ],
         "contacts": {
           "instagram": [],
@@ -2750,13 +2690,15 @@
             "+37322111072"
           ],
           "website": [
-            "https://marathon.md/ro/marathonfunrun",
-            "https://marathon.md/ru/marathonfunrun",
-            "https://marathon.md/en/marathonfunrun"
+            "https://marathon.md/en/about-run",
+            "https://marathon.md/en/about",
+            "https://marathon.md/ro/marathon42km",
+            "https://marathon.md/ro/halfmarathon21km",
+            "https://marathon.md/ro/marathon10km"
           ]
         },
         "event_ids": [
-          "51db3d2f3c3be7b5bdce"
+          "06a5692ddda3d95611c5"
         ],
         "crm_status": "NEW_LEAD",
         "crm_relation": "CRM_IDENTITY_INSUFFICIENT",
@@ -2767,9 +2709,11 @@
         "crm_contact_additions": [],
         "last_contacted_at": "",
         "source_urls": [
-          "https://marathon.md/ro/marathonfunrun",
-          "https://marathon.md/ru/marathonfunrun",
-          "https://marathon.md/en/marathonfunrun"
+          "https://marathon.md/en/about-run",
+          "https://marathon.md/en/about",
+          "https://marathon.md/ro/marathon42km",
+          "https://marathon.md/ro/halfmarathon21km",
+          "https://marathon.md/ro/marathon10km"
         ]
       },
       {
@@ -2822,6 +2766,62 @@
         "crm_contact_additions": [],
         "last_contacted_at": "",
         "source_urls": [
+          "https://marathon.md/ru/marathonfunrun",
+          "https://marathon.md/en/marathonfunrun"
+        ]
+      },
+      {
+        "global_organizer_id": "f87cb77740056f59d213",
+        "organizer_id": "06d876b3825db501f7bf",
+        "name": "",
+        "display_name": "Неустановленный организатор — Fun run",
+        "identity_status": "UNRESOLVED",
+        "contact_status": "NEEDS_IDENTITY_CHECK",
+        "countries": [
+          "Moldova"
+        ],
+        "cities": [
+          "Chișinău"
+        ],
+        "contacts": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "contact_candidates": {
+          "instagram": [
+            "https://www.instagram.com/chisinaumarathon/"
+          ],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [
+            "event@sporter.md"
+          ],
+          "phone": [
+            "+37322111072"
+          ],
+          "website": [
+            "https://marathon.md/ro/marathonfunrun",
+            "https://marathon.md/ru/marathonfunrun",
+            "https://marathon.md/en/marathonfunrun"
+          ]
+        },
+        "event_ids": [
+          "51db3d2f3c3be7b5bdce"
+        ],
+        "crm_status": "NEW_LEAD",
+        "crm_relation": "CRM_IDENTITY_INSUFFICIENT",
+        "crm_match_id": "",
+        "crm_match_name": "",
+        "crm_match_score": 0.0,
+        "crm_match_reasons": [],
+        "crm_contact_additions": [],
+        "last_contacted_at": "",
+        "source_urls": [
+          "https://marathon.md/ro/marathonfunrun",
           "https://marathon.md/ru/marathonfunrun",
           "https://marathon.md/en/marathonfunrun"
         ]
@@ -2931,66 +2931,6 @@
         ]
       },
       {
-        "global_organizer_id": "404c261b7a7ab25d7afb",
-        "organizer_id": "01256a3a141eb325b971",
-        "name": "",
-        "display_name": "Неустановленный организатор — Кишиневский марафон 2026",
-        "identity_status": "UNRESOLVED",
-        "contact_status": "NEEDS_IDENTITY_CHECK",
-        "countries": [
-          "Moldova"
-        ],
-        "cities": [
-          "Кишинёв"
-        ],
-        "contacts": {
-          "instagram": [],
-          "telegram": [],
-          "whatsapp": [],
-          "email": [],
-          "phone": [],
-          "website": []
-        },
-        "contact_candidates": {
-          "instagram": [
-            "https://www.instagram.com/chisinaumarathon/"
-          ],
-          "telegram": [],
-          "whatsapp": [],
-          "email": [
-            "event@sporter.md"
-          ],
-          "phone": [
-            "+37322111072"
-          ],
-          "website": [
-            "https://marathon.md/ru/marathon42km",
-            "https://marathon.md/ru/halfmarathon21km",
-            "https://marathon.md/ru/marathon10km",
-            "https://marathon.md/ru/marathon5km",
-            "https://marathon.md/ru/marathonkids"
-          ]
-        },
-        "event_ids": [
-          "20de6ee032c4f48dc208"
-        ],
-        "crm_status": "NEW_LEAD",
-        "crm_relation": "CRM_IDENTITY_INSUFFICIENT",
-        "crm_match_id": "",
-        "crm_match_name": "",
-        "crm_match_score": 0.0,
-        "crm_match_reasons": [],
-        "crm_contact_additions": [],
-        "last_contacted_at": "",
-        "source_urls": [
-          "https://marathon.md/ru/marathon42km",
-          "https://marathon.md/ru/halfmarathon21km",
-          "https://marathon.md/ru/marathon10km",
-          "https://marathon.md/ru/marathon5km",
-          "https://marathon.md/ru/marathonkids"
-        ]
-      },
-      {
         "global_organizer_id": "6db0c68c23312de5cd16",
         "organizer_id": "779b33948a661408638c",
         "name": "",
@@ -3048,6 +2988,66 @@
           "https://marathon.md/ru/marathon10km",
           "https://marathon.md/ru/marathon5km",
           "https://marathon.md/en/run-2026"
+        ]
+      },
+      {
+        "global_organizer_id": "404c261b7a7ab25d7afb",
+        "organizer_id": "01256a3a141eb325b971",
+        "name": "",
+        "display_name": "Неустановленный организатор — Кишиневский марафон 2026",
+        "identity_status": "UNRESOLVED",
+        "contact_status": "NEEDS_IDENTITY_CHECK",
+        "countries": [
+          "Moldova"
+        ],
+        "cities": [
+          "Кишинёв"
+        ],
+        "contacts": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "contact_candidates": {
+          "instagram": [
+            "https://www.instagram.com/chisinaumarathon/"
+          ],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [
+            "event@sporter.md"
+          ],
+          "phone": [
+            "+37322111072"
+          ],
+          "website": [
+            "https://marathon.md/ru/marathon42km",
+            "https://marathon.md/ru/halfmarathon21km",
+            "https://marathon.md/ru/marathon10km",
+            "https://marathon.md/ru/marathon5km",
+            "https://marathon.md/ru/marathonkids"
+          ]
+        },
+        "event_ids": [
+          "20de6ee032c4f48dc208"
+        ],
+        "crm_status": "NEW_LEAD",
+        "crm_relation": "CRM_IDENTITY_INSUFFICIENT",
+        "crm_match_id": "",
+        "crm_match_name": "",
+        "crm_match_score": 0.0,
+        "crm_match_reasons": [],
+        "crm_contact_additions": [],
+        "last_contacted_at": "",
+        "source_urls": [
+          "https://marathon.md/ru/marathon42km",
+          "https://marathon.md/ru/halfmarathon21km",
+          "https://marathon.md/ru/marathon10km",
+          "https://marathon.md/ru/marathon5km",
+          "https://marathon.md/ru/marathonkids"
         ]
       },
       {
@@ -3326,13 +3326,13 @@
       "country": "Kazakhstan",
       "events": 20,
       "organizers": 19,
-      "last_run_id": "20260918T090536Z",
+      "last_run_id": "20260919T085301Z",
       "status": "PASS_WITH_REVIEW_QUEUE",
       "organizer_research": {
         "market_code": "kz",
-        "observed_at": "2026-09-18T09:08:56+00:00",
+        "observed_at": "2026-09-19T08:56:19+00:00",
         "tasks_processed": 5,
-        "search_hits": 42,
+        "search_hits": 47,
         "candidates_found": 0,
         "contacts_promoted": 0,
         "identities_resolved": 0,
@@ -3344,11 +3344,11 @@
       "country": "Russia",
       "events": 3,
       "organizers": 3,
-      "last_run_id": "20260918T090639Z",
+      "last_run_id": "20260919T085401Z",
       "status": "PASS_WITH_REVIEW_QUEUE",
       "organizer_research": {
         "market_code": "ru",
-        "observed_at": "2026-09-18T09:09:10+00:00",
+        "observed_at": "2026-09-19T08:56:34+00:00",
         "tasks_processed": 3,
         "search_hits": 0,
         "candidates_found": 0,
@@ -3366,7 +3366,7 @@
       "status": "PASS_WITH_REVIEW_QUEUE",
       "organizer_research": {
         "market_code": "kg",
-        "observed_at": "2026-09-18T09:09:05+00:00",
+        "observed_at": "2026-09-19T08:56:29+00:00",
         "tasks_processed": 5,
         "search_hits": 41,
         "candidates_found": 0,
@@ -3421,13 +3421,13 @@
       "country": "Georgia",
       "events": 1,
       "organizers": 1,
-      "last_run_id": "20260915T093300Z",
+      "last_run_id": "20260919T085509Z",
       "status": "PASS_WITH_REVIEW_QUEUE",
       "organizer_research": {
         "market_code": "ge",
-        "observed_at": "2026-09-18T09:09:10+00:00",
+        "observed_at": "2026-09-19T08:56:34+00:00",
         "tasks_processed": 1,
-        "search_hits": 5,
+        "search_hits": 9,
         "candidates_found": 0,
         "contacts_promoted": 0,
         "identities_resolved": 0,
@@ -3439,13 +3439,13 @@
       "country": "Moldova",
       "events": 8,
       "organizers": 8,
-      "last_run_id": "20260916T092600Z",
+      "last_run_id": "20260919T085523Z",
       "status": "PASS_WITH_REVIEW_QUEUE",
       "organizer_research": {
         "market_code": "md",
-        "observed_at": "2026-09-18T09:09:00+00:00",
+        "observed_at": "2026-09-19T08:56:24+00:00",
         "tasks_processed": 5,
-        "search_hits": 46,
+        "search_hits": 47,
         "candidates_found": 0,
         "contacts_promoted": 0,
         "identities_resolved": 0,
@@ -3457,7 +3457,7 @@
       "country": "Tajikistan",
       "events": 0,
       "organizers": 0,
-      "last_run_id": "20260916T092805Z",
+      "last_run_id": "20260919T085601Z",
       "status": "PASS",
       "organizer_research": {}
     },

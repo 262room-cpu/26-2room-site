@@ -1,15 +1,15 @@
 {
   "last_success": {
-    "kz": "2026-09-18T09:06:39+00:00",
-    "ru": "2026-09-18T09:07:53+00:00",
+    "kz": "2026-09-19T08:54:00+00:00",
+    "ru": "2026-09-19T08:55:09+00:00",
     "kg": "2026-09-17T09:36:19+00:00",
     "uz": "2026-09-17T09:36:39+00:00",
     "am": "2026-09-18T09:08:11+00:00",
     "az": "2026-09-18T09:08:30+00:00",
     "by": "2026-09-18T09:08:55+00:00",
-    "ge": "2026-09-15T09:33:12+00:00",
-    "md": "2026-09-16T09:28:05+00:00",
-    "tj": "2026-09-16T09:28:24+00:00",
+    "ge": "2026-09-19T08:55:23+00:00",
+    "md": "2026-09-19T08:56:01+00:00",
+    "tj": "2026-09-19T08:56:19+00:00",
     "tm": "2026-09-16T09:28:51+00:00",
     "mn": "2026-09-17T09:35:43+00:00"
   },
@@ -1342,6 +1342,45 @@
         },
         {
           "market_code": "by",
+          "status": "PASS",
+          "returncode": 0
+        }
+      ]
+    },
+    {
+      "at": "2026-09-19T08:56:19+00:00",
+      "selected": [
+        "kz",
+        "ru",
+        "ge",
+        "md",
+        "tj"
+      ],
+      "budget_seconds": 1200,
+      "per_market_timeout_seconds": 300,
+      "results": [
+        {
+          "market_code": "kz",
+          "status": "PASS_WITH_REVIEW_QUEUE",
+          "returncode": 0
+        },
+        {
+          "market_code": "ru",
+          "status": "PASS_WITH_REVIEW_QUEUE",
+          "returncode": 0
+        },
+        {
+          "market_code": "ge",
+          "status": "PASS_WITH_REVIEW_QUEUE",
+          "returncode": 0
+        },
+        {
+          "market_code": "md",
+          "status": "PASS_WITH_REVIEW_QUEUE",
+          "returncode": 0
+        },
+        {
+          "market_code": "tj",
           "status": "PASS",
           "returncode": 0
         }

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-18T09:08:56+00:00",
+  "generated_at": "2026-09-19T08:56:19+00:00",
   "markets": [
     {
       "market_code": "am",
@@ -42,7 +42,7 @@
       "candidates_after": 1,
       "related_rows_removed": 0,
       "organizers_removed": 0,
-      "evidence_rows_compacted": 0
+      "evidence_rows_compacted": 7
     },
     {
       "market_code": "kg",
@@ -154,5 +154,5 @@
   "same_edition_duplicates_collapsed_total": 0,
   "variant_evidence_rows_removed_total": 0,
   "variant_sources_sanitized_total": 0,
-  "evidence_rows_compacted_total": 176
+  "evidence_rows_compacted_total": 183
 }
