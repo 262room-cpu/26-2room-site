@@ -1,25 +1,25 @@
 {
-  "generated_at": "2026-09-19T08:56:35+00:00",
+  "generated_at": "2026-09-20T09:25:51+00:00",
   "markets": {
     "kz": {
       "country": "Kazakhstan",
       "events": 20,
       "organizers": 19,
-      "last_run_id": "20260919T085301Z",
+      "last_run_id": "20260920T092214Z",
       "status": "PASS_WITH_REVIEW_QUEUE"
     },
     "ru": {
       "country": "Russia",
       "events": 3,
       "organizers": 3,
-      "last_run_id": "20260919T085401Z",
+      "last_run_id": "20260920T092314Z",
       "status": "PASS_WITH_REVIEW_QUEUE"
     },
     "kg": {
       "country": "Kyrgyzstan",
       "events": 7,
       "organizers": 7,
-      "last_run_id": "20260917T093544Z",
+      "last_run_id": "20260920T092458Z",
       "status": "PASS_WITH_REVIEW_QUEUE"
     },
     "uz": {
@@ -75,14 +75,14 @@
       "country": "Turkmenistan",
       "events": 1,
       "organizers": 1,
-      "last_run_id": "20260916T092824Z",
+      "last_run_id": "20260920T092426Z",
       "status": "PASS_WITH_REVIEW_QUEUE"
     },
     "mn": {
       "country": "Mongolia",
       "events": 1,
       "organizers": 1,
-      "last_run_id": "20260917T093534Z",
+      "last_run_id": "20260920T092445Z",
       "status": "PASS_WITH_REVIEW_QUEUE"
     }
   },
