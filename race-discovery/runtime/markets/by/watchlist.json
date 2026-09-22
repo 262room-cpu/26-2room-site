@@ -6,6 +6,11 @@
       "first_seen": "2026-09-10T16:06:20+00:00",
       "family": "TELEGRAM_MESSAGE",
       "last_seen": "2026-09-10T17:37:14+00:00"
+    },
+    "https://t.me/mst_gov_by/34365": {
+      "first_seen": "2026-09-22T09:26:56+00:00",
+      "family": "TELEGRAM_MESSAGE",
+      "last_seen": "2026-09-22T09:26:56+00:00"
     }
   }
 }
