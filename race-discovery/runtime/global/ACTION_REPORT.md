@@ -1,6 +1,6 @@
 # 26.2 ROOM — Race Discovery Action Report
 
-Generated: 2026-09-23T09:28:01+00:00
+Generated: 2026-09-24T09:28:03+00:00
 
 ## Сводка
 
@@ -20,7 +20,7 @@ Generated: 2026-09-23T09:28:01+00:00
 
 ## Новые старты для приложения
 
-- 25th Amangeldy Race 2026 — 2026-01-17 — Алматы, Kazakhstan
+- 25th Amangeldy Race 2026 — 2026-01-17 — Астана, Kazakhstan
 - VIII Ташкентский международный марафон – 2026 — 2026-03-16 — Ташкент, Uzbekistan
 - Backyard Ultra KZ 2026 — 2026-03-22 — Алматы, Kazakhstan
 - Забег «Апрель» — 2026-04-05 — Москва, Russia
@@ -52,7 +52,7 @@ Generated: 2026-09-23T09:28:01+00:00
 - Road Race — 2026-09-20 — Алматы, Kazakhstan
 - ALMATY MARATHON 2026 — 2026-09-27 — Алматы, Kazakhstan
 - CASPIAN MARATHON — 2026-10-11 — Актау, Kazakhstan
-- Salomon Trail 2026 — 2026-10-18 — Алматы, Kazakhstan
+- Salomon Trail 2026 — 2026-10-18 — Астана, Kazakhstan
 - TURKISTAN MARATHON 2026 — 2026-10-25 — Туркестан, Kazakhstan
 
 ## Конфликты и ручная проверка
