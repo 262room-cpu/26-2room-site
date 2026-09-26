@@ -1,39 +1,39 @@
 {
   "status": "PASS_WITH_REVIEW_QUEUE",
-  "run_id": "20260922T092805Z",
-  "started_at": "2026-09-22T09:28:05+00:00",
+  "run_id": "20260926T092848Z",
+  "started_at": "2026-09-26T09:28:48+00:00",
   "phase": "DONE",
   "queries_completed": 16,
-  "urls_discovered": 33,
-  "signals_accepted": 12,
-  "urls_checked": 33,
+  "urls_discovered": 34,
+  "signals_accepted": 13,
+  "urls_checked": 31,
   "hubs_detected": 1,
   "hub_links_discovered": 25,
-  "raw_candidates": 25,
-  "finished_at": "2026-09-22T09:30:14+00:00",
+  "raw_candidates": 23,
+  "finished_at": "2026-09-26T09:30:19+00:00",
   "last_summary": {
-    "run_id": "20260922T092805Z",
-    "started_at": "2026-09-22T09:28:05+00:00",
-    "finished_at": "2026-09-22T09:30:14+00:00",
+    "run_id": "20260926T092848Z",
+    "started_at": "2026-09-26T09:28:48+00:00",
+    "finished_at": "2026-09-26T09:30:19+00:00",
     "queries": 16,
-    "search_hits_seen": 103,
-    "search_hits_accepted": 12,
-    "search_hits_rejected": 91,
+    "search_hits_seen": 96,
+    "search_hits_accepted": 13,
+    "search_hits_rejected": 83,
     "page_geo_rejected": 0,
-    "signals": 12,
+    "signals": 13,
     "private_signals": 0,
     "private_inbox_source": "NONE",
-    "urls_discovered": 33,
-    "urls_checked": 33,
+    "urls_discovered": 34,
+    "urls_checked": 31,
     "hubs_detected": 1,
     "hub_links_discovered": 25,
     "telegram_feeds": 0,
     "telegram_messages_seen": 0,
     "telegram_messages_accepted": 0,
     "telegram_external_links": 0,
-    "raw_candidates": 25,
+    "raw_candidates": 23,
     "deduplicated_candidates": 3,
-    "duplicates_discarded": 22,
+    "duplicates_discarded": 20,
     "quarantined_noise": 0,
     "new": 0,
     "updated": 1,
@@ -58,7 +58,23 @@
     "organizer_contact_status_counts": {
       "NEEDS_IDENTITY_CHECK": 8
     },
-    "errors": []
+    "errors": [
+      {
+        "phase": "FETCH",
+        "url": "https://fr.beincrypto.com/prix/doragonland/price-prediction/",
+        "error": "HTTPError: HTTP Error 403: Forbidden"
+      },
+      {
+        "phase": "FETCH",
+        "url": "https://marathon.md/ru/run-2026",
+        "error": "HTTPError: HTTP Error 404: Not Found"
+      },
+      {
+        "phase": "FETCH",
+        "url": "https://marathon.md/ro/run-2026",
+        "error": "HTTPError: HTTP Error 404: Not Found"
+      }
+    ]
   },
   "catalog_source": "SUPABASE:ma.26-2room.com/events_with_stats",
   "telegram_feeds": 0,
