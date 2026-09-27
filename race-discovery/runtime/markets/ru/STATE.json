@@ -1,27 +1,27 @@
 {
   "status": "PASS_WITH_REVIEW_QUEUE",
-  "run_id": "20260926T092738Z",
-  "started_at": "2026-09-26T09:27:38+00:00",
+  "run_id": "20260927T100754Z",
+  "started_at": "2026-09-27T10:07:54+00:00",
   "phase": "DONE",
   "queries_completed": 16,
-  "urls_discovered": 138,
-  "signals_accepted": 32,
+  "urls_discovered": 142,
+  "signals_accepted": 35,
   "urls_checked": 45,
   "raw_candidates": 2,
-  "finished_at": "2026-09-26T09:28:48+00:00",
+  "finished_at": "2026-09-27T10:09:24+00:00",
   "last_summary": {
-    "run_id": "20260926T092738Z",
-    "started_at": "2026-09-26T09:27:38+00:00",
-    "finished_at": "2026-09-26T09:28:48+00:00",
+    "run_id": "20260927T100754Z",
+    "started_at": "2026-09-27T10:07:54+00:00",
+    "finished_at": "2026-09-27T10:09:24+00:00",
     "queries": 16,
-    "search_hits_seen": 108,
-    "search_hits_accepted": 32,
-    "search_hits_rejected": 76,
+    "search_hits_seen": 102,
+    "search_hits_accepted": 35,
+    "search_hits_rejected": 67,
     "page_geo_rejected": 0,
-    "signals": 32,
+    "signals": 35,
     "private_signals": 0,
     "private_inbox_source": "NONE",
-    "urls_discovered": 138,
+    "urls_discovered": 142,
     "urls_checked": 45,
     "hubs_detected": 10,
     "hub_links_discovered": 116,
@@ -54,7 +54,13 @@
     "organizer_contact_status_counts": {
       "NEEDS_IDENTITY_CHECK": 3
     },
-    "errors": []
+    "errors": [
+      {
+        "phase": "FETCH",
+        "url": "https://russiarunning.com/event/Rytsarskiytreyl",
+        "error": "URLError: <urlopen error _ssl.c:993: The handshake operation timed out>"
+      }
+    ]
   },
   "catalog_source": "SUPABASE:ma.26-2room.com/events_with_stats",
   "hubs_detected": 10,
