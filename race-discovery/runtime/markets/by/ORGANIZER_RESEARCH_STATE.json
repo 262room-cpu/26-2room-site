@@ -1,8 +1,8 @@
 {
-  "market_code": "ru",
+  "market_code": "by",
   "observed_at": "2026-09-28T11:10:11+00:00",
-  "tasks_processed": 3,
-  "search_hits": 0,
+  "tasks_processed": 1,
+  "search_hits": 10,
   "candidates_found": 0,
   "contacts_promoted": 0,
   "identities_resolved": 0,

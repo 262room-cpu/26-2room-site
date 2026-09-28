@@ -1,6 +1,16 @@
 {
   "domains": {},
-  "organizers": {},
+  "organizers": {
+    "7d529d0dd50d26cf1f61": {
+      "first_seen": "2026-09-28T11:09:14+00:00",
+      "event_ids": [
+        "48366cadc16b9c88e44c"
+      ],
+      "name": "",
+      "instagram": [],
+      "last_checked": "2026-09-28T11:09:14+00:00"
+    }
+  },
   "social_sources": {
     "https://t.me/mst_gov_by/34142": {
       "first_seen": "2026-09-10T16:06:20+00:00",
@@ -11,6 +21,16 @@
       "first_seen": "2026-09-22T09:26:56+00:00",
       "family": "TELEGRAM_MESSAGE",
       "last_seen": "2026-09-22T09:26:56+00:00"
+    },
+    "https://t.me/mst_gov_by/34429": {
+      "first_seen": "2026-09-28T11:09:14+00:00",
+      "family": "TELEGRAM_MESSAGE",
+      "last_seen": "2026-09-28T11:09:14+00:00"
+    },
+    "https://t.me/mst_gov_by/34441": {
+      "first_seen": "2026-09-28T11:09:14+00:00",
+      "family": "TELEGRAM_MESSAGE",
+      "last_seen": "2026-09-28T11:09:14+00:00"
     }
   }
 }
