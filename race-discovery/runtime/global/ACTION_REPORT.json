@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-29T10:54:11+00:00",
+  "generated_at": "2026-09-30T10:40:27+00:00",
   "catalog_connected": true,
   "catalog_note": "READ_ONLY_COMPARISON_ACTIVE",
   "organizer_crm_connected": true,
@@ -68,7 +68,7 @@
         "source_urls": [
           "https://athletex.kz/competitions/AmangeldyRace2026"
         ],
-        "last_checked_at": "2026-09-29T10:48:23+00:00"
+        "last_checked_at": "2026-09-30T10:36:16+00:00"
       },
       {
         "candidate_id": "47579f55486d9712a344",
@@ -108,7 +108,7 @@
         "source_urls": [
           "https://athletex.kz/competitions/Backyard_Ultra_2026"
         ],
-        "last_checked_at": "2026-09-29T10:48:23+00:00"
+        "last_checked_at": "2026-09-30T10:36:16+00:00"
       },
       {
         "candidate_id": "a43c9dd38e9b1f673bc5",
@@ -128,7 +128,7 @@
         "source_urls": [
           "https://aprilrun5km.runc.run/"
         ],
-        "last_checked_at": "2026-09-29T10:49:34+00:00"
+        "last_checked_at": "2026-09-30T10:37:22+00:00"
       },
       {
         "candidate_id": "bb8c385bface50b485e6",
@@ -168,7 +168,7 @@
         "source_urls": [
           "https://athletex.kz/competitions/TengriUltra2026"
         ],
-        "last_checked_at": "2026-09-29T10:48:23+00:00"
+        "last_checked_at": "2026-09-30T10:36:16+00:00"
       },
       {
         "candidate_id": "cf598e75284cde8e59c8",
@@ -188,7 +188,7 @@
         "source_urls": [
           "https://athletex.kz/competitions/HMOskemen2026"
         ],
-        "last_checked_at": "2026-09-29T10:48:23+00:00"
+        "last_checked_at": "2026-09-30T10:36:16+00:00"
       },
       {
         "candidate_id": "05c0ae4fa31f7206f7a4",
@@ -208,7 +208,7 @@
         "source_urls": [
           "https://ulaanbaatar.marathon.mn/register"
         ],
-        "last_checked_at": "2026-09-27T10:09:24+00:00"
+        "last_checked_at": "2026-09-30T10:38:58+00:00"
       },
       {
         "candidate_id": "0a9c5d7e66570d2f5fb4",
@@ -228,7 +228,7 @@
         "source_urls": [
           "https://rwsrun.kz/ru/"
         ],
-        "last_checked_at": "2026-09-29T10:48:23+00:00"
+        "last_checked_at": "2026-09-30T10:36:16+00:00"
       },
       {
         "candidate_id": "0849561b0b34db2d4b75",
@@ -248,7 +248,7 @@
         "source_urls": [
           "https://athletex.kz/competitions/astanatrail26"
         ],
-        "last_checked_at": "2026-09-29T10:48:23+00:00"
+        "last_checked_at": "2026-09-30T10:36:16+00:00"
       },
       {
         "candidate_id": "9a2a780c84859e0f231c",
@@ -268,7 +268,7 @@
         "source_urls": [
           "https://athletex.kz/competitions/KarkyraUltra2026"
         ],
-        "last_checked_at": "2026-09-29T10:48:23+00:00"
+        "last_checked_at": "2026-09-30T10:36:16+00:00"
       },
       {
         "candidate_id": "6203eac8f927caa4c83f",
@@ -288,7 +288,7 @@
         "source_urls": [
           "https://spbhalf.runc.run/"
         ],
-        "last_checked_at": "2026-09-29T10:49:34+00:00"
+        "last_checked_at": "2026-09-30T10:37:22+00:00"
       },
       {
         "candidate_id": "e89ad2a3fb2a576eae54",
@@ -558,7 +558,7 @@
         "source_urls": [
           "http://triathlon.kg/events/cempionat-respubliki-po-duatlonu-2026"
         ],
-        "last_checked_at": "2026-09-27T10:09:36+00:00"
+        "last_checked_at": "2026-09-30T10:39:11+00:00"
       },
       {
         "candidate_id": "eb67caca3ee984b0394e",
@@ -583,7 +583,7 @@
       {
         "candidate_id": "dca5ae2d062c732a21f3",
         "name": "INDOOR TRIATHLON SERIES (#5)",
-        "date": "2026-11-14",
+        "date": "2026-11-21",
         "city": "Ош",
         "country": "Kyrgyzstan",
         "market_code": "kg",
@@ -598,7 +598,7 @@
         "source_urls": [
           "http://triathlon.kg/events/indoor-triathlon-series-5"
         ],
-        "last_checked_at": "2026-09-27T10:09:36+00:00"
+        "last_checked_at": "2026-09-30T10:39:11+00:00"
       },
       {
         "candidate_id": "ef7b2070358759b58823",
@@ -738,7 +738,7 @@
         "source_urls": [
           "https://qhm26.athleticfamily.kz/ru"
         ],
-        "last_checked_at": "2026-09-29T10:48:23+00:00"
+        "last_checked_at": "2026-09-30T10:36:16+00:00"
       },
       {
         "candidate_id": "5241a5fed59554dcce89",
@@ -824,7 +824,7 @@
           "https://caspian-marathon.kz/ru/users_list?distance=5",
           "https://www.caspian-marathon.kz/ru/calendar"
         ],
-        "last_checked_at": "2026-09-29T10:48:23+00:00"
+        "last_checked_at": "2026-09-30T10:36:16+00:00"
       },
       {
         "candidate_id": "f6c61906d4b8949f3fd4",
@@ -921,7 +921,7 @@
         "source_urls": [
           "https://athletex.kz/competitions/AlpineRace2026"
         ],
-        "last_checked_at": "2026-09-29T10:48:23+00:00"
+        "last_checked_at": "2026-09-30T10:36:16+00:00"
       },
       {
         "candidate_id": "41f381f5b9f3d6e9053c",
@@ -957,7 +957,7 @@
         "source_urls": [
           "https://athletex.kz/competitions/rrspring2026"
         ],
-        "last_checked_at": "2026-09-29T10:48:23+00:00"
+        "last_checked_at": "2026-09-30T10:36:16+00:00"
       },
       {
         "candidate_id": "8594284542683da69c00",
@@ -1035,7 +1035,7 @@
         "source_urls": [
           "https://qhm26.athleticfamily.kz/ru"
         ],
-        "last_checked_at": "2026-09-29T10:48:23+00:00"
+        "last_checked_at": "2026-09-30T10:36:16+00:00"
       },
       {
         "candidate_id": "00317196b5ee669a0850",
@@ -1095,7 +1095,7 @@
           "https://caspian-marathon.kz/ru/users_list?distance=5",
           "https://www.caspian-marathon.kz/ru/calendar"
         ],
-        "last_checked_at": "2026-09-29T10:48:23+00:00"
+        "last_checked_at": "2026-09-30T10:36:16+00:00"
       },
       {
         "candidate_id": "06a5692ddda3d95611c5",
@@ -3448,13 +3448,13 @@
       "country": "Kazakhstan",
       "events": 20,
       "organizers": 19,
-      "last_run_id": "20260929T104823Z",
+      "last_run_id": "20260930T103616Z",
       "status": "PASS_WITH_REVIEW_QUEUE",
       "organizer_research": {
         "market_code": "kz",
-        "observed_at": "2026-09-29T10:53:57+00:00",
+        "observed_at": "2026-09-30T10:40:14+00:00",
         "tasks_processed": 5,
-        "search_hits": 18,
+        "search_hits": 24,
         "candidates_found": 0,
         "contacts_promoted": 0,
         "identities_resolved": 0,
@@ -3466,11 +3466,11 @@
       "country": "Russia",
       "events": 3,
       "organizers": 3,
-      "last_run_id": "20260929T104934Z",
+      "last_run_id": "20260930T103722Z",
       "status": "PASS_WITH_REVIEW_QUEUE",
       "organizer_research": {
         "market_code": "ru",
-        "observed_at": "2026-09-29T10:54:09+00:00",
+        "observed_at": "2026-09-30T10:40:25+00:00",
         "tasks_processed": 3,
         "search_hits": 0,
         "candidates_found": 0,
@@ -3484,13 +3484,13 @@
       "country": "Kyrgyzstan",
       "events": 7,
       "organizers": 7,
-      "last_run_id": "20260927T100936Z",
+      "last_run_id": "20260930T103911Z",
       "status": "PASS_WITH_REVIEW_QUEUE",
       "organizer_research": {
         "market_code": "kg",
-        "observed_at": "2026-09-29T10:54:04+00:00",
+        "observed_at": "2026-09-30T10:40:21+00:00",
         "tasks_processed": 5,
-        "search_hits": 42,
+        "search_hits": 39,
         "candidates_found": 0,
         "contacts_promoted": 0,
         "identities_resolved": 0,
@@ -3539,9 +3539,9 @@
       "status": "PASS_WITH_REVIEW_QUEUE",
       "organizer_research": {
         "market_code": "by",
-        "observed_at": "2026-09-29T10:54:09+00:00",
+        "observed_at": "2026-09-30T10:40:25+00:00",
         "tasks_processed": 1,
-        "search_hits": 10,
+        "search_hits": 3,
         "candidates_found": 0,
         "contacts_promoted": 0,
         "identities_resolved": 0,
@@ -3575,9 +3575,9 @@
       "status": "PASS_WITH_REVIEW_QUEUE",
       "organizer_research": {
         "market_code": "md",
-        "observed_at": "2026-09-29T10:54:00+00:00",
+        "observed_at": "2026-09-30T10:40:16+00:00",
         "tasks_processed": 5,
-        "search_hits": 30,
+        "search_hits": 26,
         "candidates_found": 0,
         "contacts_promoted": 0,
         "identities_resolved": 0,
@@ -3597,7 +3597,7 @@
       "country": "Turkmenistan",
       "events": 1,
       "organizers": 1,
-      "last_run_id": "20260926T093037Z",
+      "last_run_id": "20260930T103829Z",
       "status": "PASS_WITH_REVIEW_QUEUE",
       "organizer_research": {}
     },
@@ -3605,7 +3605,7 @@
       "country": "Mongolia",
       "events": 1,
       "organizers": 1,
-      "last_run_id": "20260927T100924Z",
+      "last_run_id": "20260930T103858Z",
       "status": "PASS_WITH_REVIEW_QUEUE",
       "organizer_research": {}
     }
