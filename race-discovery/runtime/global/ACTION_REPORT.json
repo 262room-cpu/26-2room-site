@@ -1,51 +1,51 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-10-03T10:02:03+00:00",
+  "generated_at": "2026-10-04T10:44:49+00:00",
   "catalog_connected": true,
   "catalog_note": "READ_ONLY_COMPARISON_ACTIVE",
   "organizer_crm_connected": true,
   "organizer_crm_source": "PRIVATE_FILE:organizer_crm.json",
   "organizer_crm_note": "READ_ONLY_ORGANIZER_CRM_ACTIVE",
   "counts": {
-    "events_total": 43,
+    "events_total": 44,
     "event_statuses": {
       "UPDATED": 23,
       "VERIFIED": 7,
-      "NEW": 7,
+      "NEW": 8,
       "CONFLICT": 6
     },
     "catalog_relations": {
-      "NOT_IN_APP": 33,
+      "NOT_IN_APP": 34,
       "POSSIBLE_APP_MATCH": 2,
       "ALREADY_IN_APP": 2,
       "IN_APP_CHANGED": 6
     },
-    "events_not_in_app": 33,
+    "events_not_in_app": 34,
     "events_changed_in_app": 6,
     "possible_app_matches": 2,
     "conflicts_or_review": 6,
     "cancelled_or_postponed": 0,
-    "organizers_total": 41,
+    "organizers_total": 42,
     "organizer_identity_statuses": {
       "NAMED": 4,
-      "UNRESOLVED": 37
+      "UNRESOLVED": 38
     },
     "organizer_contact_statuses": {
       "CONTACTS_MISSING": 4,
-      "NEEDS_IDENTITY_CHECK": 37
+      "NEEDS_IDENTITY_CHECK": 38
     },
     "outreach_ready": 0,
     "unknown_organizers_with_contact_route": 0,
     "organizer_crm_relations": {
       "EXISTING_ORGANIZER": 2,
-      "CRM_IDENTITY_INSUFFICIENT": 37,
+      "CRM_IDENTITY_INSUFFICIENT": 38,
       "NEW_ORGANIZER_LEAD": 2
     },
     "organizers_existing_in_crm": 2,
     "organizer_contact_updates_for_crm": 0,
     "possible_organizer_crm_matches": 0,
     "new_organizer_leads": 2,
-    "organizer_crm_identity_insufficient": 37,
+    "organizer_crm_identity_insufficient": 38,
     "crm_can_help_resolve_identity": 0
   },
   "queues": {
@@ -68,7 +68,7 @@
         "source_urls": [
           "https://athletex.kz/competitions/AmangeldyRace2026"
         ],
-        "last_checked_at": "2026-10-03T09:57:50+00:00"
+        "last_checked_at": "2026-10-04T10:40:29+00:00"
       },
       {
         "candidate_id": "47579f55486d9712a344",
@@ -88,7 +88,7 @@
         "source_urls": [
           "https://gov.uz/ru/yoshlar/news/view/143031"
         ],
-        "last_checked_at": "2026-10-01T11:06:38+00:00"
+        "last_checked_at": "2026-10-04T10:43:35+00:00"
       },
       {
         "candidate_id": "db637633c2f26ae9a7ed",
@@ -108,7 +108,7 @@
         "source_urls": [
           "https://athletex.kz/competitions/Backyard_Ultra_2026"
         ],
-        "last_checked_at": "2026-10-03T09:57:50+00:00"
+        "last_checked_at": "2026-10-04T10:40:29+00:00"
       },
       {
         "candidate_id": "41f381f5b9f3d6e9053c",
@@ -128,7 +128,7 @@
         "source_urls": [
           "https://athletex.kz/competitions/rrspring2026"
         ],
-        "last_checked_at": "2026-10-03T09:57:50+00:00"
+        "last_checked_at": "2026-10-04T10:40:29+00:00"
       },
       {
         "candidate_id": "a43c9dd38e9b1f673bc5",
@@ -148,7 +148,7 @@
         "source_urls": [
           "https://aprilrun5km.runc.run/"
         ],
-        "last_checked_at": "2026-10-03T09:59:06+00:00"
+        "last_checked_at": "2026-10-04T10:41:35+00:00"
       },
       {
         "candidate_id": "bb8c385bface50b485e6",
@@ -188,7 +188,7 @@
         "source_urls": [
           "https://athletex.kz/competitions/TengriUltra2026"
         ],
-        "last_checked_at": "2026-10-03T09:57:50+00:00"
+        "last_checked_at": "2026-10-04T10:40:29+00:00"
       },
       {
         "candidate_id": "cf598e75284cde8e59c8",
@@ -208,7 +208,7 @@
         "source_urls": [
           "https://athletex.kz/competitions/HMOskemen2026"
         ],
-        "last_checked_at": "2026-10-03T09:57:50+00:00"
+        "last_checked_at": "2026-10-04T10:40:29+00:00"
       },
       {
         "candidate_id": "05c0ae4fa31f7206f7a4",
@@ -248,7 +248,7 @@
         "source_urls": [
           "https://rwsrun.kz/ru/"
         ],
-        "last_checked_at": "2026-10-03T09:57:50+00:00"
+        "last_checked_at": "2026-10-04T10:40:29+00:00"
       },
       {
         "candidate_id": "0849561b0b34db2d4b75",
@@ -268,7 +268,7 @@
         "source_urls": [
           "https://athletex.kz/competitions/astanatrail26"
         ],
-        "last_checked_at": "2026-10-03T09:57:50+00:00"
+        "last_checked_at": "2026-10-04T10:40:29+00:00"
       },
       {
         "candidate_id": "9a2a780c84859e0f231c",
@@ -288,7 +288,27 @@
         "source_urls": [
           "https://athletex.kz/competitions/KarkyraUltra2026"
         ],
-        "last_checked_at": "2026-10-03T09:57:50+00:00"
+        "last_checked_at": "2026-10-04T10:40:29+00:00"
+      },
+      {
+        "candidate_id": "ab93d88f6744883a7ed9",
+        "name": "Триатлон",
+        "date": "2026-06-28",
+        "city": "Ош",
+        "country": "Kyrgyzstan",
+        "market_code": "kg",
+        "status": "NEW",
+        "confidence": 0.74,
+        "catalog_relation": "NOT_IN_APP",
+        "app_match_id": "ec8c4f24-9625-40e2-a31f-2e20e8008f8d",
+        "app_diffs": [],
+        "organizer": "",
+        "organizer_id": "217ff8bf7e372dc6a307",
+        "organizer_contact_status": "NEEDS_IDENTITY_CHECK",
+        "source_urls": [
+          "https://ru.wikipedia.org/wiki/%D0%A2%D1%80%D0%B8%D0%B0%D1%82%D0%BB%D0%BE%D0%BD"
+        ],
+        "last_checked_at": "2026-10-04T10:42:44+00:00"
       },
       {
         "candidate_id": "6203eac8f927caa4c83f",
@@ -308,7 +328,7 @@
         "source_urls": [
           "https://spbhalf.runc.run/"
         ],
-        "last_checked_at": "2026-10-03T09:59:06+00:00"
+        "last_checked_at": "2026-10-04T10:41:35+00:00"
       },
       {
         "candidate_id": "e89ad2a3fb2a576eae54",
@@ -618,7 +638,7 @@
         "source_urls": [
           "http://triathlon.kg/events/indoor-triathlon-series-5"
         ],
-        "last_checked_at": "2026-09-30T10:39:11+00:00"
+        "last_checked_at": "2026-10-04T10:42:44+00:00"
       },
       {
         "candidate_id": "ef7b2070358759b58823",
@@ -758,7 +778,7 @@
         "source_urls": [
           "https://qhm26.athleticfamily.kz/ru"
         ],
-        "last_checked_at": "2026-10-03T09:57:50+00:00"
+        "last_checked_at": "2026-10-04T10:40:29+00:00"
       },
       {
         "candidate_id": "5241a5fed59554dcce89",
@@ -844,7 +864,7 @@
           "https://caspian-marathon.kz/ru/users_list?distance=5",
           "https://www.caspian-marathon.kz/ru/calendar"
         ],
-        "last_checked_at": "2026-10-03T09:57:50+00:00"
+        "last_checked_at": "2026-10-04T10:40:29+00:00"
       },
       {
         "candidate_id": "f6c61906d4b8949f3fd4",
@@ -941,7 +961,7 @@
         "source_urls": [
           "https://athletex.kz/competitions/AlpineRace2026"
         ],
-        "last_checked_at": "2026-10-03T09:57:50+00:00"
+        "last_checked_at": "2026-10-04T10:40:29+00:00"
       },
       {
         "candidate_id": "8594284542683da69c00",
@@ -967,7 +987,7 @@
         "source_urls": [
           "https://athletex.kz/competitions/racenation2026"
         ],
-        "last_checked_at": "2026-10-03T09:57:50+00:00"
+        "last_checked_at": "2026-10-04T10:40:29+00:00"
       }
     ],
     "conflicts_and_review": [
@@ -1019,7 +1039,7 @@
         "source_urls": [
           "https://qhm26.athleticfamily.kz/ru"
         ],
-        "last_checked_at": "2026-10-03T09:57:50+00:00"
+        "last_checked_at": "2026-10-04T10:40:29+00:00"
       },
       {
         "candidate_id": "00317196b5ee669a0850",
@@ -1079,7 +1099,7 @@
           "https://caspian-marathon.kz/ru/users_list?distance=5",
           "https://www.caspian-marathon.kz/ru/calendar"
         ],
-        "last_checked_at": "2026-10-03T09:57:50+00:00"
+        "last_checked_at": "2026-10-04T10:40:29+00:00"
       },
       {
         "candidate_id": "06a5692ddda3d95611c5",
@@ -2372,6 +2392,50 @@
         ]
       },
       {
+        "global_organizer_id": "f42f887151c7f9445893",
+        "organizer_id": "217ff8bf7e372dc6a307",
+        "name": "",
+        "display_name": "Неустановленный организатор — Триатлон",
+        "identity_status": "UNRESOLVED",
+        "contact_status": "NEEDS_IDENTITY_CHECK",
+        "countries": [
+          "Kyrgyzstan"
+        ],
+        "cities": [
+          "Ош"
+        ],
+        "contacts": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "contact_candidates": {
+          "instagram": [],
+          "telegram": [],
+          "whatsapp": [],
+          "email": [],
+          "phone": [],
+          "website": []
+        },
+        "event_ids": [
+          "ab93d88f6744883a7ed9"
+        ],
+        "crm_status": "NEW_LEAD",
+        "crm_relation": "CRM_IDENTITY_INSUFFICIENT",
+        "crm_match_id": "",
+        "crm_match_name": "",
+        "crm_match_score": 0.0,
+        "crm_match_reasons": [],
+        "crm_contact_additions": [],
+        "last_contacted_at": "",
+        "source_urls": [
+          "https://ru.wikipedia.org/wiki/%D0%A2%D1%80%D0%B8%D0%B0%D1%82%D0%BB%D0%BE%D0%BD"
+        ]
+      },
+      {
         "global_organizer_id": "b8e486af4fa126a00393",
         "organizer_id": "86e7b637a04cfe1dbb0f",
         "name": "",
@@ -3432,13 +3496,13 @@
       "country": "Kazakhstan",
       "events": 20,
       "organizers": 19,
-      "last_run_id": "20261003T095750Z",
+      "last_run_id": "20261004T104029Z",
       "status": "PASS_WITH_REVIEW_QUEUE",
       "organizer_research": {
         "market_code": "kz",
-        "observed_at": "2026-10-03T10:01:47+00:00",
+        "observed_at": "2026-10-04T10:44:36+00:00",
         "tasks_processed": 5,
-        "search_hits": 24,
+        "search_hits": 26,
         "candidates_found": 0,
         "contacts_promoted": 0,
         "identities_resolved": 0,
@@ -3450,11 +3514,11 @@
       "country": "Russia",
       "events": 3,
       "organizers": 3,
-      "last_run_id": "20261003T095906Z",
+      "last_run_id": "20261004T104135Z",
       "status": "PASS_WITH_REVIEW_QUEUE",
       "organizer_research": {
         "market_code": "ru",
-        "observed_at": "2026-10-03T10:02:02+00:00",
+        "observed_at": "2026-10-04T10:44:48+00:00",
         "tasks_processed": 3,
         "search_hits": 0,
         "candidates_found": 0,
@@ -3466,27 +3530,27 @@
     },
     "kg": {
       "country": "Kyrgyzstan",
-      "events": 7,
-      "organizers": 7,
-      "last_run_id": "20260930T103911Z",
+      "events": 8,
+      "organizers": 8,
+      "last_run_id": "20261004T104244Z",
       "status": "PASS_WITH_REVIEW_QUEUE",
       "organizer_research": {
         "market_code": "kg",
-        "observed_at": "2026-10-03T10:01:56+00:00",
+        "observed_at": "2026-10-04T10:44:39+00:00",
         "tasks_processed": 5,
-        "search_hits": 38,
+        "search_hits": 19,
         "candidates_found": 0,
         "contacts_promoted": 0,
         "identities_resolved": 0,
         "outreach_ready": 0,
-        "web_pages_verified": 0
+        "web_pages_verified": 2
       }
     },
     "uz": {
       "country": "Uzbekistan",
       "events": 1,
       "organizers": 1,
-      "last_run_id": "20261001T110638Z",
+      "last_run_id": "20261004T104335Z",
       "status": "PASS_WITH_REVIEW_QUEUE",
       "organizer_research": {
         "market_code": "uz",
@@ -3503,7 +3567,7 @@
       "country": "Armenia",
       "events": 0,
       "organizers": 0,
-      "last_run_id": "20261001T110717Z",
+      "last_run_id": "20261004T104411Z",
       "status": "PASS",
       "organizer_research": {}
     },
@@ -3523,9 +3587,9 @@
       "status": "PASS_WITH_REVIEW_QUEUE",
       "organizer_research": {
         "market_code": "by",
-        "observed_at": "2026-10-03T10:02:02+00:00",
+        "observed_at": "2026-10-04T10:44:48+00:00",
         "tasks_processed": 1,
-        "search_hits": 0,
+        "search_hits": 4,
         "candidates_found": 0,
         "contacts_promoted": 0,
         "identities_resolved": 0,
@@ -3559,9 +3623,9 @@
       "status": "PASS_WITH_REVIEW_QUEUE",
       "organizer_research": {
         "market_code": "md",
-        "observed_at": "2026-10-03T10:01:51+00:00",
+        "observed_at": "2026-10-04T10:44:43+00:00",
         "tasks_processed": 5,
-        "search_hits": 20,
+        "search_hits": 24,
         "candidates_found": 0,
         "contacts_promoted": 0,
         "identities_resolved": 0,
