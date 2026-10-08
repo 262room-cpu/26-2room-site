@@ -1,6 +1,6 @@
 # 26.2 ROOM — Race Discovery Action Report
 
-Generated: 2026-10-07T11:17:04+00:00
+Generated: 2026-10-08T11:33:55+00:00
 
 ## Сводка
 
@@ -52,7 +52,7 @@ Generated: 2026-10-07T11:17:04+00:00
 - Road Race — 2026-09-20 — Алматы, Kazakhstan
 - ALMATY MARATHON 2026 — 2026-09-27 — Алматы, Kazakhstan
 - CASPIAN MARATHON — 2026-10-11 — Актау, Kazakhstan
-- Salomon Trail 2026 — 2026-10-18 — Астана, Kazakhstan
+- Salomon Trail 2026 — 2026-10-18 — Алматы, Kazakhstan
 - TURKISTAN MARATHON 2026 — 2026-10-25 — Туркестан, Kazakhstan
 
 ## Конфликты и ручная проверка
