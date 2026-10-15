@@ -1,39 +1,39 @@
 {
   "status": "PASS_WITH_REVIEW_QUEUE",
-  "run_id": "20261014T093856Z",
-  "started_at": "2026-10-14T09:38:56+00:00",
+  "run_id": "20261015T091659Z",
+  "started_at": "2026-10-15T09:16:59+00:00",
   "phase": "DONE",
   "queries_completed": 16,
-  "urls_discovered": 98,
-  "signals_accepted": 48,
+  "urls_discovered": 148,
+  "signals_accepted": 49,
   "urls_checked": 45,
-  "raw_candidates": 4,
-  "finished_at": "2026-10-14T09:41:44+00:00",
+  "raw_candidates": 2,
+  "finished_at": "2026-10-15T09:18:11+00:00",
   "last_summary": {
-    "run_id": "20261014T093856Z",
-    "started_at": "2026-10-14T09:38:56+00:00",
-    "finished_at": "2026-10-14T09:41:44+00:00",
+    "run_id": "20261015T091659Z",
+    "started_at": "2026-10-15T09:16:59+00:00",
+    "finished_at": "2026-10-15T09:18:11+00:00",
     "queries": 16,
     "search_hits_seen": 88,
-    "search_hits_accepted": 48,
-    "search_hits_rejected": 40,
+    "search_hits_accepted": 49,
+    "search_hits_rejected": 39,
     "page_geo_rejected": 0,
-    "signals": 48,
+    "signals": 49,
     "private_signals": 0,
     "private_inbox_source": "NONE",
-    "urls_discovered": 98,
+    "urls_discovered": 148,
     "urls_checked": 45,
-    "hubs_detected": 9,
-    "hub_links_discovered": 69,
+    "hubs_detected": 10,
+    "hub_links_discovered": 115,
     "telegram_feeds": 0,
     "telegram_messages_seen": 0,
     "telegram_messages_accepted": 0,
     "telegram_external_links": 0,
-    "raw_candidates": 4,
-    "deduplicated_candidates": 4,
+    "raw_candidates": 2,
+    "deduplicated_candidates": 2,
     "duplicates_discarded": 0,
     "quarantined_noise": 0,
-    "new": 2,
+    "new": 0,
     "updated": 2,
     "conflicts": 0,
     "catalog_source": "SUPABASE:ma.26-2room.com/events_with_stats",
@@ -49,43 +49,17 @@
       "VERIFIED": 2
     },
     "organizer_records": 5,
-    "organizer_new_leads": 2,
+    "organizer_new_leads": 0,
     "organizer_outreach_ready": 0,
     "organizer_research_queue": 5,
     "organizer_contact_status_counts": {
       "NEEDS_IDENTITY_CHECK": 5
     },
-    "errors": [
-      {
-        "phase": "FETCH",
-        "url": "https://russiarunning.com/Series",
-        "error": "URLError: <urlopen error timed out>"
-      },
-      {
-        "phase": "FETCH",
-        "url": "https://probeg.org/races/",
-        "error": "URLError: <urlopen error timed out>"
-      },
-      {
-        "phase": "FETCH",
-        "url": "https://live.russiarunning.com/",
-        "error": "URLError: <urlopen error timed out>"
-      },
-      {
-        "phase": "FETCH",
-        "url": "https://aprilrun5km.runc.run/",
-        "error": "URLError: <urlopen error timed out>"
-      },
-      {
-        "phase": "FETCH",
-        "url": "https://wnmarathon.runc.run/",
-        "error": "URLError: <urlopen error timed out>"
-      }
-    ]
+    "errors": []
   },
   "catalog_source": "SUPABASE:ma.26-2room.com/events_with_stats",
-  "hubs_detected": 9,
-  "hub_links_discovered": 69,
+  "hubs_detected": 10,
+  "hub_links_discovered": 115,
   "telegram_feeds": 0,
   "telegram_messages_seen": 0,
   "telegram_messages_accepted": 0,
