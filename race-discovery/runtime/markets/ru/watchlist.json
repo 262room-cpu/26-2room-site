@@ -14,7 +14,7 @@
         "https://aprilrun5km.runc.run/"
       ],
       "event_count": 1,
-      "last_checked": "2026-10-23T09:28:12+00:00"
+      "last_checked": "2026-10-24T08:59:21+00:00"
     },
     "spbhalf.runc.run": {
       "first_seen": "2026-09-10T15:07:26+00:00",
@@ -22,7 +22,7 @@
         "https://spbhalf.runc.run/"
       ],
       "event_count": 1,
-      "last_checked": "2026-10-23T09:28:12+00:00"
+      "last_checked": "2026-10-24T08:59:21+00:00"
     },
     "moscowmarathon.runc.run": {
       "first_seen": "2026-09-10T15:07:26+00:00",
@@ -30,7 +30,7 @@
         "https://moscowmarathon.runc.run/"
       ],
       "event_count": 1,
-      "last_checked": "2026-10-23T09:28:12+00:00"
+      "last_checked": "2026-10-24T08:59:21+00:00"
     },
     "kids.runc.run": {
       "first_seen": "2026-09-10T15:07:26+00:00",
@@ -48,7 +48,7 @@
         "https://results.runc.run/event/moscow_marathon_42,2km_2026/overview/"
       ],
       "event_count": 3,
-      "last_checked": "2026-10-23T09:28:12+00:00"
+      "last_checked": "2026-10-24T08:59:21+00:00"
     }
   },
   "organizers": {
@@ -77,7 +77,7 @@
       ],
       "name": "",
       "instagram": [],
-      "last_checked": "2026-10-23T09:28:12+00:00"
+      "last_checked": "2026-10-24T08:59:21+00:00"
     },
     "8534f2c99de9c1a8f5a6": {
       "first_seen": "2026-09-10T16:04:43+00:00",
@@ -86,7 +86,7 @@
       ],
       "name": "",
       "instagram": [],
-      "last_checked": "2026-10-23T09:28:12+00:00"
+      "last_checked": "2026-10-24T08:59:21+00:00"
     },
     "a05c16a86ad915b9fef1": {
       "first_seen": "2026-09-10T16:04:43+00:00",
@@ -95,7 +95,7 @@
       ],
       "name": "",
       "instagram": [],
-      "last_checked": "2026-10-23T09:28:12+00:00"
+      "last_checked": "2026-10-24T08:59:21+00:00"
     },
     "13e75c3c5cc48ce35484": {
       "first_seen": "2026-10-14T09:38:56+00:00",
@@ -104,7 +104,7 @@
       ],
       "name": "",
       "instagram": [],
-      "last_checked": "2026-10-23T09:28:12+00:00"
+      "last_checked": "2026-10-24T08:59:21+00:00"
     },
     "c69585b20c312eb57659": {
       "first_seen": "2026-10-14T09:38:56+00:00",
@@ -113,7 +113,7 @@
       ],
       "name": "",
       "instagram": [],
-      "last_checked": "2026-10-23T09:28:12+00:00"
+      "last_checked": "2026-10-24T08:59:21+00:00"
     }
   },
   "social_sources": {}
