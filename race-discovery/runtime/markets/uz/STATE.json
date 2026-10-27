@@ -1,27 +1,27 @@
 {
   "status": "PASS_WITH_REVIEW_QUEUE",
-  "run_id": "20261024T090057Z",
-  "started_at": "2026-10-24T09:00:57+00:00",
+  "run_id": "20261027T095847Z",
+  "started_at": "2026-10-27T09:58:47+00:00",
   "phase": "DONE",
   "queries_completed": 16,
-  "urls_discovered": 17,
-  "signals_accepted": 21,
+  "urls_discovered": 16,
+  "signals_accepted": 20,
   "urls_checked": 16,
   "raw_candidates": 1,
-  "finished_at": "2026-10-24T09:01:22+00:00",
+  "finished_at": "2026-10-27T09:59:13+00:00",
   "last_summary": {
-    "run_id": "20261024T090057Z",
-    "started_at": "2026-10-24T09:00:57+00:00",
-    "finished_at": "2026-10-24T09:01:22+00:00",
+    "run_id": "20261027T095847Z",
+    "started_at": "2026-10-27T09:58:47+00:00",
+    "finished_at": "2026-10-27T09:59:13+00:00",
     "queries": 16,
-    "search_hits_seen": 101,
-    "search_hits_accepted": 21,
-    "search_hits_rejected": 80,
+    "search_hits_seen": 92,
+    "search_hits_accepted": 20,
+    "search_hits_rejected": 72,
     "page_geo_rejected": 0,
-    "signals": 21,
+    "signals": 20,
     "private_signals": 0,
     "private_inbox_source": "NONE",
-    "urls_discovered": 17,
+    "urls_discovered": 16,
     "urls_checked": 16,
     "hubs_detected": 0,
     "hub_links_discovered": 0,
@@ -54,13 +54,7 @@
     "organizer_contact_status_counts": {
       "NEEDS_IDENTITY_CHECK": 1
     },
-    "errors": [
-      {
-        "phase": "FETCH",
-        "url": "https://fr.beincrypto.com/prix/zoracles/price-prediction/",
-        "error": "HTTPError: HTTP Error 403: Forbidden"
-      }
-    ]
+    "errors": []
   },
   "catalog_source": "SUPABASE:ma.26-2room.com/events_with_stats",
   "hubs_detected": 0,
