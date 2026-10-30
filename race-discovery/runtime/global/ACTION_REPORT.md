@@ -1,15 +1,15 @@
 # 26.2 ROOM — Race Discovery Action Report
 
-Generated: 2026-10-29T11:04:26+00:00
+Generated: 2026-10-30T11:01:35+00:00
 
 ## Сводка
 
-- Событий в исследовательской базе: **47**
-- Организаторов: **45**
+- Событий в исследовательской базе: **48**
+- Организаторов: **46**
 - Готовы для связи: **0**
 - Неустановленный организатор, но найден канал связи: **0**
 - Конфликты / требуют проверки: **6**
-- Новые относительно приложения: **36**
+- Новые относительно приложения: **37**
 - Изменились относительно приложения: **7**
 - Возможные совпадения: **2**
 - Уже есть в CRM организаторов: **2**
@@ -51,17 +51,17 @@ Generated: 2026-10-29T11:04:26+00:00
 - Qaragandy Half Marathon 2026 — 2026-09-20 — Караганда, Kazakhstan
 - Road Race — 2026-09-20 — Алматы, Kazakhstan
 - ALMATY MARATHON 2026 — 2026-09-27 — Алматы, Kazakhstan
-- CASPIAN MARATHON — 2026-10-11 — Актау, Kazakhstan
 - Salomon Trail 2026 — 2026-10-18 — Алматы, Kazakhstan
 - TURKISTAN MARATHON 2026 — 2026-10-25 — Туркестан, Kazakhstan
 - CITY RUN 2026 — 2026-11-15 — Алматы, Kazakhstan
+- CASPIAN MARATHON — 2027-01-17 — Актау, Kazakhstan
 
 ## Конфликты и ручная проверка
 
 - Кишиневский марафон 2026 — 2026-09-13 — Кишинёв, Moldova
 - Qaragandy Half Marathon 2026 — 2026-09-20 — Караганда, Kazakhstan
 - ALMATY MARATHON 2026 — 2026-09-27 — Алматы, Kazakhstan
-- CASPIAN MARATHON — 2026-10-11 — Актау, Kazakhstan
+- CASPIAN MARATHON — 2027-01-17 — Актау, Kazakhstan
 - Chisinau Marathon 2027 — 2027-09-26 — Кишинёв, Moldova
 - Кишиневский марафон 2027 — 2027-09-26 — Кишинёв, Moldova
 
@@ -91,7 +91,7 @@ Generated: 2026-10-29T11:04:26+00:00
 - Неустановленный организатор — 2026 VISA Asia Triathlon Cup Cholpon-Ata AG Relay
 - Неустановленный организатор — 2026 VISA Asia Triathlon Cup Cholpon-Ata AG Standard
 - Неустановленный организатор — 2026 VISA Asia Triathlon Cup Cholpon-Ata AG Super Sprint
-- Неустановленный организатор — INDOOR TRIATHLON SERIES (#5)
+- Неустановленный организатор — Indoor Triathlon 2026
 
 ## CRM — новые организаторы
 
