@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-11-11T12:04:21+00:00",
+  "generated_at": "2026-11-12T13:04:25+00:00",
   "catalog_connected": true,
   "catalog_note": "READ_ONLY_COMPARISON_ACTIVE",
   "organizer_crm_connected": true,
@@ -15,14 +15,14 @@
       "CONFLICT": 6
     },
     "catalog_relations": {
-      "NOT_IN_APP": 38,
-      "POSSIBLE_APP_MATCH": 4,
+      "POSSIBLE_APP_MATCH": 5,
+      "NOT_IN_APP": 37,
       "ALREADY_IN_APP": 2,
       "IN_APP_CHANGED": 7
     },
-    "events_not_in_app": 38,
+    "events_not_in_app": 37,
     "events_changed_in_app": 7,
-    "possible_app_matches": 4,
+    "possible_app_matches": 5,
     "conflicts_or_review": 6,
     "cancelled_or_postponed": 0,
     "organizers_total": 49,
@@ -50,26 +50,6 @@
   },
   "queues": {
     "new_events_not_in_app": [
-      {
-        "candidate_id": "ffb025fc86e974339ab6",
-        "name": "25th Amangeldy Race 2026",
-        "date": "2026-01-17",
-        "city": "Астана",
-        "country": "Kazakhstan",
-        "market_code": "kz",
-        "status": "UPDATED",
-        "confidence": 0.89,
-        "catalog_relation": "NOT_IN_APP",
-        "app_match_id": "e1963fe6-cc04-40b3-a716-7475906d5e32",
-        "app_diffs": [],
-        "organizer": "",
-        "organizer_id": "e1cd17ef203ab0e3431e",
-        "organizer_contact_status": "NEEDS_IDENTITY_CHECK",
-        "source_urls": [
-          "https://athletex.kz/competitions/AmangeldyRace2026"
-        ],
-        "last_checked_at": "2026-11-11T11:59:07+00:00"
-      },
       {
         "candidate_id": "47579f55486d9712a344",
         "name": "VIII Ташкентский международный марафон – 2026",
@@ -108,7 +88,7 @@
         "source_urls": [
           "https://athletex.kz/competitions/Backyard_Ultra_2026"
         ],
-        "last_checked_at": "2026-11-11T11:59:07+00:00"
+        "last_checked_at": "2026-11-12T13:00:02+00:00"
       },
       {
         "candidate_id": "a43c9dd38e9b1f673bc5",
@@ -128,7 +108,7 @@
         "source_urls": [
           "https://aprilrun5km.runc.run/"
         ],
-        "last_checked_at": "2026-11-11T12:00:25+00:00"
+        "last_checked_at": "2026-11-12T13:01:24+00:00"
       },
       {
         "candidate_id": "bb8c385bface50b485e6",
@@ -168,7 +148,7 @@
         "source_urls": [
           "https://marathon.tj/ru/events/one-run-2026"
         ],
-        "last_checked_at": "2026-11-08T11:28:46+00:00"
+        "last_checked_at": "2026-11-12T13:02:41+00:00"
       },
       {
         "candidate_id": "cf598e75284cde8e59c8",
@@ -188,7 +168,7 @@
         "source_urls": [
           "https://athletex.kz/competitions/HMOskemen2026"
         ],
-        "last_checked_at": "2026-11-11T11:59:07+00:00"
+        "last_checked_at": "2026-11-12T13:00:02+00:00"
       },
       {
         "candidate_id": "05c0ae4fa31f7206f7a4",
@@ -208,7 +188,7 @@
         "source_urls": [
           "https://ulaanbaatar.marathon.mn/register"
         ],
-        "last_checked_at": "2026-11-09T13:11:42+00:00"
+        "last_checked_at": "2026-11-12T13:04:01+00:00"
       },
       {
         "candidate_id": "0a9c5d7e66570d2f5fb4",
@@ -228,7 +208,7 @@
         "source_urls": [
           "https://rwsrun.kz/ru/"
         ],
-        "last_checked_at": "2026-11-11T11:59:07+00:00"
+        "last_checked_at": "2026-11-12T13:00:02+00:00"
       },
       {
         "candidate_id": "0849561b0b34db2d4b75",
@@ -248,7 +228,7 @@
         "source_urls": [
           "https://athletex.kz/competitions/astanatrail26"
         ],
-        "last_checked_at": "2026-11-11T11:59:07+00:00"
+        "last_checked_at": "2026-11-12T13:00:02+00:00"
       },
       {
         "candidate_id": "9a2a780c84859e0f231c",
@@ -268,7 +248,7 @@
         "source_urls": [
           "https://athletex.kz/competitions/KarkyraUltra2026"
         ],
-        "last_checked_at": "2026-11-11T11:59:07+00:00"
+        "last_checked_at": "2026-11-12T13:00:02+00:00"
       },
       {
         "candidate_id": "ab93d88f6744883a7ed9",
@@ -308,7 +288,7 @@
         "source_urls": [
           "https://spbhalf.runc.run/"
         ],
-        "last_checked_at": "2026-11-11T12:00:25+00:00"
+        "last_checked_at": "2026-11-12T13:01:24+00:00"
       },
       {
         "candidate_id": "e89ad2a3fb2a576eae54",
@@ -644,7 +624,7 @@
       {
         "candidate_id": "dc11ca2ba4450cc7971f",
         "name": "Все материалы",
-        "date": "2026-11-06",
+        "date": "2026-11-12",
         "city": "Астана",
         "country": "Kazakhstan",
         "market_code": "kz",
@@ -659,7 +639,7 @@
         "source_urls": [
           "https://www.gov.kz/memleket/entities/astana/press/news?lang=ru"
         ],
-        "last_checked_at": "2026-11-06T12:18:32+00:00"
+        "last_checked_at": "2026-11-12T13:00:02+00:00"
       },
       {
         "candidate_id": "dca5ae2d062c732a21f3",
@@ -739,7 +719,7 @@
         "source_urls": [
           "https://marathon.tj/ru/events/one-run-2027"
         ],
-        "last_checked_at": "2026-11-08T11:28:46+00:00"
+        "last_checked_at": "2026-11-12T13:02:41+00:00"
       },
       {
         "candidate_id": "06a5692ddda3d95611c5",
@@ -859,7 +839,7 @@
         "source_urls": [
           "https://qhm26.athleticfamily.kz/ru"
         ],
-        "last_checked_at": "2026-11-11T11:59:07+00:00"
+        "last_checked_at": "2026-11-12T13:00:02+00:00"
       },
       {
         "candidate_id": "5241a5fed59554dcce89",
@@ -911,7 +891,7 @@
           }
         ],
         "organizer": "Корпоративный фонд «Смелость быть первым»",
-        "organizer_id": "dbad1d470c96b22649ce",
+        "organizer_id": "902a8cd024b5e6bd4bfe",
         "organizer_contact_status": "CONTACTS_MISSING",
         "source_urls": [
           "https://almaty-marathon.kz/ru/events/almaty_marathon_2026/",
@@ -949,7 +929,7 @@
           "https://athletex.kz/competitions/calendar",
           "https://athletex.kz/competitions/SalomonTrail2026"
         ],
-        "last_checked_at": "2026-11-11T11:59:07+00:00"
+        "last_checked_at": "2026-11-12T13:00:02+00:00"
       },
       {
         "candidate_id": "05850758ebc06baf087f",
@@ -970,7 +950,7 @@
           }
         ],
         "organizer": "Корпоративный фонд «Смелость быть первым»",
-        "organizer_id": "dbad1d470c96b22649ce",
+        "organizer_id": "902a8cd024b5e6bd4bfe",
         "organizer_contact_status": "CONTACTS_MISSING",
         "source_urls": [
           "https://almaty-marathon.kz/ru/events/turkistan_marathon_2026/",
@@ -1002,13 +982,13 @@
           }
         ],
         "organizer": "Корпоративный фонд «Смелость быть первым»",
-        "organizer_id": "dbad1d470c96b22649ce",
+        "organizer_id": "902a8cd024b5e6bd4bfe",
         "organizer_contact_status": "CONTACTS_MISSING",
         "source_urls": [
           "https://almaty-marathon.kz/ru/events",
           "https://almaty-marathon.kz/ru/events/city__run_2026/"
         ],
-        "last_checked_at": "2026-11-09T13:08:14+00:00"
+        "last_checked_at": "2026-11-12T13:00:02+00:00"
       },
       {
         "candidate_id": "d99f3b407b82c34209f1",
@@ -1041,10 +1021,41 @@
           "https://caspian-marathon.kz/ru/users_list?distance=5",
           "https://www.caspian-marathon.kz/ru/calendar"
         ],
-        "last_checked_at": "2026-11-11T11:59:07+00:00"
+        "last_checked_at": "2026-11-12T13:00:02+00:00"
       }
     ],
     "possible_app_matches": [
+      {
+        "candidate_id": "ffb025fc86e974339ab6",
+        "name": "25th Amangeldy Race 2026",
+        "date": "2026-01-17",
+        "city": "Алматы",
+        "country": "Kazakhstan",
+        "market_code": "kz",
+        "status": "UPDATED",
+        "confidence": 0.89,
+        "catalog_relation": "POSSIBLE_APP_MATCH",
+        "app_match_id": "e1963fe6-cc04-40b3-a716-7475906d5e32",
+        "app_diffs": [
+          {
+            "field": "name",
+            "app": "Amangeldy Race",
+            "discovered": "25th Amangeldy Race 2026"
+          },
+          {
+            "field": "date",
+            "app": "2027-01-17",
+            "discovered": "2026-01-17"
+          }
+        ],
+        "organizer": "",
+        "organizer_id": "e1cd17ef203ab0e3431e",
+        "organizer_contact_status": "NEEDS_IDENTITY_CHECK",
+        "source_urls": [
+          "https://athletex.kz/competitions/AmangeldyRace2026"
+        ],
+        "last_checked_at": "2026-11-12T13:00:02+00:00"
+      },
       {
         "candidate_id": "91a5618d9a25e40bc497",
         "name": "Alpine Race 2026",
@@ -1079,7 +1090,7 @@
         "source_urls": [
           "https://athletex.kz/competitions/AlpineRace2026"
         ],
-        "last_checked_at": "2026-11-11T11:59:07+00:00"
+        "last_checked_at": "2026-11-12T13:00:02+00:00"
       },
       {
         "candidate_id": "41f381f5b9f3d6e9053c",
@@ -1115,7 +1126,7 @@
         "source_urls": [
           "https://athletex.kz/competitions/rrspring2026"
         ],
-        "last_checked_at": "2026-11-11T11:59:07+00:00"
+        "last_checked_at": "2026-11-12T13:00:02+00:00"
       },
       {
         "candidate_id": "05d499be50f0c73ff51f",
@@ -1151,7 +1162,7 @@
         "source_urls": [
           "https://athletex.kz/competitions/TengriUltra2026"
         ],
-        "last_checked_at": "2026-11-11T11:59:07+00:00"
+        "last_checked_at": "2026-11-12T13:00:02+00:00"
       },
       {
         "candidate_id": "8594284542683da69c00",
@@ -1177,7 +1188,7 @@
         "source_urls": [
           "https://athletex.kz/competitions/racenation2026"
         ],
-        "last_checked_at": "2026-11-11T11:59:07+00:00"
+        "last_checked_at": "2026-11-12T13:00:02+00:00"
       }
     ],
     "conflicts_and_review": [
@@ -1229,7 +1240,7 @@
         "source_urls": [
           "https://qhm26.athleticfamily.kz/ru"
         ],
-        "last_checked_at": "2026-11-11T11:59:07+00:00"
+        "last_checked_at": "2026-11-12T13:00:02+00:00"
       },
       {
         "candidate_id": "00317196b5ee669a0850",
@@ -1255,7 +1266,7 @@
           }
         ],
         "organizer": "Корпоративный фонд «Смелость быть первым»",
-        "organizer_id": "dbad1d470c96b22649ce",
+        "organizer_id": "902a8cd024b5e6bd4bfe",
         "organizer_contact_status": "CONTACTS_MISSING",
         "source_urls": [
           "https://almaty-marathon.kz/ru/events/almaty_marathon_2026/",
@@ -1294,7 +1305,7 @@
           "https://caspian-marathon.kz/ru/users_list?distance=5",
           "https://www.caspian-marathon.kz/ru/calendar"
         ],
-        "last_checked_at": "2026-11-11T11:59:07+00:00"
+        "last_checked_at": "2026-11-12T13:00:02+00:00"
       },
       {
         "candidate_id": "06a5692ddda3d95611c5",
@@ -1359,7 +1370,7 @@
           "Kazakhstan"
         ],
         "cities": [
-          "Астана"
+          "Алматы"
         ],
         "contacts": {
           "instagram": [],
@@ -3875,9 +3886,9 @@
       },
       {
         "global_organizer_id": "73b8c3a488afbbce5ff5",
-        "organizer_id": "dbad1d470c96b22649ce",
+        "organizer_id": "902a8cd024b5e6bd4bfe",
         "name": "Корпоративный фонд «Смелость быть первым»",
-        "display_name": "",
+        "display_name": "Неустановленный организатор — CITY RUN 2026",
         "identity_status": "NAMED",
         "contact_status": "CONTACTS_MISSING",
         "countries": [
@@ -3910,15 +3921,15 @@
           ],
           "phone": [],
           "website": [
+            "https://almaty-marathon.kz/ru/events/city__run_2026/",
             "https://almaty-marathon.kz/ru/events/almaty_marathon_2026/",
-            "https://almaty-marathon.kz/ru/events/turkistan_marathon_2026/",
-            "https://almaty-marathon.kz/ru/events/city__run_2026/"
+            "https://almaty-marathon.kz/ru/events/turkistan_marathon_2026/"
           ]
         },
         "event_ids": [
+          "eb67caca3ee984b0394e",
           "00317196b5ee669a0850",
-          "05850758ebc06baf087f",
-          "eb67caca3ee984b0394e"
+          "05850758ebc06baf087f"
         ],
         "crm_status": "NEW_LEAD",
         "crm_relation": "EXISTING_ORGANIZER",
@@ -3934,11 +3945,11 @@
         "crm_contact_additions": [],
         "last_contacted_at": "",
         "source_urls": [
+          "https://almaty-marathon.kz/ru/events/city__run_2026/",
+          "https://almaty-marathon.kz/ru/events",
           "https://almaty-marathon.kz/ru/events/almaty_marathon_2026/",
           "https://almaty-marathon.kz/ru/events/almaty_marathon_2026/regulation?page=text",
-          "https://almaty-marathon.kz/ru/events/turkistan_marathon_2026/",
-          "https://almaty-marathon.kz/ru/events",
-          "https://almaty-marathon.kz/ru/events/city__run_2026/"
+          "https://almaty-marathon.kz/ru/events/turkistan_marathon_2026/"
         ]
       }
     ],
@@ -4051,13 +4062,13 @@
       "country": "Kazakhstan",
       "events": 22,
       "organizers": 21,
-      "last_run_id": "20261111T115907Z",
+      "last_run_id": "20261112T130002Z",
       "status": "PASS_WITH_REVIEW_QUEUE",
       "organizer_research": {
         "market_code": "kz",
-        "observed_at": "2026-11-11T12:04:16+00:00",
+        "observed_at": "2026-11-12T13:04:18+00:00",
         "tasks_processed": 5,
-        "search_hits": 33,
+        "search_hits": 30,
         "candidates_found": 0,
         "contacts_promoted": 0,
         "identities_resolved": 0,
@@ -4069,11 +4080,11 @@
       "country": "Russia",
       "events": 5,
       "organizers": 5,
-      "last_run_id": "20261111T120025Z",
+      "last_run_id": "20261112T130124Z",
       "status": "PASS_WITH_REVIEW_QUEUE",
       "organizer_research": {
         "market_code": "ru",
-        "observed_at": "2026-11-11T12:04:19+00:00",
+        "observed_at": "2026-11-12T13:04:23+00:00",
         "tasks_processed": 5,
         "search_hits": 0,
         "candidates_found": 0,
@@ -4091,9 +4102,9 @@
       "status": "PASS_WITH_REVIEW_QUEUE",
       "organizer_research": {
         "market_code": "kg",
-        "observed_at": "2026-11-11T12:04:19+00:00",
+        "observed_at": "2026-11-12T13:04:22+00:00",
         "tasks_processed": 5,
-        "search_hits": 8,
+        "search_hits": 0,
         "candidates_found": 0,
         "contacts_promoted": 0,
         "identities_resolved": 0,
@@ -4178,7 +4189,7 @@
       "status": "PASS_WITH_REVIEW_QUEUE",
       "organizer_research": {
         "market_code": "md",
-        "observed_at": "2026-11-11T12:04:19+00:00",
+        "observed_at": "2026-11-12T13:04:23+00:00",
         "tasks_processed": 5,
         "search_hits": 0,
         "candidates_found": 0,
@@ -4192,11 +4203,11 @@
       "country": "Tajikistan",
       "events": 2,
       "organizers": 2,
-      "last_run_id": "20261108T112846Z",
+      "last_run_id": "20261112T130241Z",
       "status": "PASS_WITH_REVIEW_QUEUE",
       "organizer_research": {
         "market_code": "tj",
-        "observed_at": "2026-11-11T12:04:19+00:00",
+        "observed_at": "2026-11-12T13:04:23+00:00",
         "tasks_processed": 2,
         "search_hits": 16,
         "candidates_found": 0,
@@ -4210,7 +4221,7 @@
       "country": "Turkmenistan",
       "events": 1,
       "organizers": 1,
-      "last_run_id": "20261109T131043Z",
+      "last_run_id": "20261112T130305Z",
       "status": "PASS_WITH_REVIEW_QUEUE",
       "organizer_research": {}
     },
@@ -4218,7 +4229,7 @@
       "country": "Mongolia",
       "events": 1,
       "organizers": 1,
-      "last_run_id": "20261109T131142Z",
+      "last_run_id": "20261112T130401Z",
       "status": "PASS_WITH_REVIEW_QUEUE",
       "organizer_research": {}
     }
