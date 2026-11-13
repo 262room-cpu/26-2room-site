@@ -1,6 +1,6 @@
 # 26.2 ROOM — Race Discovery Action Report
 
-Generated: 2026-11-12T13:04:25+00:00
+Generated: 2026-11-13T12:30:49+00:00
 
 ## Сводка
 
@@ -51,7 +51,7 @@ Generated: 2026-11-12T13:04:25+00:00
 - Qaragandy Half Marathon 2026 — 2026-09-20 — Караганда, Kazakhstan
 - Road Race — 2026-09-20 — Алматы, Kazakhstan
 - ALMATY MARATHON 2026 — 2026-09-27 — Алматы, Kazakhstan
-- Salomon Trail 2026 — 2026-10-18 — Астана, Kazakhstan
+- Salomon Trail 2026 — 2026-10-18 — Алматы, Kazakhstan
 - TURKISTAN MARATHON 2026 — 2026-10-25 — Туркестан, Kazakhstan
 - CITY RUN 2026 — 2026-11-15 — Алматы, Kazakhstan
 - CASPIAN MARATHON — 2027-01-17 — Актау, Kazakhstan
