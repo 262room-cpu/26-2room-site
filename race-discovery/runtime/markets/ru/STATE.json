@@ -1,71 +1,86 @@
 {
   "status": "PASS_WITH_REVIEW_QUEUE",
-  "run_id": "20261116T130012Z",
-  "started_at": "2026-11-16T13:00:12+00:00",
+  "run_id": "20261117T134234Z",
+  "started_at": "2026-11-17T13:42:34+00:00",
   "phase": "DONE",
   "queries_completed": 16,
-  "urls_discovered": 135,
-  "signals_accepted": 39,
+  "urls_discovered": 113,
+  "signals_accepted": 49,
   "urls_checked": 45,
-  "raw_candidates": 2,
-  "finished_at": "2026-11-16T13:01:44+00:00",
+  "raw_candidates": 1,
+  "finished_at": "2026-11-17T13:43:36+00:00",
   "last_summary": {
-    "run_id": "20261116T130012Z",
-    "started_at": "2026-11-16T13:00:12+00:00",
-    "finished_at": "2026-11-16T13:01:44+00:00",
+    "run_id": "20261117T134234Z",
+    "started_at": "2026-11-17T13:42:34+00:00",
+    "finished_at": "2026-11-17T13:43:36+00:00",
     "queries": 16,
-    "search_hits_seen": 100,
-    "search_hits_accepted": 39,
-    "search_hits_rejected": 61,
+    "search_hits_seen": 88,
+    "search_hits_accepted": 49,
+    "search_hits_rejected": 39,
     "page_geo_rejected": 0,
-    "signals": 39,
+    "signals": 49,
     "private_signals": 0,
     "private_inbox_source": "NONE",
-    "urls_discovered": 135,
+    "urls_discovered": 113,
     "urls_checked": 45,
-    "hubs_detected": 9,
-    "hub_links_discovered": 109,
+    "hubs_detected": 2,
+    "hub_links_discovered": 80,
     "telegram_feeds": 0,
     "telegram_messages_seen": 0,
     "telegram_messages_accepted": 0,
     "telegram_external_links": 0,
-    "raw_candidates": 2,
-    "deduplicated_candidates": 2,
+    "raw_candidates": 1,
+    "deduplicated_candidates": 1,
     "duplicates_discarded": 0,
     "quarantined_noise": 0,
-    "new": 0,
-    "updated": 2,
+    "new": 1,
+    "updated": 0,
     "conflicts": 0,
     "catalog_source": "SUPABASE:ma.26-2room.com/events_with_stats",
     "catalog_events": 103,
     "catalog_relations": {
-      "NOT_IN_APP": 5
+      "NOT_IN_APP": 6
     },
-    "review_list": 5,
+    "review_list": 6,
     "suppressed_already_in_app": 0,
     "needs_manual_review": 0,
     "status_counts": {
       "UPDATED": 3,
-      "VERIFIED": 2
+      "VERIFIED": 3
     },
-    "organizer_records": 5,
-    "organizer_new_leads": 0,
+    "organizer_records": 6,
+    "organizer_new_leads": 1,
     "organizer_outreach_ready": 0,
-    "organizer_research_queue": 5,
+    "organizer_research_queue": 6,
     "organizer_contact_status_counts": {
-      "NEEDS_IDENTITY_CHECK": 5
+      "NEEDS_IDENTITY_CHECK": 6
     },
     "errors": [
       {
         "phase": "FETCH",
-        "url": "https://nightrun10km.runc.run/",
-        "error": "URLError: <urlopen error _ssl.c:994: The handshake operation timed out>"
+        "url": "https://news.google.com/rss/articles/CBMi6wFBVV95cUxQUGd3dDI3Wnk3S1ZaTUlfdFBNV0Z6VExxZGJtcVNUTVo5THNnQWp6RUxTSXJzdWlZb0pZNEtoQ19xekVzTVpJWFRlMDVvTW03T1hVSTl0cWgtaDFzbHpSc2VrLWFmUG5veS1zbjlyeng2T001ZFlnYV9XVjFJa2R3ZTNoVFJRRDlkMWgyYnpqNTUxdWMxUEJ1MzRiaURaUGdkVUtPdFNwUEhCdE9EM2J5ODNJR2xDbkRUVHJMTjFNRGtqUExmYTdGeE80ZE1IcndZNG05SGk1MWhlbGtCZHBNWUpCaGE2bjBEQTVZ?oc=5",
+        "error": "HTTPError: HTTP Error 429: Too Many Requests"
+      },
+      {
+        "phase": "FETCH",
+        "url": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE1xakp2LWVlcEotTU1Malo2YVBNSU1relNSaHNMenpkckVNdnVGQVJHS0h2c3Nob1F2bTRxWVpLbjJIM3VJUFktTVNMZEx5VFdGNjFRWFBJd0o?oc=5",
+        "error": "HTTPError: HTTP Error 429: Too Many Requests"
+      },
+      {
+        "phase": "FETCH",
+        "url": "https://news.google.com/rss/articles/CBMiS0FVX3lxTE9ZU0o4UHlvUWdWTGMzcEZad0NyQjYwaDBtWWphZDBGUHZfVXJqSE5qRFpSTHl2LWh1WW1QTVQtZFZtRzFTOU9EdUYwNA?oc=5",
+        "error": "HTTPError: HTTP Error 429: Too Many Requests"
+      },
+      {
+        "phase": "FETCH",
+        "url": "https://news.google.com/rss/articles/CBMiRkFVX3lxTE42bWtIdHpjM2l6d29qSDk4Tk81N3VkTVRVbi1UVkVHYmZ3ZEd0ZXNfLVk5T3dIV0VqcDF1d3dKQmxmSklzOHc?oc=5",
+        "error": "HTTPError: HTTP Error 429: Too Many Requests"
       }
     ]
   },
   "catalog_source": "SUPABASE:ma.26-2room.com/events_with_stats",
-  "hubs_detected": 9,
-  "hub_links_discovered": 109,
+  "hubs_detected": 2,
+  "hub_links_discovered": 80,
   "telegram_feeds": 0,
   "telegram_messages_seen": 0,
   "telegram_messages_accepted": 0,
