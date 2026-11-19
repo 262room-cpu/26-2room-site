@@ -1,27 +1,27 @@
 {
   "status": "PASS_WITH_REVIEW_QUEUE",
-  "run_id": "20261118T131650Z",
-  "started_at": "2026-11-18T13:16:50+00:00",
+  "run_id": "20261119T133944Z",
+  "started_at": "2026-11-19T13:39:44+00:00",
   "phase": "DONE",
   "queries_completed": 16,
-  "urls_discovered": 117,
-  "signals_accepted": 49,
+  "urls_discovered": 113,
+  "signals_accepted": 44,
   "urls_checked": 45,
   "raw_candidates": 1,
-  "finished_at": "2026-11-18T13:17:58+00:00",
+  "finished_at": "2026-11-19T13:40:51+00:00",
   "last_summary": {
-    "run_id": "20261118T131650Z",
-    "started_at": "2026-11-18T13:16:50+00:00",
-    "finished_at": "2026-11-18T13:17:58+00:00",
+    "run_id": "20261119T133944Z",
+    "started_at": "2026-11-19T13:39:44+00:00",
+    "finished_at": "2026-11-19T13:40:51+00:00",
     "queries": 16,
-    "search_hits_seen": 86,
-    "search_hits_accepted": 49,
-    "search_hits_rejected": 37,
+    "search_hits_seen": 90,
+    "search_hits_accepted": 44,
+    "search_hits_rejected": 46,
     "page_geo_rejected": 0,
-    "signals": 49,
+    "signals": 44,
     "private_signals": 0,
     "private_inbox_source": "NONE",
-    "urls_discovered": 117,
+    "urls_discovered": 113,
     "urls_checked": 45,
     "hubs_detected": 2,
     "hub_links_discovered": 80,
@@ -37,7 +37,7 @@
     "updated": 0,
     "conflicts": 0,
     "catalog_source": "SUPABASE:ma.26-2room.com/events_with_stats",
-    "catalog_events": 103,
+    "catalog_events": 105,
     "catalog_relations": {
       "NOT_IN_APP": 6
     },
@@ -58,22 +58,17 @@
     "errors": [
       {
         "phase": "FETCH",
-        "url": "https://news.google.com/rss/articles/CBMinwFBVV95cUxNTTRxem9IN3pZaUk3OTVJR1d6THNRa215N1VjUXlqY2tTdkdDTHJ3YS13UXNETl9HVWdDR19DendjRWRGaU9WUTVPUnk5RjZ2ZVZYNGFwQ1d6YnFkT2FxUldMajU1al9TRkk0TnFmeHpLLXpYYks3ZFhFMTB6RE85cjFJcWdidWFwZzY4eFdqLTQ0dUgtcEF0VjdYckdoWjQ?oc=5",
+        "url": "https://news.google.com/rss/articles/CBMiYkFVX3lxTE5aYjN3aHhFMG53blAtZ2NZdWpiRGJPd2ZFV2RMODctRUVxNWJUU0lnYnY4eld0MEdCazExdTVrcklCY19PZVo3aDB4NkRCbU0xdDRUNmlTS1pHaTdmOG5ZMU13?oc=5",
         "error": "HTTPError: HTTP Error 429: Too Many Requests"
       },
       {
         "phase": "FETCH",
-        "url": "https://news.google.com/rss/articles/CBMiXkFVX3lxTE5yMzZSbW5RMVBPWG5UbGgxczJuWW8yNlVXdE9ndDFjX3d4OEhMTEQxc296M2EzYi1xR0ZHUGJWZE5LaW5CQWczSlJVMDdvQ1JUakF4d1U3NG5lQ3ExOXc?oc=5",
+        "url": "https://news.google.com/rss/articles/CBMiUkFVX3lxTE9NV0FGNUJiVmVDejNYQ19WLW01Q1puYmtHcUhKM3g3NmZvcWE3bENSUkhTOU5ORDlYdHhVY3Brdkl3bjdxRUtIVnlQemxaOUZBSGc?oc=5",
         "error": "HTTPError: HTTP Error 429: Too Many Requests"
       },
       {
         "phase": "FETCH",
-        "url": "https://news.google.com/rss/articles/CBMiZkFVX3lxTE13X2JuZFU4bjhEZlZ2b3p1NVNBdmN6a2VUeXFEald3RFNxZWNPQ3BJM3VhNGZ6MkpqNzNHemg5RFIwRVJrWkJvUTVFUXJOeU9GOHVrVzRQUkJhNlZrTlBnQU4yemxBdw?oc=5",
-        "error": "HTTPError: HTTP Error 429: Too Many Requests"
-      },
-      {
-        "phase": "FETCH",
-        "url": "https://news.google.com/rss/articles/CBMivAFBVV95cUxPN3B0aG8xMFBjZ3FDSkZFS2xPRXJfZi11MW01Sk9iOWlmWTVhYkNKcmRhZF9TUVZ0OEpMSTJySGZIRzlwLWJuVDFXaVp6QUFiYW1QNm5IeGY1ZWx2d0p4MU41SFhLajNRRUIzbnJlMlhaeTdBekctNjBacjZVdWU1cDYwck9wQVNrZlFWWi1jTE5CSkpBaUl6Y0lPbUp5QzZoXzVKQk9qQUdiWUxNS3B0OUhpVFl4cXROVGpndtIBwgFBVV95cUxOc0t1d3Nsc3RfTkxVc2o4Rkg0WmpLbnNGbFZrNm5MY2JmU0IwV01CYmNQWFhTTWNpQVAyZ05TYm5UQzBBd19tYjhwQkY4QVV6cVVHbWk0QUZIM2xQU1hJb0xWQTl6UE00elZaUEtGVXJrbG9KMjZULUZsaURIOHBMOXJwbDJseUVmWHM0U2xjel9OYkJkSWlrTzJTZ19PTDRsRDVHVTBzQXF6cGZkdlZqeUMzaURJaWZocllWaFhkN2tPdw?oc=5",
+        "url": "https://news.google.com/rss/articles/CBMiqgFBVV95cUxQNklLaEFLV3NrUTFiZFRUYTJaQ1UwX1hvUDNUZkJOUTE2ckFrblMyb2ZEQ0p0WU9oak1IWkw5UVBWLVpDSGwxdkZsYmM5NDVOdmZfcnZ5Si1XU25XLVloLUlOanhHSmlFcG00THp0LVJSdXNTTFA4c2NvVTlobk9IYTBuZDFBeDF6REFmNVY1MFF5S1I3VFhmNUlZaTl2a2tiQXRWOXg5R3VaZw?oc=5",
         "error": "HTTPError: HTTP Error 429: Too Many Requests"
       }
     ]
