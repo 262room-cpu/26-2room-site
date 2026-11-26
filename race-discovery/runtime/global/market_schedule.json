@@ -1,9 +1,9 @@
 {
   "last_success": {
-    "kz": "2026-11-25T14:43:53+00:00",
-    "ru": "2026-11-25T14:44:53+00:00",
-    "kg": "2026-11-23T15:06:52+00:00",
-    "uz": "2026-11-23T15:07:19+00:00",
+    "kz": "2026-11-26T14:07:17+00:00",
+    "ru": "2026-11-26T14:08:17+00:00",
+    "kg": "2026-11-26T14:09:14+00:00",
+    "uz": "2026-11-26T14:09:44+00:00",
     "am": "2026-11-23T15:07:41+00:00",
     "az": "2026-11-24T15:10:07+00:00",
     "by": "2026-11-24T15:12:10+00:00",
@@ -11,48 +11,9 @@
     "md": "2026-11-25T14:46:18+00:00",
     "tj": "2026-11-25T14:46:41+00:00",
     "tm": "2026-11-25T14:47:41+00:00",
-    "mn": "2026-11-22T12:48:37+00:00"
+    "mn": "2026-11-26T14:08:31+00:00"
   },
   "history": [
-    {
-      "at": "2026-09-27T10:10:45+00:00",
-      "selected": [
-        "kz",
-        "ru",
-        "mn",
-        "kg",
-        "uz"
-      ],
-      "budget_seconds": 1200,
-      "per_market_timeout_seconds": 300,
-      "results": [
-        {
-          "market_code": "kz",
-          "status": "PASS_WITH_REVIEW_QUEUE",
-          "returncode": 0
-        },
-        {
-          "market_code": "ru",
-          "status": "PASS_WITH_REVIEW_QUEUE",
-          "returncode": 0
-        },
-        {
-          "market_code": "mn",
-          "status": "PASS_WITH_REVIEW_QUEUE",
-          "returncode": 0
-        },
-        {
-          "market_code": "kg",
-          "status": "PASS_WITH_REVIEW_QUEUE",
-          "returncode": 0
-        },
-        {
-          "market_code": "uz",
-          "status": "PASS_WITH_REVIEW_QUEUE",
-          "returncode": 0
-        }
-      ]
-    },
     {
       "at": "2026-09-28T11:09:57+00:00",
       "selected": [
@@ -2349,6 +2310,45 @@
         },
         {
           "market_code": "tm",
+          "status": "PASS_WITH_REVIEW_QUEUE",
+          "returncode": 0
+        }
+      ]
+    },
+    {
+      "at": "2026-11-26T14:09:44+00:00",
+      "selected": [
+        "kz",
+        "ru",
+        "mn",
+        "kg",
+        "uz"
+      ],
+      "budget_seconds": 1200,
+      "per_market_timeout_seconds": 300,
+      "results": [
+        {
+          "market_code": "kz",
+          "status": "PASS_WITH_REVIEW_QUEUE",
+          "returncode": 0
+        },
+        {
+          "market_code": "ru",
+          "status": "PASS_WITH_REVIEW_QUEUE",
+          "returncode": 0
+        },
+        {
+          "market_code": "mn",
+          "status": "PASS_WITH_REVIEW_QUEUE",
+          "returncode": 0
+        },
+        {
+          "market_code": "kg",
+          "status": "PASS_WITH_REVIEW_QUEUE",
+          "returncode": 0
+        },
+        {
+          "market_code": "uz",
           "status": "PASS_WITH_REVIEW_QUEUE",
           "returncode": 0
         }

@@ -1,28 +1,28 @@
 {
   "status": "PASS_WITH_REVIEW_QUEUE",
-  "run_id": "20261123T150609Z",
-  "started_at": "2026-11-23T15:06:09+00:00",
+  "run_id": "20261126T140831Z",
+  "started_at": "2026-11-26T14:08:31+00:00",
   "phase": "DONE",
   "queries_completed": 16,
-  "urls_discovered": 27,
-  "signals_accepted": 31,
-  "urls_checked": 26,
+  "urls_discovered": 33,
+  "signals_accepted": 38,
+  "urls_checked": 33,
   "raw_candidates": 2,
-  "finished_at": "2026-11-23T15:06:52+00:00",
+  "finished_at": "2026-11-26T14:09:14+00:00",
   "last_summary": {
-    "run_id": "20261123T150609Z",
-    "started_at": "2026-11-23T15:06:09+00:00",
-    "finished_at": "2026-11-23T15:06:52+00:00",
+    "run_id": "20261126T140831Z",
+    "started_at": "2026-11-26T14:08:31+00:00",
+    "finished_at": "2026-11-26T14:09:14+00:00",
     "queries": 16,
-    "search_hits_seen": 97,
-    "search_hits_accepted": 31,
-    "search_hits_rejected": 66,
+    "search_hits_seen": 90,
+    "search_hits_accepted": 38,
+    "search_hits_rejected": 52,
     "page_geo_rejected": 0,
-    "signals": 31,
+    "signals": 38,
     "private_signals": 0,
     "private_inbox_source": "NONE",
-    "urls_discovered": 27,
-    "urls_checked": 26,
+    "urls_discovered": 33,
+    "urls_checked": 33,
     "hubs_detected": 1,
     "hub_links_discovered": 4,
     "telegram_feeds": 0,
@@ -37,7 +37,7 @@
     "updated": 0,
     "conflicts": 0,
     "catalog_source": "SUPABASE:ma.26-2room.com/events_with_stats",
-    "catalog_events": 106,
+    "catalog_events": 107,
     "catalog_relations": {
       "NOT_IN_APP": 10
     },
@@ -55,13 +55,7 @@
     "organizer_contact_status_counts": {
       "NEEDS_IDENTITY_CHECK": 10
     },
-    "errors": [
-      {
-        "phase": "FETCH",
-        "url": "https://news.google.com/rss/articles/CBMiakFVX3lxTFBZRXhSakVjS0x0clBnVENxSndHd3k1b2ZxdWJseHB0ZUlyMFZ0ZkhaZWdkV3Y5MWtLN08ySzQ5aXpCRlVSUlZ3UERPU1lIQ1JmTWRWeGVCWjdUT254aE1GYTNwdjNTUmtuZnc?oc=5",
-        "error": "HTTPError: HTTP Error 429: Too Many Requests"
-      }
-    ]
+    "errors": []
   },
   "catalog_source": "SUPABASE:ma.26-2room.com/events_with_stats",
   "hubs_detected": 1,
